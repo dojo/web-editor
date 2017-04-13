@@ -1,0 +1,6 @@
+/.tscache
+/dev
+/dist
+/html-report
+/node_modules
+coverage-*.json

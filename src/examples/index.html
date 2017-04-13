@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>@dojo/web-editor</title>
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
+	<style>
+		body {
+			font-family: 'Roboto Slab', serif;
+		}
+
+		.hidden {
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<h1>@dojo/web-editor</h1>
+
+	<div>
+		<label for="project">Project bundle to load:</label>
+		<input type="text" name="project" id="project" placeholder="Enter the project file to load" value="dojo-test-app.project.json"></input>
+		<button type="button" name="load-project" id="load-project">Load</button>
+	</div>
+
+	<div id="div-file" class="hidden">
+		<div>
+			<label for="select-file">File to display:</label>
+			<select name="select-file" id="select-file"></select>
+		</div>
+		<div>
+			<button type="button" name="compile-project" id="compile-project">Compile</button>
+		</div>
+	</div>
+
+	<div id="editor" style="height: 600px; width: 800px; border: 1px solid grey;"></div>
+
+	<h2>Compiler Out</h2>
+	<div id="compiler-out"></div>
+
+	<!-- TODO: The Dojo 2 loader appears to provide a different scope to a plugin than expected which causes errors -->
+	<script src="../../../node_modules/monaco-editor/min/vs/loader.js"></script>
+
+	<script>
+		require.config({
+			paths: {
+				'vs': '../../../node_modules/monaco-editor/min/vs',
+				'@dojo': '../../../node_modules/@dojo'
+			},
+			packages: [
+				{ name: 'src', location: '../../..' }
+			]
+		});
+
+		window.MonacoEnvironment = {
+			getWorkerUrl: function () {
+				return '../worker-proxy.js';
+			}
+		};
+
+		require([ './index' ], function () {});
+	</script>
+</body>
+</html>
