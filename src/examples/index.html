@@ -39,25 +39,13 @@
 
 	<!-- TODO: The Dojo 2 loader appears to provide a different scope to a plugin than expected which causes errors -->
 	<script src="../../../node_modules/monaco-editor/min/vs/loader.js"></script>
-
 	<script>
-		require.config({
-			paths: {
-				'vs': '../../../node_modules/monaco-editor/min/vs',
-				'@dojo': '../../../node_modules/@dojo'
-			},
-			packages: [
-				{ name: 'src', location: '../../..' }
-			]
-		});
-
 		window.MonacoEnvironment = {
 			getWorkerUrl: function () {
 				return '../worker-proxy.js';
 			}
 		};
-
-		require([ './index' ], function () {});
 	</script>
+	<script src="./index.js"></script>
 </body>
 </html>

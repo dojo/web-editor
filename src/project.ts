@@ -6,9 +6,43 @@ import { assign } from '@dojo/core/lang';
 import request from '@dojo/core/request';
 import { find, includes } from '@dojo/shim/array';
 import WeakMap from '@dojo/shim/WeakMap';
-import { OutputFile } from 'typescript';
+import { DiagnosticMessageChain, OutputFile } from 'typescript';
 
-import { EmitFile, TypeScriptWorker } from './interfaces';
+import { EmitFile, PromiseLanguageService, TypeScriptWorker } from './interfaces';
+
+/**
+ * Flatten a TypeScript diagnostic message
+ *
+ * Ported from `typescript` due to the fact that this is not exposed via `monaco-editor`
+ *
+ * @param messageText The text of the diagnostic message
+ * @param newLine The newline character to use when flattening
+ */
+function flattenDiagnosticMessageText(messageText: string | DiagnosticMessageChain, newLine: string): string {
+	if (typeof messageText === 'string') {
+		return messageText;
+	}
+	else {
+		let diagnosticChain = messageText;
+		let result = '';
+
+		let indent = 0;
+		while (diagnosticChain) {
+			if (indent) {
+				result += newLine;
+
+				for (let i = 0; i < indent; i++) {
+					result += '  ';
+				}
+			}
+			result += diagnosticChain.messageText;
+			indent++;
+			diagnosticChain = diagnosticChain.next!;
+		}
+
+		return result;
+	}
+}
 
 interface ProjectFileData {
 	/**
@@ -69,6 +103,30 @@ export class Project extends Evented {
 	 * A map of meta data related to project files
 	 */
 	private _fileMap = new WeakMap<ProjectFile, ProjectFileData>();
+
+	/**
+	 * Check if there are any emit errors for a given file
+	 * @param services The language services to check
+	 * @param filename The reference filename
+	 */
+	private async _checkEmitErrors(services: PromiseLanguageService, filename: string) {
+		const diagnostics = [
+			...await services.getCompilerOptionsDiagnostics(),
+			...await services.getSemanticDiagnostics(filename),
+			...await services.getSyntacticDiagnostics(filename)
+		];
+
+		diagnostics.forEach((diagnostic) => {
+			const message = flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+			if (diagnostic.file) {
+				const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+				console.warn(`Error ${diagnostic.file.name} (${line + 1},${character + 1}): ${message}`);
+			}
+			else {
+				console.warn(`Error: ${message}`);
+			}
+		});
+	}
 
 	/**
 	 * An async function which resolves with the parsed text of the project bundle
@@ -152,7 +210,7 @@ export class Project extends Evented {
 		assign(options, {
 			allowNonTsExtensions: true,
 			target: monaco.languages.typescript.ScriptTarget.ES5,
-			module: monaco.languages.typescript.ModuleKind.UMD,
+			module: monaco.languages.typescript.ModuleKind.AMD,
 			moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs
 		});
 
@@ -166,24 +224,27 @@ export class Project extends Evented {
 		if (!this._project) {
 			throw new Error('Project not loaded.');
 		}
+
 		const typescriptFileUris = this._project.files
 			.filter(({ type }) => type === ProjectFileType.Definition || type === ProjectFileType.TypeScript)
 			.map(({ name }) => this.getFileModel(name).uri);
 		const worker: TypeScriptWorker = await monaco.languages.typescript.getTypeScriptWorker();
-		const client = await worker(...typescriptFileUris);
-		const output = await Promise.all(typescriptFileUris.map((file) => client.getEmitOutput(file.toString())));
+		const services = await worker(...typescriptFileUris);
+
+		const output = await Promise.all(typescriptFileUris.map(async (file) => {
+			const filename = file.toString();
+			const emitOutput = await services.getEmitOutput(filename);
+			await this._checkEmitErrors(services, filename);
+			return emitOutput;
+		}));
+
 		return output
-			.reduce((previous, output) => { /* get emitted typescript files */
-				if (output.emitSkipped) {
-					return previous;
-				}
-				return previous.concat(output.outputFiles);
-			}, [] as OutputFile[])
-			.map(({ text, name }) => { return { text, name: name.replace('file://', '') }; }) /* conform to emitted file format */
+			.reduce((previous, output) => previous.concat(output.outputFiles), [] as OutputFile[])
+			.map(({ text, name }) => { return { text, name: name.replace('file:///', ''), type: ProjectFileType.JavaScript }; }) /* conform to emitted file format */
 			.concat(this._project.files /* add on other project files */
 				.filter(({ type }) => type !== ProjectFileType.Definition && type !== ProjectFileType.TypeScript)
-				.map(({ name }) => this.getFileModel(name))
-				.map((model) => { return { name: model.uri.fsPath.replace(/\/\.\//, '/'), text: model.getValue() }; }));
+				.map(({ name, type }) => { return { model: this.getFileModel(name), type }; })
+				.map(({ model, type }) => { return { name: model.uri.fsPath.replace(/^\/\.\//, ''), text: model.getValue(), type }; }));
 	}
 
 	/**
@@ -192,6 +253,17 @@ export class Project extends Evented {
 	get(): ProjectBundle | undefined {
 		this._updateBundle();
 		return this._project;
+	}
+
+	/**
+	 * The package dependencies for this project
+	 * @param includeDev If `true` it will include development dependencies.  Defaults to `false`.
+	 */
+	getDependencies(includeDev = false): { [pkg: string]: string } {
+		if (!this._project) {
+			throw new Error('Project not loaded.');
+		}
+		return assign({}, this._project.package.peerDependencies, this._project.package.dependencies, includeDev && this._project.package.devDependencies);
 	}
 
 	/**
