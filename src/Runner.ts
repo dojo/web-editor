@@ -21,19 +21,21 @@ hasAdd('dom-iframe-srcdoc', 'srcdoc' in document.createElement('iframe'));
  */
 function docSrc(strings: TemplateStringsArray, css: string[], dependencies: { [pkg: string]: string; }, modules: { [mid: string]: string }): string {
 	const [ preCss, preDependencies, preModules, ...postscript ] = strings;
-	let paths = `{\n`;
+	let pathsText = `{\n`;
 	for (const pkg in dependencies) {
-		paths += `\t'${pkg}': 'https://unpkg.com/${pkg}@${dependencies[pkg]}',\n`;
+		pathsText += `\t'${pkg}': 'https://unpkg.com/${pkg}@${dependencies[pkg]}',\n`;
 	}
-	paths += `}\n`;
+	pathsText += `}\n`;
 
 	let modulesText = `var cache = {\n`;
 	for (const mid in modules) {
-		modulesText += `\t'${mid}': function () {` + modules[mid].replace(/define\s*\(\s*\[/, `define('${mid}', [`) + '},\n';
+		modulesText += `\t'${mid}': function () {\n${modules[mid]}\n},\n`;
 	}
 	modulesText += `};\nrequire.cache(cache);\n/* workaround for dojo/loader#124 */\nrequire.cache({});\n`;
 
-	return preCss + css.join('\n') + preDependencies + paths + preModules + modulesText + postscript.join('\n');
+	const cssText = css.length ? `<style>\n${css.join('\n')}\t</style>` : '';
+
+	return preCss + cssText + preDependencies + pathsText + preModules + modulesText + postscript.join('\n');
 }
 
 export default class Runner extends Evented {
@@ -64,13 +66,14 @@ export default class Runner extends Evented {
 					require.config({
 						paths: ${dependencies},
 						packages: [
-							{ name: 'maquette', main: '/dist/maquette.min' }
+							{ name: 'maquette', main: '/dist/maquette.min' },
+							{ name: 'tslib', location: 'https://unpkg.com/tslib/', main: 'tslib' }
 						]
 					});
 
 					${modules}
 
-					require([ 'src/main' ], function () {});
+					require([ 'tslib', 'src/main' ], function () {});
 				</script>
 			</body>
 			</html>`;

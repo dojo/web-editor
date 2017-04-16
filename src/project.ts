@@ -82,6 +82,7 @@ function getLanguageFromType(type: ProjectFileType): string {
 		return 'markdown';
 	case ProjectFileType.CSS:
 		return 'css';
+	case ProjectFileType.SourceMap:
 	case ProjectFileType.JSON:
 		return 'json';
 	case ProjectFileType.PlainText:
@@ -90,6 +91,32 @@ function getLanguageFromType(type: ProjectFileType): string {
 		return 'xml';
 	default:
 		return 'unknown';
+	}
+}
+
+type ScriptTarget = monaco.languages.typescript.ScriptTarget;
+const ScriptTarget = monaco.languages.typescript.ScriptTarget;
+
+function getScriptTarget(type: string): ScriptTarget {
+	switch (type) {
+	case 'es3':
+		return ScriptTarget.ES3;
+	case 'es5':
+		return ScriptTarget.ES5;
+	case 'es6':
+	case 'es2015':
+		return ScriptTarget.ES2015;
+	case 'es7':
+	case 'es2016':
+		return ScriptTarget.ES2016;
+	case 'es8':
+	case 'es2017':
+		return ScriptTarget.ES2017;
+	case 'esnext':
+		return ScriptTarget.ESNext;
+	case 'latest':
+	default:
+		return ScriptTarget.ES5;
 	}
 }
 
@@ -189,12 +216,13 @@ export class Project extends Evented {
 	 * with additional settings that are required for use in the web-editor.
 	 */
 	private _setTypeScriptEnvironment(): void {
+		type CompilerOptions = monaco.languages.typescript.CompilerOptions;
 		const { compilerOptions = {} } = this._project!.tsconfig;
-		const options: monaco.languages.typescript.CompilerOptions = {};
+		const options: CompilerOptions = {};
 
 		/* copied from tsconfig.json */
-		const { lib, noImplicitAny, noImplicitThis, noImplicitReturns, noLib, noUnusedLocals, noUnusedParameters, strictNullChecks, types } = compilerOptions;
-		assign(options, {
+		const { lib, noImplicitAny, noImplicitThis, noImplicitReturns, noLib, noUnusedLocals, noUnusedParameters, strictNullChecks, target, types } = compilerOptions;
+		assign(options, <CompilerOptions> {
 			lib,
 			noImplicitAny,
 			noImplicitThis,
@@ -203,15 +231,18 @@ export class Project extends Evented {
 			noUnusedLocals,
 			noUnusedParameters,
 			strictNullChecks,
+			target: getScriptTarget(target),
 			types
 		});
 
 		/* asserted for web editing */
-		assign(options, {
-			allowNonTsExtensions: true,
-			target: monaco.languages.typescript.ScriptTarget.ES5,
-			module: monaco.languages.typescript.ModuleKind.AMD,
-			moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs
+		assign(options, <CompilerOptions> {
+			allowNonTsExtensions: true, /* needed for compiling like this */
+			inlineSources: true, /* we will embed the sources in the source maps */
+			module: monaco.languages.typescript.ModuleKind.AMD, /* only support AMD, so only compile to AMD */
+			moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs, /* only support this for of module resolution */
+			noEmitHelpers: true, /* we will add the helpers later */
+			sourceMap: true /* we will generate sourcemaps and remap them when we add them to the page */
 		});
 
 		monaco.languages.typescript.typescriptDefaults.setCompilerOptions(options);
@@ -240,7 +271,13 @@ export class Project extends Evented {
 
 		return output
 			.reduce((previous, output) => previous.concat(output.outputFiles), [] as OutputFile[])
-			.map(({ text, name }) => { return { text, name: name.replace('file:///', ''), type: ProjectFileType.JavaScript }; }) /* conform to emitted file format */
+			.map(({ text, name }) => { /* conform to emitted file format */
+				return {
+					text,
+					name: name.replace('file:///', ''),
+					type: /^(.*\.(?!map$))?[^.]*$/.test(name) ? ProjectFileType.JavaScript : ProjectFileType.SourceMap
+				};
+			})
 			.concat(this._project.files /* add on other project files */
 				.filter(({ type }) => type !== ProjectFileType.Definition && type !== ProjectFileType.TypeScript)
 				.map(({ name, type }) => { return { model: this.getFileModel(name), type }; })
