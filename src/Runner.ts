@@ -1,5 +1,7 @@
+import { ProjectFileType } from '@dojo/cli-emit-editor/interfaces/editor';
 import Evented from '@dojo/core/Evented';
-import { add as hasAdd } from '@dojo/has/has';
+import has, { add as hasAdd } from '@dojo/has/has';
+import project from './project';
 
 declare global {
 	interface HTMLIFrameElement {
@@ -16,11 +18,19 @@ hasAdd('dom-iframe-srcdoc', 'srcdoc' in document.createElement('iframe'));
  * Generate an HTML document source
  * @param strings Array of template strings
  * @param css The CSS as an array of strings
+ * @param html The HTML to be used in the body of the document
  * @param dependencies A map of package dependencies required
  * @param modules Any modules to be injected into the page
  */
-function docSrc(strings: TemplateStringsArray, css: string[], dependencies: { [pkg: string]: string; }, modules: { [mid: string]: string }): string {
-	const [ preCss, preDependencies, preModules, ...postscript ] = strings;
+function docSrc(
+	strings: TemplateStringsArray,
+	css: string[],
+	bodyAttributes: { [attr: string]: string; },
+	html: string,
+	dependencies: { [pkg: string]: string; },
+	modules: { [mid: string]: string }
+): string {
+	const [ preCss, preBodyAttributes, preHtml, preDependencies, preModules, ...postscript ] = strings;
 	let pathsText = `{\n`;
 	for (const pkg in dependencies) {
 		pathsText += `\t'${pkg}': 'https://unpkg.com/${pkg}@${dependencies[pkg]}',\n`;
@@ -33,34 +43,63 @@ function docSrc(strings: TemplateStringsArray, css: string[], dependencies: { [p
 	}
 	modulesText += `};\nrequire.cache(cache);\n/* workaround for dojo/loader#124 */\nrequire.cache({});\n`;
 
-	const cssText = css.length ? `<style>\n${css.join('\n')}\t</style>` : '';
+	const cssText = `<style>\n${css.join('\n')}\n\t\t\t\t</style>\n`;
 
-	return preCss + cssText + preDependencies + pathsText + preModules + modulesText + postscript.join('\n');
+	let bodyAttributesText = '';
+	for (const attr in bodyAttributes) {
+		bodyAttributesText += ` $[attr]="${bodyAttributes[attr]}"`;
+	}
+
+	return preCss + cssText + preBodyAttributes + bodyAttributesText + preHtml + html + preDependencies + pathsText
+		+ preModules + modulesText + postscript.join('\n');
+}
+
+/**
+ * Set the `srcdoc` on an `HTMLIFrameElement` in a way that works on browsers that don't directly support
+ * setting that attribute.
+ * @param iframe The iframe to set the `srcdoc` on
+ * @param srcdoc The string that will be the `srcdoc` for the iframe
+ */
+function setSrcDoc(iframe: HTMLIFrameElement, srcdoc: string) {
+	iframe.setAttribute('srcdoc', srcdoc);
+	if (!has('dom-iframe-srcdoc')) {
+		iframe.setAttribute('src', `javascript: window.frameElement.getAttribute('srcdoc');`);
+	}
+}
+
+export interface GetDocOptions {
+	css?: string[];
+	bodyAttributes?: { [attr: string]: string; };
+	dependencies: { [pkg: string]: string; };
+	html?: string;
+	modules: { [mid: string]: string; };
 }
 
 export default class Runner extends Evented {
 	/**
 	 * The private iframe that the project will run in
 	 */
-	private _iframe: HTMLIFrameElement;
+	private _iframe: HTMLIFrameElement | undefined;
+
+	private _root: HTMLElement;
+
+	constructor(root: HTMLElement) {
+		super();
+		this._root = root;
+	}
 
 	/**
-	 * Generate a source document to be used in the iframe
-	 *
-	 * TODO: This should likely be private
-	 * @param dependencies A map of dependencies to be injected into the document
-	 * @param modules A map of modules to be injected into the document
-	 * @param css An array of strings of CSS text to be injected into the document
+	 * Generate the document
+	 * @param param0 The options to use
 	 */
-	getDoc(dependencies: { [pkg: string]: string; }, modules: { [mid: string]: string; }, css: string[] = []): string {
+	getDoc({ css = [], bodyAttributes = {}, dependencies, html = '', modules }: GetDocOptions): string {
 		return docSrc`<!DOCTYPE html>
 			<html>
 			<head>
 				${css}
 			</head>
-			<body>
-				<p>Welcome to dojo-test-app</p>
-				<my-app></my-app>
+			<body${bodyAttributes}>
+				${html}
 				<script src="https://unpkg.com/@dojo/loader@beta1/loader.min.js"></script>
 				<script>
 					require.config({
@@ -85,10 +124,35 @@ export default class Runner extends Evented {
 	 * @param dependencies A map of dependencies
 	 * @param modules A map of modules to be injected
 	 */
-	run(root: HTMLElement, dependencies: { [pkg: string]: string; }, modules: { [mid: string]: string; }) {
-		this._iframe = document.createElement('iframe');
-		const srcdoc = this.getDoc(dependencies, modules);
-		this._iframe.srcdoc = srcdoc;
-		root.appendChild(this._iframe);
+	async run() {
+		if (!project.isLoaded()) {
+			throw new Error('Project not loaded.');
+		}
+
+		if (!this._iframe) {
+			this._iframe = document.createElement('iframe');
+		}
+
+		const program = await project.emit();
+
+		const modules = program
+			.filter(({ type }) => type === ProjectFileType.JavaScript)
+			.reduce((map, { name, text }) => {
+				map[name.replace(/\.js$/, '')] = text;
+				return map;
+			}, {} as { [mid: string]: string });
+
+		const dependencies = project.getDependencies();
+
+		const srcdoc = this.getDoc({
+			html: `<p>Welcome to dojo-test-app</p>
+				<my-app></my-app>`,
+			dependencies,
+			modules
+		});
+		setSrcDoc(this._iframe, srcdoc);
+		if (this._iframe.parentElement !== this._root) {
+			this._root.appendChild(this._iframe);
+		}
 	}
 }

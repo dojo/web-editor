@@ -8,6 +8,27 @@
 			font-family: 'Roboto Slab', serif;
 		}
 
+		/* flexbox seems a little challenged because while auto layout is on the editor, growing can be done
+		 * but shrinking seems to get stuck on the width of the editor */
+		.wrap {
+			display: flex;
+			align-items: center;
+		}
+
+		.box {
+			flex: 1;
+			margin: 1em 0.5em;
+			height: 600px;
+			border: 1px solid grey;
+		}
+
+		#runner iframe {
+			border: none;
+			position: relative;
+			height: 100%;
+			width: 100%;
+		}
+
 		.hidden {
 			display: none;
 		}
@@ -28,14 +49,14 @@
 			<select name="select-file" id="select-file"></select>
 		</div>
 		<div>
-			<button type="button" name="compile-project" id="compile-project">Compile</button>
+			<button type="button" name="run" id="run">Run</button>
 		</div>
 	</div>
 
-	<div id="editor" style="height: 600px; width: 800px; border: 1px solid grey;"></div>
-
-	<h2>Compiler Out</h2>
-	<div id="compiler-out"></div>
+	<div class="wrap">
+		<div id="editor" class="box"></div>
+		<div id="runner" class="box"></div>
+	</div>
 
 	<!-- TODO: The Dojo 2 loader appears to provide a different scope to a plugin than expected which causes errors -->
 	<script src="../../../node_modules/monaco-editor/min/vs/loader.js"></script>

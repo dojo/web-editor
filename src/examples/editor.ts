@@ -1,17 +1,23 @@
 import Editor from '../Editor';
 import project from '../project';
+import Runner from '../Runner';
 
 /* get references to key DOM nodes */
 const divFile = <HTMLDivElement> document.getElementById('div-file');
 const loadProjectButton = <HTMLButtonElement> document.getElementById('load-project');
 const projectDiv = <HTMLInputElement> document.getElementById('project');
 const selectFile = <HTMLSelectElement> document.getElementById('select-file');
-const compileProjectButton = <HTMLButtonElement> document.getElementById('compile-project');
-const compilerOut = <HTMLDivElement> document.getElementById('compiler-out');
+const runButton = <HTMLButtonElement> document.getElementById('run');
 
 /* create an editor */
-const divEditor = <HTMLDivElement> document.getElementById('editor');
-const editor = new Editor(divEditor);
+const editorDiv = <HTMLDivElement> document.getElementById('editor');
+const editor = new Editor(editorDiv, {
+	automaticLayout: true /* enables the editor to resize automagically */
+});
+
+/* create a runner */
+const runnerDiv = <HTMLDivElement> document.getElementById('runner');
+const runner = new Runner(runnerDiv);
 
 /**
  * Listener that will be attached to the load project button click
@@ -24,30 +30,11 @@ async function loadProjectButtonClick(e: MouseEvent) {
 	loadProjectButton.removeEventListener('click', loadProjectButtonClick);
 }
 
-/**
- * Listener that will be attached to the compile project button click
- * @param e The mouse event
- */
-async function compileProjectButtonClick(e: MouseEvent) {
+async function runButtonClick(e: MouseEvent) {
 	e.preventDefault();
-	while (compilerOut.firstChild) {
-		compilerOut.removeChild(compilerOut.firstChild);
-	}
-	compilerOut.innerHTML = '<h3>Compiling...</h3>';
-	const files = await project.emit();
-	while (compilerOut.firstChild) {
-		compilerOut.removeChild(compilerOut.firstChild);
-	}
-	files
-		.sort(({ name: namea }, { name: nameb }) => namea < nameb ? -1 : 1)
-		.forEach((file) => {
-			const header = document.createElement('h3');
-			header.textContent = file.name;
-			compilerOut.appendChild(header);
-			const content = document.createElement('pre');
-			content.textContent = file.text;
-			compilerOut.appendChild(content);
-		});
+	runButton.setAttribute('disabled', 'disabled');
+	await runner.run();
+	runButton.removeAttribute('disabled');
 }
 
 /**
@@ -84,4 +71,4 @@ async function load(filename: string) {
 
 /* attach button listeners */
 loadProjectButton.addEventListener('click', loadProjectButtonClick);
-compileProjectButton.addEventListener('click', compileProjectButtonClick);
+runButton.addEventListener('click', runButtonClick);
