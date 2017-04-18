@@ -5,7 +5,7 @@ import Runner from '../Runner';
 /* get references to key DOM nodes */
 const divFile = <HTMLDivElement> document.getElementById('div-file');
 const loadProjectButton = <HTMLButtonElement> document.getElementById('load-project');
-const projectDiv = <HTMLInputElement> document.getElementById('project');
+const projectSelect = <HTMLSelectElement> document.getElementById('project');
 const selectFile = <HTMLSelectElement> document.getElementById('select-file');
 const runButton = <HTMLButtonElement> document.getElementById('run');
 
@@ -16,7 +16,7 @@ const editor = new Editor(editorDiv, {
 });
 
 /* create a runner */
-const runnerDiv = <HTMLDivElement> document.getElementById('runner');
+const runnerDiv = <HTMLIFrameElement> document.getElementById('runner');
 const runner = new Runner(runnerDiv);
 
 /**
@@ -25,8 +25,10 @@ const runner = new Runner(runnerDiv);
  */
 async function loadProjectButtonClick(e: MouseEvent) {
 	e.preventDefault();
-	await load(projectDiv.value);
-	loadProjectButton.disabled = true;
+	await load('../../../projects/' + projectSelect.value);
+
+	projectSelect.setAttribute('disabled', 'disabled');
+	loadProjectButton.setAttribute('disabled', 'disabled');
 	loadProjectButton.removeEventListener('click', loadProjectButtonClick);
 }
 
@@ -56,6 +58,8 @@ async function load(filename: string) {
 	await project.load(filename);
 	const projectBundle = project.get()!;
 	console.log(`Loaded. Project contains ${projectBundle.files.length + projectBundle.environmentFiles.length} files.`);
+
+	/* generate UI for selecting a file */
 	project.getFiles()
 		.sort((a, b) => a < b ? -1 : 1)
 		.forEach((name) => {
@@ -71,4 +75,6 @@ async function load(filename: string) {
 
 /* attach button listeners */
 loadProjectButton.addEventListener('click', loadProjectButtonClick);
+loadProjectButton.removeAttribute('disabled');
+projectSelect.removeAttribute('disabled');
 runButton.addEventListener('click', runButtonClick);

@@ -39,7 +39,7 @@ export function initConfig(grunt: IGrunt, otherOptions: any) {
 			require(`./tasks/${task}`)(grunt);
 		});
 
-	grunt.registerTask('dev', [ 'clean:dev', 'ts:dev', 'copy:dev' ]);
+	grunt.registerTask('dev', [ 'clean:dev', 'ts:dev', 'copy:dev', 'webpack:dev' ]);
 
 	grunt.registerTask('default', [ 'dev' ]);
 };

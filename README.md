@@ -1,0 +1,4 @@
+# @dojo/web-editor
+
+## Functionality
+

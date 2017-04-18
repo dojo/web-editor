@@ -22,7 +22,7 @@
 			border: 1px solid grey;
 		}
 
-		#runner iframe {
+		#runner {
 			border: none;
 			position: relative;
 			height: 100%;
@@ -38,9 +38,13 @@
 	<h1>@dojo/web-editor</h1>
 
 	<div>
-		<label for="project">Project bundle to load:</label>
-		<input type="text" name="project" id="project" placeholder="Enter the project file to load" value="dojo-test-app.project.json"></input>
-		<button type="button" name="load-project" id="load-project">Load</button>
+		<label for="project">Project to load:</label>
+		<select type="text" name="project" id="project" disabled>
+			<option value="dojo-test-app.project.json">Dojo2 Hello World</option>
+			<option value="dojo2-todo-mvc.project.json" selected>Dojo2 Todo MVC</option>
+			<option value="dojo2-todo-mvc-kitchensink.project.json">Dojo2 Kitchensink Todo MVC</option>
+		</select>
+		<button type="button" name="load-project" id="load-project" disabled>Load</button>
 	</div>
 
 	<div id="div-file" class="hidden">
@@ -55,8 +59,13 @@
 
 	<div class="wrap">
 		<div id="editor" class="box"></div>
-		<div id="runner" class="box"></div>
+		<div class="box">
+			<iframe src="../support/blank.html" id="runner" name="runner"></iframe>
+		</div>
 	</div>
+
+	<!-- postcss is created a single bundle that exports `postcss`, `cssnext`, `postcssModules` to the global namespace -->
+	<script src="../external/postcss-bundle.js"></script>
 
 	<!-- TODO: The Dojo 2 loader appears to provide a different scope to a plugin than expected which causes errors -->
 	<script src="../../../node_modules/monaco-editor/min/vs/loader.js"></script>

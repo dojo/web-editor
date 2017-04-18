@@ -7,6 +7,7 @@ import request from '@dojo/core/request';
 import { find, includes } from '@dojo/shim/array';
 import WeakMap from '@dojo/shim/WeakMap';
 import { DiagnosticMessageChain, OutputFile } from 'typescript';
+import { getEmit } from './support/css';
 
 import { EmitFile, PromiseLanguageService, TypeScriptWorker } from './interfaces';
 
@@ -221,8 +222,9 @@ export class Project extends Evented {
 		const options: CompilerOptions = {};
 
 		/* copied from tsconfig.json */
-		const { lib, noImplicitAny, noImplicitThis, noImplicitReturns, noLib, noUnusedLocals, noUnusedParameters, strictNullChecks, target, types } = compilerOptions;
+		const { experimentalDecorators, lib, noImplicitAny, noImplicitThis, noImplicitReturns, noLib, noUnusedLocals, noUnusedParameters, strictNullChecks, target, types } = compilerOptions;
 		assign(options, <CompilerOptions> {
+			experimentalDecorators,
 			lib,
 			noImplicitAny,
 			noImplicitThis,
@@ -269,6 +271,16 @@ export class Project extends Evented {
 			return emitOutput;
 		}));
 
+		const cssFiles = await getEmit(...this._project.files /* add css modules */
+			.filter(({ type }) => type === ProjectFileType.CSS)
+			.map(({ name, type }) => { return { model: this.getFileModel(name), type }; })
+			.map(({ model, type }) => { return { name: model.uri.fsPath.replace(/^\/\.\//, ''), text: model.getValue(), type }; }));
+
+		const otherFiles = this._project.files /* add on other project files */
+			.filter(({ type }) => type !== ProjectFileType.Definition && type !== ProjectFileType.TypeScript && type !== ProjectFileType.CSS)
+			.map(({ name, type }) => { return { model: this.getFileModel(name), type }; })
+			.map(({ model, type }) => { return { name: model.uri.fsPath.replace(/^\/\.\//, ''), text: model.getValue(), type }; });
+
 		return output
 			.reduce((previous, output) => previous.concat(output.outputFiles), [] as OutputFile[])
 			.map(({ text, name }) => { /* conform to emitted file format */
@@ -278,10 +290,7 @@ export class Project extends Evented {
 					type: /^(.*\.(?!map$))?[^.]*$/.test(name) ? ProjectFileType.JavaScript : ProjectFileType.SourceMap
 				};
 			})
-			.concat(this._project.files /* add on other project files */
-				.filter(({ type }) => type !== ProjectFileType.Definition && type !== ProjectFileType.TypeScript)
-				.map(({ name, type }) => { return { model: this.getFileModel(name), type }; })
-				.map(({ model, type }) => { return { name: model.uri.fsPath.replace(/^\/\.\//, ''), text: model.getValue(), type }; }));
+			.concat(cssFiles, otherFiles);
 	}
 
 	/**
@@ -300,7 +309,7 @@ export class Project extends Evented {
 		if (!this._project) {
 			throw new Error('Project not loaded.');
 		}
-		return assign({}, this._project.package.peerDependencies, this._project.package.dependencies, includeDev && this._project.package.devDependencies);
+		return assign({}, this._project.dependencies.production, includeDev ? this._project.dependencies.development : undefined);
 	}
 
 	/**
@@ -329,6 +338,17 @@ export class Project extends Evented {
 			fileData.model = createMonacoModel(file);
 		}
 		return fileData.model;
+	}
+
+	getFileText(filename: string): string {
+		return this.getFileModel(filename).getValue();
+	}
+
+	getIndexHtml(): string {
+		if (!this._project) {
+			throw new Error('Project not loaded.');
+		}
+		return this.getFileText(this._project.index);
 	}
 
 	/**

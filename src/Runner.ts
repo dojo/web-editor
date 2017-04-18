@@ -1,18 +1,6 @@
 import { ProjectFileType } from '@dojo/cli-emit-editor/interfaces/editor';
 import Evented from '@dojo/core/Evented';
-import has, { add as hasAdd } from '@dojo/has/has';
 import project from './project';
-
-declare global {
-	interface HTMLIFrameElement {
-		srcdoc: string;
-	}
-}
-
-/**
- * Some browsers don't support `srcdoc` and will need to be polyfilled
- */
-hasAdd('dom-iframe-srcdoc', 'srcdoc' in document.createElement('iframe'));
 
 /**
  * Generate an HTML document source
@@ -24,13 +12,14 @@ hasAdd('dom-iframe-srcdoc', 'srcdoc' in document.createElement('iframe'));
  */
 function docSrc(
 	strings: TemplateStringsArray,
+	scripts: string[],
 	css: string[],
 	bodyAttributes: { [attr: string]: string; },
 	html: string,
 	dependencies: { [pkg: string]: string; },
 	modules: { [mid: string]: string }
 ): string {
-	const [ preCss, preBodyAttributes, preHtml, preDependencies, preModules, ...postscript ] = strings;
+	const [ preScripts, preCss, preBodyAttributes, preHtml, preDependencies, preModules, ...postscript ] = strings;
 	let pathsText = `{\n`;
 	for (const pkg in dependencies) {
 		pathsText += `\t'${pkg}': 'https://unpkg.com/${pkg}@${dependencies[pkg]}',\n`;
@@ -45,26 +34,54 @@ function docSrc(
 
 	const cssText = `<style>\n${css.join('\n')}\n\t\t\t\t</style>\n`;
 
+	let scriptsText = '';
+	scripts.forEach((src) => {
+		scriptsText += `<script src="${src}"></script>\n\t`;
+	});
+
 	let bodyAttributesText = '';
 	for (const attr in bodyAttributes) {
 		bodyAttributesText += ` $[attr]="${bodyAttributes[attr]}"`;
 	}
 
-	return preCss + cssText + preBodyAttributes + bodyAttributesText + preHtml + html + preDependencies + pathsText
-		+ preModules + modulesText + postscript.join('\n');
+	return preScripts + scriptsText + preCss + cssText + preBodyAttributes + bodyAttributesText + preHtml + html
+		+ preDependencies + pathsText + preModules + modulesText + postscript.join('\n');
 }
 
 /**
- * Set the `srcdoc` on an `HTMLIFrameElement` in a way that works on browsers that don't directly support
- * setting that attribute.
- * @param iframe The iframe to set the `srcdoc` on
- * @param srcdoc The string that will be the `srcdoc` for the iframe
+ * Writes to the document of an `iframe`
+ * @param iframe The target `iframe`
+ * @param source The source to be written
  */
-function setSrcDoc(iframe: HTMLIFrameElement, srcdoc: string) {
-	iframe.setAttribute('srcdoc', srcdoc);
-	if (!has('dom-iframe-srcdoc')) {
-		iframe.setAttribute('src', `javascript: window.frameElement.getAttribute('srcdoc');`);
+function writeIframeDoc(iframe: HTMLIFrameElement, source: string) {
+	iframe.contentWindow.document.write(source);
+}
+
+function parseHtml(content: string): { css: string, body: string, scripts: string[] } {
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(content, 'text/html');
+	const scriptNodes = doc.querySelectorAll('script');
+	const scripts: string[] = [];
+	for (let i = 0; i < scriptNodes.length; i++) {
+		const script = scriptNodes[i];
+		script.parentElement && script.parentElement.removeChild(script);
+		if (script.src && /^http(?:s)?:\/{2}/.test(script.src)) {
+			scripts.push(script.src);
+		}
 	}
+	const css: string[] = [];
+	const styles = doc.querySelectorAll('style');
+	for (let i = 0; i < styles.length; i++) {
+		const style = styles[i];
+		if (style.textContent) {
+			css.push(style.textContent);
+		}
+	}
+	return {
+		css: css.join('\n'),
+		body: doc.body && doc.body.innerHTML || '',
+		scripts
+	};
 }
 
 export interface GetDocOptions {
@@ -73,6 +90,7 @@ export interface GetDocOptions {
 	dependencies: { [pkg: string]: string; };
 	html?: string;
 	modules: { [mid: string]: string; };
+	scripts?: string[];
 }
 
 export default class Runner extends Evented {
@@ -81,21 +99,24 @@ export default class Runner extends Evented {
 	 */
 	private _iframe: HTMLIFrameElement | undefined;
 
-	private _root: HTMLElement;
-
-	constructor(root: HTMLElement) {
+	/**
+	 * Create a runner instance attached to a specific `iframe`
+	 * @param iframe The `iframe` that should be used
+	 */
+	constructor(iframe: HTMLIFrameElement) {
 		super();
-		this._root = root;
+		this._iframe = iframe;
 	}
 
 	/**
 	 * Generate the document
 	 * @param param0 The options to use
 	 */
-	getDoc({ css = [], bodyAttributes = {}, dependencies, html = '', modules }: GetDocOptions): string {
+	getDoc({ css = [], bodyAttributes = {}, dependencies, html = '', modules, scripts = [] }: GetDocOptions): string {
 		return docSrc`<!DOCTYPE html>
 			<html>
 			<head>
+				${scripts}
 				${css}
 			</head>
 			<body${bodyAttributes}>
@@ -105,13 +126,14 @@ export default class Runner extends Evented {
 					require.config({
 						paths: ${dependencies},
 						packages: [
+							{ name: 'cldr', location: 'https://unpkg.com/cldrjs@^0.4.6/dist/cldr', main: '../cldr' },
+							{ name: 'globalize', main: '/dist/globalize' },
 							{ name: 'maquette', main: '/dist/maquette.min' },
-							{ name: 'tslib', location: 'https://unpkg.com/tslib/', main: 'tslib' }
+							{ name: 'pepjs', main: 'dist/pep' },
+							{ name: 'tslib', location: 'https://unpkg.com/tslib@^1.6.0/', main: 'tslib' }
 						]
 					});
-
 					${modules}
-
 					require([ 'tslib', 'src/main' ], function () {});
 				</script>
 			</body>
@@ -119,10 +141,7 @@ export default class Runner extends Evented {
 	}
 
 	/**
-	 * Attach an iframe to the root and run the supplied code
-	 * @param root The HTMLElement that the iframe will be a child of
-	 * @param dependencies A map of dependencies
-	 * @param modules A map of modules to be injected
+	 * Get the emit from the current project and run it in the runner's `iframe`
 	 */
 	async run() {
 		if (!project.isLoaded()) {
@@ -142,17 +161,24 @@ export default class Runner extends Evented {
 				return map;
 			}, {} as { [mid: string]: string });
 
+		const css = program
+			.filter(({ type }) => type === ProjectFileType.CSS)
+			.map(({ text }) => text);
+
 		const dependencies = project.getDependencies();
 
-		const srcdoc = this.getDoc({
-			html: `<p>Welcome to dojo-test-app</p>
-				<my-app></my-app>`,
-			dependencies,
-			modules
-		});
-		setSrcDoc(this._iframe, srcdoc);
-		if (this._iframe.parentElement !== this._root) {
-			this._root.appendChild(this._iframe);
+		const { css: indexCss, body: html, scripts } = parseHtml(project.getIndexHtml());
+		if (indexCss) {
+			css.unshift(indexCss);
 		}
+
+		const source = this.getDoc({
+			css,
+			html,
+			dependencies,
+			modules,
+			scripts
+		});
+		writeIframeDoc(this._iframe, source);
 	}
 }
