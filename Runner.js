@@ -99,7 +99,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
      * @param source The source to be written
      */
     function writeIframeDoc(iframe, source) {
-        iframe.contentWindow.document.write(source);
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve) {
+                        function onLoadListener() {
+                            iframe.contentWindow.document.write(source);
+                            iframe.contentWindow.document.close();
+                            iframe.removeEventListener('load', onLoadListener);
+                            resolve();
+                        }
+                        iframe.addEventListener('load', onLoadListener);
+                        iframe.contentWindow.location.reload();
+                    })];
+            });
+        });
     }
     function parseHtml(content) {
         var parser = new DOMParser();
@@ -196,7 +209,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                                 modules: modules,
                                 scripts: scripts
                             });
-                            writeIframeDoc(this._iframe, source);
+                            return [4 /*yield*/, writeIframeDoc(this._iframe, source)];
+                        case 2:
+                            _b.sent();
                             return [2 /*return*/];
                     }
                 });
