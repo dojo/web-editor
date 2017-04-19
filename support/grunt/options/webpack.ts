@@ -46,7 +46,11 @@ export = function(grunt: IGrunt) {
 				filename: 'postcss-bundle.js',
 				path: resolve(cwd(), '<%= distDirectory %>/external')
 			},
-			plugins: [ new UglifyJsPlugin() ],
+			plugins: [ new UglifyJsPlugin({
+				output: {
+					'ascii_only': true
+				}
+			}) ],
 			module: {
 				rules: [ {
 					test: require.resolve('postcss-cssnext'),

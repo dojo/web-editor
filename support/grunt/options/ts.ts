@@ -7,6 +7,13 @@ export = function(grunt: IGrunt) {
 				passThrough: true,
 				tsconfig: 'tsconfig.json'
 			}
+		},
+
+		dist: {
+			tsconfig: {
+				passThrough: true,
+				tsconfig: 'tsconfig.dist.json'
+			}
 		}
 	};
 };

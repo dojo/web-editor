@@ -125,7 +125,7 @@ export default class Runner extends Evented {
 			</head>
 			<body${bodyAttributes}>
 				${html}
-				<script src="https://unpkg.com/@dojo/loader@beta1/loader.min.js"></script>
+				<script src="https://unpkg.com/@dojo/loader/loader.min.js"></script>
 				<script>
 					require.config({
 						paths: ${dependencies},
@@ -138,7 +138,12 @@ export default class Runner extends Evented {
 						]
 					});
 					${modules}
-					require([ 'tslib', 'src/main' ], function () {});
+					require([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {
+						var request = require('@dojo/core/request').default;
+						var amdRequire = require('../support/providers/amdRequire').default;
+						request.setDefaultProvider(amdRequire);
+						require([ 'src/main' ], function () { });
+					});
 				</script>
 			</body>
 			</html>`;

@@ -7,7 +7,7 @@ export = function (grunt: IGrunt) {
 		},
 
 		dist: {
-			src: [ 'dist/**/*' ],
+			src: [ '<%= distDirectory %>/**/*' ],
 			fliter(path: string) {
 				return grunt.option('remove-links') ? true : !grunt.file.isLink(path);
 			}

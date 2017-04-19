@@ -13,10 +13,9 @@
 		"noImplicitAny": true,
 		"noImplicitThis": true,
 		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"outDir": "dev",
+		"outDir": "dist",
 		"removeComments": false,
-		"rootDir": ".",
+		"rootDir": "./src",
 		"sourceMap": true,
 		"strictNullChecks": true,
 		"target": "es5",
@@ -27,7 +26,6 @@
 		]
 	},
 	"include": [
-		"./src/**/*.ts",
-		"./tests/**/*.ts"
+		"./src/**/*.ts"
 	]
 }

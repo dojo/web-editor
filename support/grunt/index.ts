@@ -3,14 +3,17 @@ import { basename, join } from 'path';
 
 export function initConfig(grunt: IGrunt, otherOptions: any) {
 	const tsconfig = grunt.file.readJSON('tsconfig.json');
+	const tsconfigDist = grunt.file.readJSON('tsconfig.dist.json');
 	const packageJson = grunt.file.readJSON('package.json');
 
 	grunt.initConfig({
 		name: packageJson.name,
 		version: packageJson.version,
 		tsconfig,
+		tsconfigDist,
 
-		devDirectory: '<%= tsconfig.compilerOptions.outDir %>'
+		devDirectory: '<%= tsconfig.compilerOptions.outDir %>',
+		distDirectory: '<%= tsconfigDist.compilerOptions.outDir %>'
 	});
 
 	/* load options */
@@ -41,5 +44,7 @@ export function initConfig(grunt: IGrunt, otherOptions: any) {
 
 	grunt.registerTask('dev', [ 'clean:dev', 'ts:dev', 'copy:dev', 'webpack:dev' ]);
 
+	grunt.registerTask('dist', [ 'clean:dist', 'ts:dist', 'copy:dist', 'webpack:dist' ]);
+
 	grunt.registerTask('default', [ 'dev' ]);
-};
+}

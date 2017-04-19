@@ -2,6 +2,9 @@ import Editor from '../Editor';
 import project from '../project';
 import Runner from '../Runner';
 
+/* path to the project directory */
+const PROJECT_DIRECTORY = '../../../projects/';
+
 /* get references to key DOM nodes */
 const divFile = <HTMLDivElement> document.getElementById('div-file');
 const loadProjectButton = <HTMLButtonElement> document.getElementById('load-project');
@@ -25,7 +28,7 @@ const runner = new Runner(runnerDiv);
  */
 async function loadProjectButtonClick(e: MouseEvent) {
 	e.preventDefault();
-	await load('../../../projects/' + projectSelect.value);
+	await load(PROJECT_DIRECTORY + projectSelect.value);
 
 	projectSelect.setAttribute('disabled', 'disabled');
 	loadProjectButton.setAttribute('disabled', 'disabled');

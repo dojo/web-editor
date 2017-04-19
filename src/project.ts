@@ -7,7 +7,8 @@ import request from '@dojo/core/request';
 import { find, includes } from '@dojo/shim/array';
 import WeakMap from '@dojo/shim/WeakMap';
 import { DiagnosticMessageChain, OutputFile } from 'typescript';
-import { getEmit } from './support/css';
+import { getEmit as getCssEmit } from './support/css';
+import { getEmit as getJsonEmit } from './support/json';
 
 import { EmitFile, PromiseLanguageService, TypeScriptWorker } from './interfaces';
 
@@ -271,13 +272,18 @@ export class Project extends Evented {
 			return emitOutput;
 		}));
 
-		const cssFiles = await getEmit(...this._project.files /* add css modules */
+		const cssFiles = await getCssEmit(...this._project.files /* add css modules */
 			.filter(({ type }) => type === ProjectFileType.CSS)
 			.map(({ name, type }) => { return { model: this.getFileModel(name), type }; })
 			.map(({ model, type }) => { return { name: model.uri.fsPath.replace(/^\/\.\//, ''), text: model.getValue(), type }; }));
 
+		const jsonFiles = getJsonEmit(...this._project.files /* add json files as a module */
+			.filter(({ type }) => type === ProjectFileType.JSON)
+			.map(({ name, type }) => { return { model: this.getFileModel(name), type }; })
+			.map(({ model, type }) => { return { name: model.uri.fsPath.replace(/^\/\.\//, ''), text: model.getValue(), type }; }));
+
 		const otherFiles = this._project.files /* add on other project files */
-			.filter(({ type }) => type !== ProjectFileType.Definition && type !== ProjectFileType.TypeScript && type !== ProjectFileType.CSS)
+			.filter(({ type }) => type !== ProjectFileType.Definition && type !== ProjectFileType.TypeScript && type !== ProjectFileType.CSS && type !== ProjectFileType.JSON)
 			.map(({ name, type }) => { return { model: this.getFileModel(name), type }; })
 			.map(({ model, type }) => { return { name: model.uri.fsPath.replace(/^\/\.\//, ''), text: model.getValue(), type }; });
 
@@ -290,7 +296,7 @@ export class Project extends Evented {
 					type: /^(.*\.(?!map$))?[^.]*$/.test(name) ? ProjectFileType.JavaScript : ProjectFileType.SourceMap
 				};
 			})
-			.concat(cssFiles, otherFiles);
+			.concat(cssFiles, jsonFiles, otherFiles);
 	}
 
 	/**
