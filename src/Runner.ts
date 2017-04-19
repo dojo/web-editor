@@ -13,7 +13,7 @@ import project from './project';
 function docSrc(
 	strings: TemplateStringsArray,
 	scripts: string[],
-	css: string[],
+	css: { name: string; text: string; }[],
 	bodyAttributes: { [attr: string]: string; },
 	html: string,
 	dependencies: { [pkg: string]: string; },
@@ -32,7 +32,11 @@ function docSrc(
 	}
 	modulesText += `};\nrequire.cache(cache);\n/* workaround for dojo/loader#124 */\nrequire.cache({});\n`;
 
-	const cssText = `<style>\n${css.join('\n')}\n\t\t\t\t</style>\n`;
+	const cssText = css.map(({ name, text }) => {
+		/* when external CSS is brought into a document, its URL URIs might not be encoded, this will encode them */
+		const encoded = text.replace(/url\(['"]?(.*?)["']?\)/ig, (match, p1: string) => `url('${encodeURI(p1)}')`);
+		return `<style>\n/* from: ${name} */\n\n${encoded}\n</style>`;
+	}).join('\n');
 
 	let scriptsText = '';
 	scripts.forEach((src) => {
@@ -85,7 +89,7 @@ function parseHtml(content: string): { css: string, body: string, scripts: strin
 }
 
 export interface GetDocOptions {
-	css?: string[];
+	css?: { name: string; text: string; }[];
 	bodyAttributes?: { [attr: string]: string; };
 	dependencies: { [pkg: string]: string; };
 	html?: string;
@@ -163,13 +167,13 @@ export default class Runner extends Evented {
 
 		const css = program
 			.filter(({ type }) => type === ProjectFileType.CSS)
-			.map(({ text }) => text);
+			.map(({ name, text }) => { return { name, text }; });
 
 		const dependencies = project.getDependencies();
 
-		const { css: indexCss, body: html, scripts } = parseHtml(project.getIndexHtml());
-		if (indexCss) {
-			css.unshift(indexCss);
+		const { css: text, body: html, scripts } = parseHtml(project.getIndexHtml());
+		if (text) {
+			css.unshift({ name: 'project index', text });
 		}
 
 		const source = this.getDoc({
