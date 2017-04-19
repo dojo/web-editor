@@ -20,7 +20,15 @@ export = function(grunt: IGrunt) {
 				cwd: '.',
 				src: [ 'projects/**/*.json', 'package.json', 'README.md', 'node_modules/monaco-editor/**/*' ],
 				dest: '<%= distDirectory %>'
-			} ]
+			} ],
+			options: {
+				process(content: string, srcpath: string) {
+					if (srcpath === 'src/examples/index.html') {
+						return content.replace('"../../../node_modules/', '"../node_modules/');
+					}
+					return content;
+				}
+			}
 		}
 	};
 };

@@ -57,8 +57,18 @@ function docSrc(
  * @param iframe The target `iframe`
  * @param source The source to be written
  */
-function writeIframeDoc(iframe: HTMLIFrameElement, source: string) {
-	iframe.contentWindow.document.write(source);
+async function writeIframeDoc(iframe: HTMLIFrameElement, source: string) {
+	return new Promise((resolve) => {
+		function onLoadListener () {
+			iframe.contentWindow.document.write(source);
+			iframe.contentWindow.document.close();
+			iframe.removeEventListener('load', onLoadListener);
+			resolve();
+		}
+
+		iframe.addEventListener('load', onLoadListener);
+		iframe.contentWindow.location.reload();
+	});
 }
 
 function parseHtml(content: string): { css: string, body: string, scripts: string[] } {
@@ -188,6 +198,6 @@ export default class Runner extends Evented {
 			modules,
 			scripts
 		});
-		writeIframeDoc(this._iframe, source);
+		await writeIframeDoc(this._iframe, source);
 	}
 }

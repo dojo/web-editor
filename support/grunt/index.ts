@@ -44,7 +44,7 @@ export function initConfig(grunt: IGrunt, otherOptions: any) {
 
 	grunt.registerTask('dev', [ 'clean:dev', 'ts:dev', 'copy:dev', 'webpack:dev' ]);
 
-	grunt.registerTask('dist', [ 'clean:dist', 'ts:dist', 'copy:dist', 'webpack:dist' ]);
+	grunt.registerTask('dist', [ 'clean:dist', 'ts:dist', 'copy:dist', 'patch', 'webpack:dist', 'auto_install:dist' ]);
 
 	grunt.registerTask('default', [ 'dev' ]);
 }
