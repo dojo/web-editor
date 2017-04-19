@@ -2,6 +2,26 @@ import { ProjectFileType } from '@dojo/cli-emit-editor/interfaces/editor';
 import Evented from '@dojo/core/Evented';
 import project from './project';
 
+export interface GetDocOptions {
+	css?: { name: string; text: string; }[];
+	bodyAttributes?: { [attr: string]: string; };
+	dependencies: { [pkg: string]: string; };
+	html?: string;
+	modules: { [mid: string]: string; };
+	scripts?: string[];
+}
+
+/**
+ * A map of custom package data that needs to be added if this package is part of project that is being run
+ */
+const PACKAGE_DATA: { [pkg: string]: string } = {
+	cldrjs: `{ name: 'cldr', location: 'https://unpkg.com/cldrjs@^0.4.6/dist/cldr', main: '../cldr' }`,
+	globalize: `{ name: 'globalize', main: '/dist/globalize' }`,
+	maquette: `{ name: 'maquette', main: '/dist/maquette.min' }`,
+	pepjs: `{ name: 'pepjs', main: 'dist/pep' }`,
+	tslib: `{ name: 'tslib', location: 'https://unpkg.com/tslib@^1.6.0/', main: 'tslib' }`
+};
+
 /**
  * Generate an HTML document source
  * @param strings Array of template strings
@@ -17,14 +37,20 @@ function docSrc(
 	bodyAttributes: { [attr: string]: string; },
 	html: string,
 	dependencies: { [pkg: string]: string; },
+	packages: string[],
 	modules: { [mid: string]: string }
 ): string {
-	const [ preScripts, preCss, preBodyAttributes, preHtml, preDependencies, preModules, ...postscript ] = strings;
-	let pathsText = `{\n`;
+	const [ preScripts, preCss, preBodyAttributes, preHtml, preDependencies, prePackages, preModules, ...postscript ] = strings;
+
+	const paths: string[] = [];
 	for (const pkg in dependencies) {
-		pathsText += `\t'${pkg}': 'https://unpkg.com/${pkg}@${dependencies[pkg]}',\n`;
+		paths.push(`'${pkg}': 'https://unpkg.com/${pkg}@${dependencies[pkg]}'`);
 	}
-	pathsText += `}\n`;
+	const pathsText = `{\n\t\t\t\t\t\t\t${paths.join(',\n\t\t\t\t\t\t\t')}\n\t\t\t\t\t\t}`;
+
+	const packagesText = `[
+							${packages.join(',\n\t\t\t\t\t\t\t')}
+						]`;
 
 	let modulesText = `var cache = {\n`;
 	for (const mid in modules) {
@@ -49,26 +75,22 @@ function docSrc(
 	}
 
 	return preScripts + scriptsText + preCss + cssText + preBodyAttributes + bodyAttributesText + preHtml + html
-		+ preDependencies + pathsText + preModules + modulesText + postscript.join('\n');
+		+ preDependencies + pathsText + prePackages + packagesText + preModules + modulesText + postscript.join('\n');
 }
 
 /**
- * Writes to the document of an `iframe`
- * @param iframe The target `iframe`
- * @param source The source to be written
+ * Return the information for packages based on dependencies for the project
+ * @param dependencies The project dependencies
  */
-async function writeIframeDoc(iframe: HTMLIFrameElement, source: string) {
-	return new Promise((resolve) => {
-		function onLoadListener () {
-			iframe.contentWindow.document.write(source);
-			iframe.contentWindow.document.close();
-			iframe.removeEventListener('load', onLoadListener);
-			resolve();
+function getPackages(dependencies: { [pkg: string]: string; }): string[] {
+	const packages: string[] = [];
+	Object.keys(PACKAGE_DATA).forEach((key) => {
+		if (key in dependencies && key !== 'tslib') {
+			packages.push(PACKAGE_DATA[key]);
 		}
-
-		iframe.addEventListener('load', onLoadListener);
-		iframe.contentWindow.location.reload();
 	});
+	packages.push(PACKAGE_DATA['tslib']); /* we are always going to inject this one */
+	return packages;
 }
 
 function parseHtml(content: string): { css: string, body: string, scripts: string[] } {
@@ -98,13 +120,23 @@ function parseHtml(content: string): { css: string, body: string, scripts: strin
 	};
 }
 
-export interface GetDocOptions {
-	css?: { name: string; text: string; }[];
-	bodyAttributes?: { [attr: string]: string; };
-	dependencies: { [pkg: string]: string; };
-	html?: string;
-	modules: { [mid: string]: string; };
-	scripts?: string[];
+/**
+ * Writes to the document of an `iframe`
+ * @param iframe The target `iframe`
+ * @param source The source to be written
+ */
+async function writeIframeDoc(iframe: HTMLIFrameElement, source: string) {
+	return new Promise((resolve) => {
+		function onLoadListener () {
+			iframe.contentWindow.document.write(source);
+			iframe.contentWindow.document.close();
+			iframe.removeEventListener('load', onLoadListener);
+			resolve();
+		}
+
+		iframe.addEventListener('load', onLoadListener);
+		iframe.contentWindow.location.reload();
+	});
 }
 
 export default class Runner extends Evented {
@@ -139,19 +171,13 @@ export default class Runner extends Evented {
 				<script>
 					require.config({
 						paths: ${dependencies},
-						packages: [
-							{ name: 'cldr', location: 'https://unpkg.com/cldrjs@^0.4.6/dist/cldr', main: '../cldr' },
-							{ name: 'globalize', main: '/dist/globalize' },
-							{ name: 'maquette', main: '/dist/maquette.min' },
-							{ name: 'pepjs', main: 'dist/pep' },
-							{ name: 'tslib', location: 'https://unpkg.com/tslib@^1.6.0/', main: 'tslib' }
-						]
+						packages: ${getPackages(dependencies)}
 					});
 					${modules}
 					require([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {
 						var request = require('@dojo/core/request').default;
-						var amdRequire = require('../support/providers/amdRequire').default;
-						request.setDefaultProvider(amdRequire);
+						var getProvider = require('../support/providers/amdRequire').default;
+						request.setDefaultProvider(getProvider(require));
 						require([ 'src/main' ], function () { });
 					});
 				</script>

@@ -1,8 +1,8 @@
 import Task from '@dojo/core/async/Task';
-import xhr from '@dojo/core/request/providers/xhr';
 import Headers from '@dojo/core/request/Headers';
+import { Provider, RequestOptions } from '@dojo/core/request/interfaces';
 import Response from '@dojo/core/request/Response';
-import { RequestOptions } from '@dojo/core/request/interfaces';
+import xhr from '@dojo/core/request/providers/xhr';
 
 export class AMDRequireResponse extends Response {
 	private _response: any;
@@ -50,25 +50,25 @@ export class AMDRequireResponse extends Response {
 }
 
 /**
- * When requesting local resources, use `require()` to retrieve them, assuming they have been made available as
- * modules in a bundle or pre-cached in the AMD loader.
- * @param url The URL to request
- * @param options Any request options
+ * Returns an AMD require provider that offloads to XHR, which can be bound to a localised require
+ * @param req The local require to bind to
  */
-export default function amdRequire(url: string, options?: RequestOptions): Task<AMDRequireResponse> {
-	/* we need to detect and rewrite URLs from @dojo/i18n/cldr/load - see issue https://github.com/dojo/i18n/issues/83 */
-	const i18nUri = /^https:\/\/unpkg\.com\/@dojo\/i18n[^\/]*\/cldr\//i;
-	const remoteUri = /^https?:\/\//i;
-	if (i18nUri.test(url) || !remoteUri.test(url)) {
-		return new Task<AMDRequireResponse>((resolve, reject) => {
-			const mid = url.replace(i18nUri, 'src/');
-			try {
-				require([ mid ], (module) => resolve(new AMDRequireResponse(mid, module)));
-			}
-			catch (e) {
-				reject(e);
-			}
-		});
-	}
-	return xhr(url, options);
+export default function getProvider(req: NodeRequire = require): Provider {
+	return function amdRequire(url: string, options?: RequestOptions): Task<AMDRequireResponse> {
+		/* we need to detect and rewrite URLs from @dojo/i18n/cldr/load - see issue https://github.com/dojo/i18n/issues/83 */
+		const i18nUri = /^https:\/\/unpkg\.com\/@dojo\/i18n[^\/]*\/cldr\//i;
+		const remoteUri = /^https?:\/\//i;
+		if (i18nUri.test(url) || !remoteUri.test(url)) {
+			return new Task<AMDRequireResponse>((resolve, reject) => {
+				const mid = url.replace(i18nUri, 'src/');
+				try {
+					req([ mid ], (module) => resolve(new AMDRequireResponse(mid, module)));
+				}
+				catch (e) {
+					reject(e);
+				}
+			});
+		}
+		return xhr(url, options);
+	};
 }
