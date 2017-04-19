@@ -57,6 +57,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var Evented_1 = require("@dojo/core/Evented");
     var project_1 = require("./project");
     /**
+     * A map of custom package data that needs to be added if this package is part of project that is being run
+     */
+    var PACKAGE_DATA = {
+        cldrjs: "{ name: 'cldr', location: 'https://unpkg.com/cldrjs@^0.4.6/dist/cldr', main: '../cldr' }",
+        globalize: "{ name: 'globalize', main: '/dist/globalize' }",
+        maquette: "{ name: 'maquette', main: '/dist/maquette.min' }",
+        pepjs: "{ name: 'pepjs', main: 'dist/pep' }",
+        tslib: "{ name: 'tslib', location: 'https://unpkg.com/tslib@^1.6.0/', main: 'tslib' }"
+    };
+    /**
      * Generate an HTML document source
      * @param strings Array of template strings
      * @param css The CSS as an array of strings
@@ -64,13 +74,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
      * @param dependencies A map of package dependencies required
      * @param modules Any modules to be injected into the page
      */
-    function docSrc(strings, scripts, css, bodyAttributes, html, dependencies, modules) {
-        var preScripts = strings[0], preCss = strings[1], preBodyAttributes = strings[2], preHtml = strings[3], preDependencies = strings[4], preModules = strings[5], postscript = strings.slice(6);
-        var pathsText = "{\n";
+    function docSrc(strings, scripts, css, bodyAttributes, html, dependencies, packages, modules) {
+        var preScripts = strings[0], preCss = strings[1], preBodyAttributes = strings[2], preHtml = strings[3], preDependencies = strings[4], prePackages = strings[5], preModules = strings[6], postscript = strings.slice(7);
+        var paths = [];
         for (var pkg in dependencies) {
-            pathsText += "\t'" + pkg + "': 'https://unpkg.com/" + pkg + "@" + dependencies[pkg] + "',\n";
+            paths.push("'" + pkg + "': 'https://unpkg.com/" + pkg + "@" + dependencies[pkg] + "'");
         }
-        pathsText += "}\n";
+        var pathsText = "{\n\t\t\t\t\t\t\t" + paths.join(',\n\t\t\t\t\t\t\t') + "\n\t\t\t\t\t\t}";
+        var packagesText = "[\n\t\t\t\t\t\t\t" + packages.join(',\n\t\t\t\t\t\t\t') + "\n\t\t\t\t\t\t]";
         var modulesText = "var cache = {\n";
         for (var mid in modules) {
             modulesText += "\t'" + mid + "': function () {\n" + modules[mid] + "\n},\n";
@@ -91,28 +102,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             bodyAttributesText += " $[attr]=\"" + bodyAttributes[attr] + "\"";
         }
         return preScripts + scriptsText + preCss + cssText + preBodyAttributes + bodyAttributesText + preHtml + html
-            + preDependencies + pathsText + preModules + modulesText + postscript.join('\n');
+            + preDependencies + pathsText + prePackages + packagesText + preModules + modulesText + postscript.join('\n');
     }
     /**
-     * Writes to the document of an `iframe`
-     * @param iframe The target `iframe`
-     * @param source The source to be written
+     * Return the information for packages based on dependencies for the project
+     * @param dependencies The project dependencies
      */
-    function writeIframeDoc(iframe, source) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve) {
-                        function onLoadListener() {
-                            iframe.contentWindow.document.write(source);
-                            iframe.contentWindow.document.close();
-                            iframe.removeEventListener('load', onLoadListener);
-                            resolve();
-                        }
-                        iframe.addEventListener('load', onLoadListener);
-                        iframe.contentWindow.location.reload();
-                    })];
-            });
+    function getPackages(dependencies) {
+        var packages = [];
+        Object.keys(PACKAGE_DATA).forEach(function (key) {
+            if (key in dependencies && key !== 'tslib') {
+                packages.push(PACKAGE_DATA[key]);
+            }
         });
+        packages.push(PACKAGE_DATA['tslib']); /* we are always going to inject this one */
+        return packages;
     }
     function parseHtml(content) {
         var parser = new DOMParser();
@@ -140,6 +144,27 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             scripts: scripts
         };
     }
+    /**
+     * Writes to the document of an `iframe`
+     * @param iframe The target `iframe`
+     * @param source The source to be written
+     */
+    function writeIframeDoc(iframe, source) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve) {
+                        function onLoadListener() {
+                            iframe.contentWindow.document.write(source);
+                            iframe.contentWindow.document.close();
+                            iframe.removeEventListener('load', onLoadListener);
+                            resolve();
+                        }
+                        iframe.addEventListener('load', onLoadListener);
+                        iframe.contentWindow.location.reload();
+                    })];
+            });
+        });
+    }
     var Runner = (function (_super) {
         __extends(Runner, _super);
         /**
@@ -157,7 +182,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
          */
         Runner.prototype.getDoc = function (_a) {
             var _b = _a.css, css = _b === void 0 ? [] : _b, _c = _a.bodyAttributes, bodyAttributes = _c === void 0 ? {} : _c, dependencies = _a.dependencies, _d = _a.html, html = _d === void 0 ? '' : _d, modules = _a.modules, _e = _a.scripts, scripts = _e === void 0 ? [] : _e;
-            return (_f = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"https://unpkg.com/@dojo/loader/loader.min.js\"></script>\n\t\t\t\t<script>\n\t\t\t\t\trequire.config({\n\t\t\t\t\t\tpaths: ", ",\n\t\t\t\t\t\tpackages: [\n\t\t\t\t\t\t\t{ name: 'cldr', location: 'https://unpkg.com/cldrjs@^0.4.6/dist/cldr', main: '../cldr' },\n\t\t\t\t\t\t\t{ name: 'globalize', main: '/dist/globalize' },\n\t\t\t\t\t\t\t{ name: 'maquette', main: '/dist/maquette.min' },\n\t\t\t\t\t\t\t{ name: 'pepjs', main: 'dist/pep' },\n\t\t\t\t\t\t\t{ name: 'tslib', location: 'https://unpkg.com/tslib@^1.6.0/', main: 'tslib' }\n\t\t\t\t\t\t]\n\t\t\t\t\t});\n\t\t\t\t\t", "\n\t\t\t\t\trequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\t\t\t\t\t\tvar request = require('@dojo/core/request').default;\n\t\t\t\t\t\tvar amdRequire = require('../support/providers/amdRequire').default;\n\t\t\t\t\t\trequest.setDefaultProvider(amdRequire);\n\t\t\t\t\t\trequire([ 'src/main' ], function () { });\n\t\t\t\t\t});\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], _f.raw = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"https://unpkg.com/@dojo/loader/loader.min.js\"></script>\n\t\t\t\t<script>\n\t\t\t\t\trequire.config({\n\t\t\t\t\t\tpaths: ", ",\n\t\t\t\t\t\tpackages: [\n\t\t\t\t\t\t\t{ name: 'cldr', location: 'https://unpkg.com/cldrjs@^0.4.6/dist/cldr', main: '../cldr' },\n\t\t\t\t\t\t\t{ name: 'globalize', main: '/dist/globalize' },\n\t\t\t\t\t\t\t{ name: 'maquette', main: '/dist/maquette.min' },\n\t\t\t\t\t\t\t{ name: 'pepjs', main: 'dist/pep' },\n\t\t\t\t\t\t\t{ name: 'tslib', location: 'https://unpkg.com/tslib@^1.6.0/', main: 'tslib' }\n\t\t\t\t\t\t]\n\t\t\t\t\t});\n\t\t\t\t\t", "\n\t\t\t\t\trequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\t\t\t\t\t\tvar request = require('@dojo/core/request').default;\n\t\t\t\t\t\tvar amdRequire = require('../support/providers/amdRequire').default;\n\t\t\t\t\t\trequest.setDefaultProvider(amdRequire);\n\t\t\t\t\t\trequire([ 'src/main' ], function () { });\n\t\t\t\t\t});\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], docSrc(_f, scripts, css, bodyAttributes, html, dependencies, modules));
+            return (_f = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"https://unpkg.com/@dojo/loader/loader.min.js\"></script>\n\t\t\t\t<script>\n\t\t\t\t\trequire.config({\n\t\t\t\t\t\tpaths: ", ",\n\t\t\t\t\t\tpackages: ", "\n\t\t\t\t\t});\n\t\t\t\t\t", "\n\t\t\t\t\trequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\t\t\t\t\t\tvar request = require('@dojo/core/request').default;\n\t\t\t\t\t\tvar getProvider = require('../support/providers/amdRequire').default;\n\t\t\t\t\t\trequest.setDefaultProvider(getProvider(require));\n\t\t\t\t\t\trequire([ 'src/main' ], function () { });\n\t\t\t\t\t});\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], _f.raw = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"https://unpkg.com/@dojo/loader/loader.min.js\"></script>\n\t\t\t\t<script>\n\t\t\t\t\trequire.config({\n\t\t\t\t\t\tpaths: ", ",\n\t\t\t\t\t\tpackages: ", "\n\t\t\t\t\t});\n\t\t\t\t\t", "\n\t\t\t\t\trequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\t\t\t\t\t\tvar request = require('@dojo/core/request').default;\n\t\t\t\t\t\tvar getProvider = require('../support/providers/amdRequire').default;\n\t\t\t\t\t\trequest.setDefaultProvider(getProvider(require));\n\t\t\t\t\t\trequire([ 'src/main' ], function () { });\n\t\t\t\t\t});\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], docSrc(_f, scripts, css, bodyAttributes, html, dependencies, getPackages(dependencies), modules));
             var _f;
         };
         /**

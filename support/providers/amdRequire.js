@@ -14,15 +14,15 @@ var __extends = (this && this.__extends) || (function () {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/async/Task", "@dojo/core/request/providers/xhr", "@dojo/core/request/Headers", "@dojo/core/request/Response"], factory);
+        define(["require", "exports", "@dojo/core/async/Task", "@dojo/core/request/Headers", "@dojo/core/request/Response", "@dojo/core/request/providers/xhr"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Task_1 = require("@dojo/core/async/Task");
-    var xhr_1 = require("@dojo/core/request/providers/xhr");
     var Headers_1 = require("@dojo/core/request/Headers");
     var Response_1 = require("@dojo/core/request/Response");
+    var xhr_1 = require("@dojo/core/request/providers/xhr");
     var AMDRequireResponse = (function (_super) {
         __extends(AMDRequireResponse, _super);
         function AMDRequireResponse(url, response) {
@@ -58,28 +58,29 @@ var __extends = (this && this.__extends) || (function () {
     }(Response_1.default));
     exports.AMDRequireResponse = AMDRequireResponse;
     /**
-     * When requesting local resources, use `require()` to retrieve them, assuming they have been made available as
-     * modules in a bundle or pre-cached in the AMD loader.
-     * @param url The URL to request
-     * @param options Any request options
+     * Returns an AMD require provider that offloads to XHR, which can be bound to a localised require
+     * @param req The local require to bind to
      */
-    function amdRequire(url, options) {
-        /* we need to detect and rewrite URLs from @dojo/i18n/cldr/load - see issue https://github.com/dojo/i18n/issues/83 */
-        var i18nUri = /^https:\/\/unpkg\.com\/@dojo\/i18n[^\/]*\/cldr\//i;
-        var remoteUri = /^https?:\/\//i;
-        if (i18nUri.test(url) || !remoteUri.test(url)) {
-            return new Task_1.default(function (resolve, reject) {
-                var mid = url.replace(i18nUri, 'src/');
-                try {
-                    require([mid], function (module) { return resolve(new AMDRequireResponse(mid, module)); });
-                }
-                catch (e) {
-                    reject(e);
-                }
-            });
-        }
-        return xhr_1.default(url, options);
+    function getProvider(req) {
+        if (req === void 0) { req = require; }
+        return function amdRequire(url, options) {
+            /* we need to detect and rewrite URLs from @dojo/i18n/cldr/load - see issue https://github.com/dojo/i18n/issues/83 */
+            var i18nUri = /^https:\/\/unpkg\.com\/@dojo\/i18n[^\/]*\/cldr\//i;
+            var remoteUri = /^https?:\/\//i;
+            if (i18nUri.test(url) || !remoteUri.test(url)) {
+                return new Task_1.default(function (resolve, reject) {
+                    var mid = url.replace(i18nUri, 'src/');
+                    try {
+                        req([mid], function (module) { return resolve(new AMDRequireResponse(mid, module)); });
+                    }
+                    catch (e) {
+                        reject(e);
+                    }
+                });
+            }
+            return xhr_1.default(url, options);
+        };
     }
-    exports.default = amdRequire;
+    exports.default = getProvider;
 });
 //# sourceMappingURL=amdRequire.js.map
