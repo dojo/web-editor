@@ -4,7 +4,7 @@ require.config({
         '@dojo': '../node_modules/@dojo'
     },
     packages: [
-        { name: 'src', location: '../..' }
+        { name: 'src', location: '..' }
     ]
 });
 require(['./editor'], function () { });
