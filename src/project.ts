@@ -1,6 +1,6 @@
 import 'vs/editor/editor.main'; /* imported for side-effects */
 
-import { ProjectBundle, ProjectFile, ProjectFileType } from '@dojo/cli-emit-editor/interfaces/editor';
+import { ProjectJson, ProjectFile, ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
 import Evented from '@dojo/core/Evented';
 import { assign } from '@dojo/core/lang';
 import request from '@dojo/core/request';
@@ -126,7 +126,7 @@ export class Project extends Evented {
 	/**
 	 * The loaded project bundle structure
 	 */
-	private _project: ProjectBundle | undefined;
+	private _project: ProjectJson | undefined;
 
 	/**
 	 * A map of meta data related to project files
@@ -302,7 +302,7 @@ export class Project extends Evented {
 	/**
 	 * Return the currently loaded project bundle.
 	 */
-	get(): ProjectBundle | undefined {
+	get(): ProjectJson | undefined {
 		this._updateBundle();
 		return this._project;
 	}

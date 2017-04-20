@@ -1,4 +1,4 @@
-import { ProjectFileType } from '@dojo/cli-emit-editor/interfaces/editor';
+import { ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
 import Evented from '@dojo/core/Evented';
 import project from './project';
 

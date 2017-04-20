@@ -1,4 +1,4 @@
-import { ProjectFileType } from '@dojo/cli-emit-editor/interfaces/editor';
+import { ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
 import { EmitOutput, LanguageService, Diagnostic } from 'typescript';
 
 export interface EmitFile {

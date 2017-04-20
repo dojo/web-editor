@@ -1,4 +1,4 @@
-import { ProjectFile, ProjectFileType } from '@dojo/cli-emit-editor/interfaces/editor';
+import { ProjectFile, ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
 import { EmitFile } from '../interfaces';
 
 export function getEmit(...files: ProjectFile[]): EmitFile[] {
