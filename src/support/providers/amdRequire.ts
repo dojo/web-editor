@@ -43,10 +43,6 @@ export class AMDRequireResponse extends Response {
 	text(): Task<string> {
 		return Task.resolve(typeof this._response === 'string' ? this._response : this._response && this._response.toString());
 	}
-
-	xml(): Task<Document> {
-		return Task.reject(new Error('XML not supported'));
-	}
 }
 
 /**

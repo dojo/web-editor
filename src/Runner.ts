@@ -93,6 +93,10 @@ function getPackages(dependencies: { [pkg: string]: string; }): string[] {
 	return packages;
 }
 
+/**
+ * Extract some specific content from an HTML document and return it
+ * @param content The source HTML content
+ */
 function parseHtml(content: string): { css: string, body: string, scripts: string[] } {
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(content, 'text/html');
@@ -143,7 +147,7 @@ export default class Runner extends Evented {
 	/**
 	 * The private iframe that the project will run in
 	 */
-	private _iframe: HTMLIFrameElement | undefined;
+	private _iframe: HTMLIFrameElement;
 
 	/**
 	 * Create a runner instance attached to a specific `iframe`
@@ -191,10 +195,6 @@ export default class Runner extends Evented {
 	async run() {
 		if (!project.isLoaded()) {
 			throw new Error('Project not loaded.');
-		}
-
-		if (!this._iframe) {
-			this._iframe = document.createElement('iframe');
 		}
 
 		const program = await project.emit();

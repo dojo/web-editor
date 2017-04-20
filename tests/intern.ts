@@ -32,13 +32,12 @@ export const loaders = {
 export const loaderOptions = {
 	packages: [
 		{ name: '@dojo', location: 'node_modules/@dojo' },
-		{ name: 'dojo', location: 'node_modules/intern/node_modules/dojo' },
 		{ name: 'src', location: 'dev/src' },
 		{ name: 'tests', location: 'dev/tests' }
 	]
 };
 
-export const suites = [ 'tests/unit/all' ];
+export const suites = [ '@dojo/test-extras/support/loadJsdom', 'tests/unit/all' ];
 
 export const functionalSuites = [ 'tests/functional/all' ];
 
