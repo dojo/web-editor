@@ -63,7 +63,7 @@ async function load(filename: string) {
 	console.log(`Loaded. Project contains ${projectBundle.files.length + projectBundle.environmentFiles.length} files.`);
 
 	/* generate UI for selecting a file */
-	project.getFiles()
+	project.getFileNames()
 		.sort((a, b) => a < b ? -1 : 1)
 		.forEach((name) => {
 			const option = document.createElement('option');

@@ -346,23 +346,12 @@ export class Project extends Evented {
 		return fileData.model;
 	}
 
-	getFileText(filename: string): string {
-		return this.getFileModel(filename).getValue();
-	}
-
-	getIndexHtml(): string {
-		if (!this._project) {
-			throw new Error('Project not loaded.');
-		}
-		return this.getFileText(this._project.index);
-	}
-
 	/**
 	 * Return an array of strings which are the names of the project files associated with the project.  By default it returns
 	 * all of the files, but to filter based on file type, pass additional arguments of the file types to filter on.
 	 * @param types Return only files that match these project file types
 	 */
-	getFiles(...types: ProjectFileType[]): string[] {
+	getFileNames(...types: ProjectFileType[]): string[] {
 		if (!this._project) {
 			throw new Error('Project not loaded.');
 		}
@@ -372,11 +361,29 @@ export class Project extends Evented {
 	}
 
 	/**
+	 * Retrieve the text of the file from the project
+	 * @param filename The file name of the project file
+	 */
+	getFileText(filename: string): string {
+		return this.getFileModel(filename).getValue();
+	}
+
+	/**
+	 * Retrieve the text for the index HTML that has been specified in the project
+	 */
+	getIndexHtml(): string {
+		if (!this._project) {
+			throw new Error('Project not loaded.');
+		}
+		return this.getFileText(this._project.index);
+	}
+
+	/**
 	 * Return `true` if the specified file name is part of the project, otherwise `false`.
 	 * @param filename The file name
 	 */
 	includes(filename: string): boolean {
-		return Boolean(this._project && includes(this.getFiles(), filename));
+		return Boolean(this._project && includes(this.getFileNames(), filename));
 	}
 
 	/**
