@@ -129,8 +129,8 @@ function parseHtml(content: string): { css: string, body: string, scripts: strin
  * @param iframe The target `iframe`
  * @param source The source to be written
  */
-async function writeIframeDoc(iframe: HTMLIFrameElement, source: string) {
-	return new Promise((resolve) => {
+async function writeIframeDoc(iframe: HTMLIFrameElement, source: string): Promise<void> {
+	return new Promise<void>((resolve) => {
 		function onLoadListener () {
 			iframe.contentWindow.document.write(source);
 			iframe.contentWindow.document.close();
@@ -192,7 +192,7 @@ export default class Runner extends Evented {
 	/**
 	 * Get the emit from the current project and run it in the runner's `iframe`
 	 */
-	async run() {
+	async run(): Promise<void> {
 		if (!project.isLoaded()) {
 			throw new Error('Project not loaded.');
 		}

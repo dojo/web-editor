@@ -331,6 +331,19 @@ export class Project extends Evented {
 	}
 
 	/**
+	 * Return an array of `ProjectFile` objects which are the files associated with the project.  By default it returns all of
+	 * the files, but to filer based on file type, pass additional arguments of the file types to filter on.
+	 * @param types Return only files that match these project file types
+	 */
+	getFiles(...types: ProjectFileType[]): ProjectFile[] {
+		if (!this._project) {
+			throw new Error('Project not loaded.');
+		}
+		return this._project.files
+			.filter(({ type }) => types.length ? includes(types, type) : true);
+	}
+
+	/**
 	 * Return a monaco-editor model for a specified file name.  Will throw if the filename is not part of the project.
 	 * @param filename The file name of the project file
 	 */
@@ -352,11 +365,7 @@ export class Project extends Evented {
 	 * @param types Return only files that match these project file types
 	 */
 	getFileNames(...types: ProjectFileType[]): string[] {
-		if (!this._project) {
-			throw new Error('Project not loaded.');
-		}
-		return this._project.files
-			.filter(({ type }) => types.length ? includes(types, type) : true)
+		return this.getFiles(...types)
 			.map(({ name }) => name);
 	}
 
