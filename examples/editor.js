@@ -126,7 +126,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         projectBundle = project_1.default.get();
                         console.log("Loaded. Project contains " + (projectBundle.files.length + projectBundle.environmentFiles.length) + " files.");
                         /* generate UI for selecting a file */
-                        project_1.default.getFiles()
+                        project_1.default.getFileNames()
                             .sort(function (a, b) { return a < b ? -1 : 1; })
                             .forEach(function (name) {
                             var option = document.createElement('option');

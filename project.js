@@ -435,32 +435,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             });
         };
         /**
-         * Return a monaco-editor model for a specified file name.  Will throw if the filename is not part of the project.
-         * @param filename The file name of the project file
-         */
-        Project.prototype.getFileModel = function (filename) {
-            var file = this.getFile(filename);
-            if (!file) {
-                throw new Error("File \"" + filename + "\" is not part of the project.");
-            }
-            var fileData = this._getProjectFileData(file);
-            if (!fileData.model) {
-                fileData.model = createMonacoModel(file);
-            }
-            return fileData.model;
-        };
-        Project.prototype.getFileText = function (filename) {
-            return this.getFileModel(filename).getValue();
-        };
-        Project.prototype.getIndexHtml = function () {
-            if (!this._project) {
-                throw new Error('Project not loaded.');
-            }
-            return this.getFileText(this._project.index);
-        };
-        /**
-         * Return an array of strings which are the names of the project files associated with the project.  By default it returns
-         * all of the files, but to filter based on file type, pass additional arguments of the file types to filter on.
+         * Return an array of `ProjectFile` objects which are the files associated with the project.  By default it returns all of
+         * the files, but to filer based on file type, pass additional arguments of the file types to filter on.
          * @param types Return only files that match these project file types
          */
         Project.prototype.getFiles = function () {
@@ -475,18 +451,60 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 .filter(function (_a) {
                 var type = _a.type;
                 return types.length ? array_1.includes(types, type) : true;
-            })
-                .map(function (_a) {
+            });
+        };
+        /**
+         * Return a monaco-editor model for a specified file name.  Will throw if the filename is not part of the project.
+         * @param filename The file name of the project file
+         */
+        Project.prototype.getFileModel = function (filename) {
+            var file = this.getFile(filename);
+            if (!file) {
+                throw new Error("File \"" + filename + "\" is not part of the project.");
+            }
+            var fileData = this._getProjectFileData(file);
+            if (!fileData.model) {
+                fileData.model = createMonacoModel(file);
+            }
+            return fileData.model;
+        };
+        /**
+         * Return an array of strings which are the names of the project files associated with the project.  By default it returns
+         * all of the files, but to filter based on file type, pass additional arguments of the file types to filter on.
+         * @param types Return only files that match these project file types
+         */
+        Project.prototype.getFileNames = function () {
+            var types = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                types[_i] = arguments[_i];
+            }
+            return this.getFiles.apply(this, types).map(function (_a) {
                 var name = _a.name;
                 return name;
             });
+        };
+        /**
+         * Retrieve the text of the file from the project
+         * @param filename The file name of the project file
+         */
+        Project.prototype.getFileText = function (filename) {
+            return this.getFileModel(filename).getValue();
+        };
+        /**
+         * Retrieve the text for the index HTML that has been specified in the project
+         */
+        Project.prototype.getIndexHtml = function () {
+            if (!this._project) {
+                throw new Error('Project not loaded.');
+            }
+            return this.getFileText(this._project.index);
         };
         /**
          * Return `true` if the specified file name is part of the project, otherwise `false`.
          * @param filename The file name
          */
         Project.prototype.includes = function (filename) {
-            return Boolean(this._project && array_1.includes(this.getFiles(), filename));
+            return Boolean(this._project && array_1.includes(this.getFileNames(), filename));
         };
         /**
          * Determine if a file, by name is _dirty_ and has not had its contents updated in the project bundle once being edited

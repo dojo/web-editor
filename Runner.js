@@ -118,6 +118,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         packages.push(PACKAGE_DATA['tslib']); /* we are always going to inject this one */
         return packages;
     }
+    /**
+     * Extract some specific content from an HTML document and return it
+     * @param content The source HTML content
+     */
     function parseHtml(content) {
         var parser = new DOMParser();
         var doc = parser.parseFromString(content, 'text/html');
@@ -196,9 +200,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         case 0:
                             if (!project_1.default.isLoaded()) {
                                 throw new Error('Project not loaded.');
-                            }
-                            if (!this._iframe) {
-                                this._iframe = document.createElement('iframe');
                             }
                             return [4 /*yield*/, project_1.default.emit()];
                         case 1:

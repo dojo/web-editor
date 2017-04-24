@@ -47,18 +47,34 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var postcss_1 = require("./postcss");
     var postcssCssnext_1 = require("./postcssCssnext");
     var postcssModules_1 = require("./postcssModules");
+    /**
+     * Take a map of classes and return the text of a `.d.ts` file which describes those class names
+     * @param classes A map of classes
+     */
     function classesToDefinition(classes) {
         return Object.keys(classes)
             .reduce(function (previous, className) {
             return previous + ("export const " + className + ": string;\n");
         }, '');
     }
-    function classesToAMD(classes) {
+    /**
+     * Take a map of classes and return an AMD module which returns an object of those class names
+     * @param classes A map of classes
+     * @param key A string which will be the key for the object map
+     */
+    function classesToAMD(classes, key) {
         var result = Object.keys(classes)
-            .map(function (className) { return "\t'" + className + "': '" + classes[className] + "'"; })
-            .join(',\n');
-        return "define([], function () {\n\t\treturn {\n\t\t" + result + "\n\t\t};\n\t});\n";
+            .map(function (className) { return "\t'" + className + "': '" + classes[className] + "'"; });
+        result.push("\t' _key': '" + key + "'");
+        return "define([], function () {\n\t\treturn {\n\t\t" + result.join(',\n') + "\n\t\t};\n\t});\n";
     }
+    /**
+     * Generate definition files for CSS Modules.
+     *
+     * Essentially this function takes a CSS Module, generates the modularised class names and then returns a `.d.ts` file
+     * that contains the source class names which can be used to import the CSS Module into a TypeScript module.
+     * @param files Project files to generate definitions for.
+     */
     function getDefinitions() {
         var files = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -103,6 +119,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         });
     }
     exports.getDefinitions = getDefinitions;
+    /**
+     * Emit transpiled CSS Modules.
+     *
+     * This function takes in any number of project files and resolves with an array of emitted files which will contain two files
+     * for each CSS module, a AMD module which returns a map of class names which have been localised and a CSS file which contains
+     * the localised CSS.
+     * @param files Project files to generate emitted CSS for.
+     */
     function getEmit() {
         var files = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -113,7 +137,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 filename;
                 mappedClasses = json;
             }
-            var mappedClasses, processor, emitFiles, i, file, result;
+            var mappedClasses, processor, emitFiles, i, file, result, key;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -143,9 +167,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                             type: 5 /* CSS */
                         });
                         if (mappedClasses) {
+                            key = file.name.split('/').pop().replace(/(\.m)?\.css$/, '');
                             emitFiles.push({
                                 name: file.name + '.js',
-                                text: classesToAMD(mappedClasses),
+                                text: classesToAMD(mappedClasses, key),
                                 type: 4 /* JavaScript */
                             });
                         }
