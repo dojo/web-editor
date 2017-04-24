@@ -228,24 +228,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             return this._fileMap.get(file);
         };
         /**
-         * Flush any changes that have come from the editor back into the project files.
-         */
-        Project.prototype._updateBundle = function () {
-            var _this = this;
-            if (!this._project) {
-                return;
-            }
-            this._project.files
-                .filter(function (_a) {
-                var name = _a.name;
-                return _this.isFileDirty(name);
-            })
-                .forEach(function (file) {
-                file.text = _this.getFileModel(file.name).getValue();
-                _this.setFileDirty(file.name, true);
-            });
-        };
-        /**
          * The the environment files in the monaco-editor environment.  These are the "non-editable" files which support the
          * project and are usually additional type definitions that the project depends upon.
          */
@@ -260,10 +242,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
          * the full context of the project.
          */
         Project.prototype._setProjectFiles = function () {
-            this._project.files.forEach(function (_a) {
-                var filename = _a.name, text = _a.text, type = _a.type;
+            var _this = this;
+            this._project.files.forEach(function (file) {
+                var filename = file.name, text = file.text, type = file.type;
                 if (type === 1 /* TypeScript */ || type === 2 /* Definition */) {
-                    monaco.languages.typescript.typescriptDefaults.addExtraLib(text, 'file:///' + filename);
+                    var fileData = _this._getProjectFileData(file);
+                    fileData.extraLibHandle = monaco.languages.typescript.typescriptDefaults.addExtraLib(text, 'file:///' + filename);
                 }
             });
         };
@@ -299,6 +283,60 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 sourceMap: true /* we will generate sourcemaps and remap them when we add them to the page */
             });
             monaco.languages.typescript.typescriptDefaults.setCompilerOptions(options);
+        };
+        /**
+         * Flush any changes that have come from the editor back into the project files.
+         */
+        Project.prototype._updateBundle = function () {
+            var _this = this;
+            if (!this._project) {
+                return;
+            }
+            this._project.files
+                .filter(function (_a) {
+                var name = _a.name;
+                return _this.isFileDirty(name);
+            })
+                .forEach(function (file) {
+                file.text = _this.getFileModel(file.name).getValue();
+                _this.setFileDirty(file.name, true);
+            });
+        };
+        /**
+         * Update a CSS Module by updating its definition file and adding it to the environment.
+         * @param cssModuleFile The CSS Module to update
+         */
+        Project.prototype._updateCssModule = function (cssModuleFile) {
+            return __awaiter(this, void 0, void 0, function () {
+                var definitionFile, existingDefinition, name, text, fileData;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            cssModuleFile.text = this._getProjectFileData(cssModuleFile).model.getValue();
+                            return [4 /*yield*/, css_1.getDefinitions(cssModuleFile)];
+                        case 1:
+                            definitionFile = (_a.sent())[0];
+                            existingDefinition = array_1.find(this._project.files, (function (_a) {
+                                var name = _a.name;
+                                return name === definitionFile.name;
+                            }));
+                            if (existingDefinition) {
+                                existingDefinition.text = definitionFile.text;
+                                definitionFile = existingDefinition;
+                            }
+                            else {
+                                this._project.files.push(definitionFile);
+                            }
+                            name = definitionFile.name, text = definitionFile.text;
+                            fileData = this._getProjectFileData(definitionFile);
+                            if (fileData.extraLibHandle) {
+                                fileData.extraLibHandle.dispose();
+                            }
+                            fileData.extraLibHandle = monaco.languages.typescript.typescriptDefaults.addExtraLib(text, 'file:///' + name);
+                            return [2 /*return*/];
+                    }
+                });
+            });
         };
         /**
          * Take the currently loaded project and emit it
@@ -447,10 +485,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             if (!this._project) {
                 throw new Error('Project not loaded.');
             }
+            var filenames = this._project.files.map(function (_a) {
+                var name = _a.name;
+                return name;
+            });
+            /* while sometimes, CSS Modules Definition files are included in a project bundle, and need to be part of the environment, they
+             * shouldn't be editable and therefore we won't return them */
             return this._project.files
                 .filter(function (_a) {
-                var type = _a.type;
-                return types.length ? array_1.includes(types, type) : true;
+                var name = _a.name, type = _a.type;
+                return !(type === 2 /* Definition */ && array_1.includes(filenames, name.replace(/\.d\.ts$/, ''))) && (types.length ? array_1.includes(types, type) : true);
             });
         };
         /**
@@ -555,7 +599,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             if (!file) {
                 throw new Error("File \"" + filename + "\" is not part of the project.");
             }
-            if (file) {
+            if (file.type === 5 /* CSS */) {
+                /* the functionality of this method negates setting the dirty flag, so we won't */
+                this._updateCssModule(file);
+            }
+            else {
                 this._getProjectFileData(file).dirty = !reset;
             }
         };

@@ -71,7 +71,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     /**
      * Generate definition files for CSS Modules.
      *
-     * Essentially this function takes a CSS Module, generates the modularised class names and then returns a `.d.ts` file
+     * This function takes a CSS Module, generates the modularised class names and then returns a `.d.ts` file
      * that contains the source class names which can be used to import the CSS Module into a TypeScript module.
      * @param files Project files to generate definitions for.
      */
