@@ -4,6 +4,10 @@ import postcss from './postcss';
 import cssnext from './postcssCssnext';
 import postcssModules from './postcssModules';
 
+/**
+ * Take a map of classes and return the text of a `.d.ts` file which describes those class names
+ * @param classes A map of classes
+ */
 function classesToDefinition(classes: { [className: string]: string; }): string {
 	return Object.keys(classes)
 		.reduce((previous, className) => {
@@ -11,18 +15,31 @@ function classesToDefinition(classes: { [className: string]: string; }): string 
 		}, '');
 }
 
-function classesToAMD(classes: { [className: string]: string; }): string {
+/**
+ * Take a map of classes and return an AMD module which returns an object of those class names
+ * @param classes A map of classes
+ * @param key A string which will be the key for the object map
+ */
+function classesToAMD(classes: { [className: string]: string; }, key: string): string {
 	const result = Object.keys(classes)
-		.map((className) => `\t'${className}': '${classes[className]}'`)
-		.join(',\n');
+		.map((className) => `\t'${className}': '${classes[className]}'`);
+	result.push(`\t' _key': '${key}'`);
+
 	return `define([], function () {
 		return {
-		${result}
+		${result.join(',\n')}
 		};
 	});\n`;
 }
 
-export async function getDefinitions(...files: ProjectFile[]) {
+/**
+ * Generate definition files for CSS Modules.
+ *
+ * Essentially this function takes a CSS Module, generates the modularised class names and then returns a `.d.ts` file
+ * that contains the source class names which can be used to import the CSS Module into a TypeScript module.
+ * @param files Project files to generate definitions for.
+ */
+export async function getDefinitions(...files: ProjectFile[]): Promise<ProjectFile[]> {
 
 	let mappedClasses: { [className: string]: string } | undefined;
 	function getJSON(filename: undefined, json: { [className: string]: string }) {
@@ -50,6 +67,14 @@ export async function getDefinitions(...files: ProjectFile[]) {
 	return definitionFiles;
 }
 
+/**
+ * Emit transpiled CSS Modules.
+ *
+ * This function takes in any number of project files and resolves with an array of emitted files which will contain two files
+ * for each CSS module, a AMD module which returns a map of class names which have been localised and a CSS file which contains
+ * the localised CSS.
+ * @param files Project files to generate emitted CSS for.
+ */
 export async function getEmit(...files: ProjectFile[]): Promise<EmitFile[]> {
 
 	let mappedClasses: { [className: string]: string } | undefined;
@@ -81,9 +106,10 @@ export async function getEmit(...files: ProjectFile[]): Promise<EmitFile[]> {
 		});
 
 		if (mappedClasses) {
+			const key = file.name.split('/').pop()!.replace(/(\.m)?\.css$/, '');
 			emitFiles.push({
 				name: file.name + '.js',
-				text: classesToAMD(mappedClasses),
+				text: classesToAMD(mappedClasses, key),
 				type: ProjectFileType.JavaScript
 			});
 		}
