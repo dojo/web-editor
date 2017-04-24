@@ -35,7 +35,7 @@ function classesToAMD(classes: { [className: string]: string; }, key: string): s
 /**
  * Generate definition files for CSS Modules.
  *
- * Essentially this function takes a CSS Module, generates the modularised class names and then returns a `.d.ts` file
+ * This function takes a CSS Module, generates the modularised class names and then returns a `.d.ts` file
  * that contains the source class names which can be used to import the CSS Module into a TypeScript module.
  * @param files Project files to generate definitions for.
  */
@@ -106,6 +106,7 @@ export async function getEmit(...files: ProjectFile[]): Promise<EmitFile[]> {
 		});
 
 		if (mappedClasses) {
+			/* get the basename and strip the extension to be used as the key for the localised CSS */
 			const key = file.name.split('/').pop()!.replace(/(\.m)?\.css$/, '');
 			emitFiles.push({
 				name: file.name + '.js',

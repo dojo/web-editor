@@ -7,10 +7,31 @@ import request from '@dojo/core/request';
 import { find, includes } from '@dojo/shim/array';
 import WeakMap from '@dojo/shim/WeakMap';
 import { DiagnosticMessageChain, OutputFile } from 'typescript';
-import { getEmit as getCssEmit } from './support/css';
+import { getDefinitions, getEmit as getCssEmit } from './support/css';
 import { getEmit as getJsonEmit } from './support/json';
 
 import { EmitFile, PromiseLanguageService, TypeScriptWorker } from './interfaces';
+
+/**
+ * Interface for private `ProjectFile` data the project needs to track for project files.
+ */
+interface ProjectFileData {
+	/**
+	 * Set to `true` if the model for the file has been updated in the editor, otherwise `false`.
+	 */
+	dirty?: boolean;
+
+	/**
+	 * Extra Lib Handle.  When registering files as extra libs in the TypeScript defaults in monaco-editor and we
+	 * subsequently need to update them, we need to store the handle to remove them from the environment.
+	 */
+	extraLibHandle?: monaco.IDisposable;
+
+	/**
+	 * The associated monaco-editor model for a project file object.
+	 */
+	model?: monaco.editor.IModel;
+}
 
 /**
  * Flatten a TypeScript diagnostic message
@@ -44,18 +65,6 @@ function flattenDiagnosticMessageText(messageText: string | DiagnosticMessageCha
 
 		return result;
 	}
-}
-
-interface ProjectFileData {
-	/**
-	 * Set to `true` if the model for the file has been updated in the editor, otherwise `false`.
-	 */
-	dirty?: boolean;
-
-	/**
-	 * The associated monaco-editor model for a project file object.
-	 */
-	model?: monaco.editor.IModel;
 }
 
 /**
@@ -138,7 +147,7 @@ export class Project extends Evented {
 	 * @param services The language services to check
 	 * @param filename The reference filename
 	 */
-	private async _checkEmitErrors(services: PromiseLanguageService, filename: string) {
+	private async _checkEmitErrors(services: PromiseLanguageService, filename: string): Promise<void> {
 		const diagnostics = [
 			...await services.getCompilerOptionsDiagnostics(),
 			...await services.getSemanticDiagnostics(filename),
@@ -177,21 +186,6 @@ export class Project extends Evented {
 	}
 
 	/**
-	 * Flush any changes that have come from the editor back into the project files.
-	 */
-	private _updateBundle(): void {
-		if (!this._project) {
-			return;
-		}
-		this._project.files
-			.filter(({ name }) => this.isFileDirty(name))
-			.forEach((file) => {
-				file.text = this.getFileModel(file.name).getValue();
-				this.setFileDirty(file.name, true);
-			});
-	}
-
-	/**
 	 * The the environment files in the monaco-editor environment.  These are the "non-editable" files which support the
 	 * project and are usually additional type definitions that the project depends upon.
 	 */
@@ -206,9 +200,11 @@ export class Project extends Evented {
 	 * the full context of the project.
 	 */
 	private _setProjectFiles(): void {
-		this._project!.files.forEach(({ name: filename, text, type }) => {
+		this._project!.files.forEach((file) => {
+			const { name: filename, text, type } = file;
 			if (type === ProjectFileType.TypeScript || type === ProjectFileType.Definition) {
-				monaco.languages.typescript.typescriptDefaults.addExtraLib(text, 'file:///' + filename);
+				const fileData = this._getProjectFileData(file);
+				fileData.extraLibHandle = monaco.languages.typescript.typescriptDefaults.addExtraLib(text, 'file:///' + filename);
 			}
 		});
 	}
@@ -249,6 +245,46 @@ export class Project extends Evented {
 		});
 
 		monaco.languages.typescript.typescriptDefaults.setCompilerOptions(options);
+	}
+
+	/**
+	 * Flush any changes that have come from the editor back into the project files.
+	 */
+	private _updateBundle(): void {
+		if (!this._project) {
+			return;
+		}
+		this._project.files
+			.filter(({ name }) => this.isFileDirty(name))
+			.forEach((file) => {
+				file.text = this.getFileModel(file.name).getValue();
+				this.setFileDirty(file.name, true);
+			});
+	}
+
+	/**
+	 * Update a CSS Module by updating its definition file and adding it to the environment.
+	 * @param cssModuleFile The CSS Module to update
+	 */
+	private async _updateCssModule(cssModuleFile: ProjectFile): Promise<void> {
+		cssModuleFile.text = this._getProjectFileData(cssModuleFile).model!.getValue();
+		let definitionFile = (await getDefinitions(cssModuleFile))[0];
+		const existingDefinition = find(this._project!.files, (({ name }) => name === definitionFile.name));
+		if (existingDefinition) {
+			existingDefinition.text = definitionFile.text;
+			definitionFile = existingDefinition;
+		}
+		else {
+			this._project!.files.push(definitionFile);
+		}
+
+		/* update the extraLib for the definition file */
+		const { name, text } = definitionFile;
+		const fileData = this._getProjectFileData(definitionFile);
+		if (fileData.extraLibHandle) {
+			fileData.extraLibHandle.dispose();
+		}
+		fileData.extraLibHandle = monaco.languages.typescript.typescriptDefaults.addExtraLib(text, 'file:///' + name);
 	}
 
 	/**
@@ -339,8 +375,11 @@ export class Project extends Evented {
 		if (!this._project) {
 			throw new Error('Project not loaded.');
 		}
+		const filenames = this._project.files.map(({ name }) => name);
+		/* while sometimes, CSS Modules Definition files are included in a project bundle, and need to be part of the environment, they
+		 * shouldn't be editable and therefore we won't return them */
 		return this._project.files
-			.filter(({ type }) => types.length ? includes(types, type) : true);
+			.filter(({ name, type }) => !(type === ProjectFileType.Definition && includes(filenames, name.replace(/\.d\.ts$/, ''))) && (types.length ? includes(types, type) : true));
 	}
 
 	/**
@@ -437,7 +476,11 @@ export class Project extends Evented {
 		if (!file) {
 			throw new Error(`File "${filename}" is not part of the project.`);
 		}
-		if (file) {
+		if (file.type === ProjectFileType.CSS) {
+			/* the functionality of this method negates setting the dirty flag, so we won't */
+			this._updateCssModule(file);
+		}
+		else {
 			this._getProjectFileData(file).dirty = !reset;
 		}
 	}
