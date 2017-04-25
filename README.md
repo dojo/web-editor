@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/dojo/web-editor.svg?branch=master)](https://travis-ci.org/dojo/web-editor)
 [![codecov.io](http://codecov.io/github/dojo/web-editor/coverage.svg?branch=master)](http://codecov.io/github/dojo/web-editor?branch=master)
-[![npm version](https://badge.fury.io/js/web-editor.svg)](http://badge.fury.io/js/web-editor)
+[![npm version](https://badge.fury.io/js/%40dojo%2Fweb-editor.svg)](http://badge.fury.io/js/%40dojo%2Fweb-editor)
 
 A package that provides editing and running of Dojo 2 projects in browser.
 
