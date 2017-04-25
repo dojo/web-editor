@@ -1,7 +1,10 @@
 import Destroyable from '@dojo/core/Destroyable';
+import global from '@dojo/core/global';
 import { createHandle } from '@dojo/core/lang';
 import { debounce } from '@dojo/core/util';
 import project from './project';
+
+const globalMonaco: typeof monaco = global.monaco;
 
 /**
  * A class which is a simple abstraction of the `monaco-editor` editor
@@ -21,7 +24,7 @@ export default class Editor extends Destroyable {
 	constructor (element: HTMLElement, options?: monaco.editor.IEditorOptions) {
 		super();
 
-		this._editor = monaco.editor.create(element, options);
+		this._editor = globalMonaco.editor.create(element, options);
 		const didChangeHandle = this._editor.onDidChangeModelContent(debounce(this._onDidChangeModelContent, 1000));
 
 		this.own(createHandle(() => {
