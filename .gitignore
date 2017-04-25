@@ -4,3 +4,4 @@
 /html-report
 /node_modules
 coverage-*.json
+coverage-*.lcov

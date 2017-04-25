@@ -9,8 +9,11 @@ export const capabilities = {
 
 export const environments = [
 	{ browserName: 'internet explorer', version: '11', platform: 'WINDOWS' },
+	{ browserName: 'edge', platform: 'WINDOWS' },
 	{ browserName: 'firefox', platform: 'WINDOWS' },
-	{ browserName: 'chrome', platform: 'WINDOWS' }
+	{ browserName: 'chrome', platform: 'WINDOWS' },
+	{ browserName: 'safari', platform: 'MAC' },
+	{ browserName: 'iPad' }
 ];
 
 export const maxConcurrency = 2;
@@ -33,6 +36,7 @@ export const loaderOptions = {
 	packages: [
 		{ name: '@dojo', location: 'node_modules/@dojo' },
 		{ name: 'src', location: 'dev/src' },
+		{ name: 'sinon', location: 'node_modules/sinon/pkg', main: 'sinon' },
 		{ name: 'tests', location: 'dev/tests' }
 	]
 };

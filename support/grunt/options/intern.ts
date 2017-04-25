@@ -20,6 +20,12 @@ export = function(grunt: IGrunt) {
 			options: {
 				runType: 'client'
 			}
+		},
+
+		saucelabs: {
+			options: {
+				config: '<%= devDirectory %>/tests/intern-saucelabs'
+			}
 		}
 	};
 };
