@@ -204,7 +204,7 @@ var __extends = (this && this.__extends) || (function () {
                     noCompact: true,
                     noAutoWrap: true
                 });
-                glob.sync('_build/**/*.js').filter(function (filepath) {
+                glob.sync('dev/**/*.js').filter(function (filepath) {
                     return !intern.executor.config.excludeInstrumentation.test(filepath) && coveredFiles_1.indexOf(path.resolve(filepath)) === -1;
                 }).forEach(function (filepath) {
                     try {
