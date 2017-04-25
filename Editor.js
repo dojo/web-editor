@@ -14,15 +14,17 @@ var __extends = (this && this.__extends) || (function () {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/Destroyable", "@dojo/core/lang", "@dojo/core/util", "./project"], factory);
+        define(["require", "exports", "@dojo/core/Destroyable", "@dojo/core/global", "@dojo/core/lang", "@dojo/core/util", "./project"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Destroyable_1 = require("@dojo/core/Destroyable");
+    var global_1 = require("@dojo/core/global");
     var lang_1 = require("@dojo/core/lang");
     var util_1 = require("@dojo/core/util");
     var project_1 = require("./project");
+    var globalMonaco = global_1.default.monaco;
     /**
      * A class which is a simple abstraction of the `monaco-editor` editor
      */
@@ -37,7 +39,7 @@ var __extends = (this && this.__extends) || (function () {
             _this._onDidChangeModelContent = function () {
                 project_1.default.setFileDirty(_this._currentFile);
             };
-            _this._editor = monaco.editor.create(element, options);
+            _this._editor = globalMonaco.editor.create(element, options);
             var didChangeHandle = _this._editor.onDidChangeModelContent(util_1.debounce(_this._onDidChangeModelContent, 1000));
             _this.own(lang_1.createHandle(function () {
                 _this._editor.dispose();
