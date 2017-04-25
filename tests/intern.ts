@@ -45,4 +45,4 @@ export const suites = [ '@dojo/test-extras/support/loadJsdom', 'tests/unit/all' 
 
 export const functionalSuites = [ 'tests/functional/all' ];
 
-export const excludeInstrumentation = /(?:node_modules|tests)[\/\\]/;
+export const excludeInstrumentation = /(?:node_modules|tests|external)[\/\\]/;
