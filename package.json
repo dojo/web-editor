@@ -2,7 +2,7 @@
   "name": "@dojo/web-editor",
   "version": "2.0.0-pre",
   "description": "Making it easy to explore Dojo 2 in a browser",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "test": "grunt test"
   },
