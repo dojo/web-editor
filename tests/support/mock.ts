@@ -7,12 +7,18 @@ let disableHandle: Handle | undefined;
 
 declare const define: DojoLoader.Define;
 
+/* TODO remove when https://github.com/dojo/loader/issues/126 is resolved */
 declare global {
 	interface NodeRequire {
 		undef(moduleId: string, recursive?: boolean): void;
 	}
 }
 
+/**
+ * Register a module to be mocked when mocking is enabled
+ * @param mid The absolute module ID to mock
+ * @param mock The mock definition of the module
+ */
 export function register(mid: string, mock: any): Handle {
 	map[mid] = () => {
 		define([], mock);
@@ -25,6 +31,12 @@ export function register(mid: string, mock: any): Handle {
 	});
 }
 
+/**
+ * Enable mocking of modules with the `@dojo/loader`.
+ *
+ * The function will return a `Handle` which will disable the mocks and remove them from
+ * the loader.
+ */
 export function enable(): Handle {
 	if (disableHandle) {
 		return disableHandle;
@@ -32,6 +44,9 @@ export function enable(): Handle {
 	require.cache(map);
 	require.cache({});
 	return disableHandle = createHandle(() => {
+		if (!disableHandle) {
+			return;
+		}
 		const emptyMap: { [mid: string]: any } = {};
 		for (const mid in map) {
 			require.undef(mid, true);
@@ -43,10 +58,14 @@ export function enable(): Handle {
 	});
 }
 
+/**
+ * Clear out all the mocked modules.
+ */
 export function clear(): void {
-	for (const mid in map) {
-		map[mid] = undefined;
+	if (disableHandle) {
+		disableHandle.destroy();
 	}
-	require.cache(map);
-	require.cache({});
+	for (const mid in map) {
+		delete map[mid];
+	}
 }
