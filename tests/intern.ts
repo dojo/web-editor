@@ -45,4 +45,4 @@ export const suites = [ '@dojo/shim/Promise', '@dojo/test-extras/support/loadJsd
 
 export const functionalSuites = [ 'tests/functional/all' ];
 
-export const excludeInstrumentation = /(?:node_modules|tests|examples|external)[\/\\]/;
+export const excludeInstrumentation = /(?:(?:node_modules|tests|examples|external)[\/\\]|worker-proxy\.js$)/;
