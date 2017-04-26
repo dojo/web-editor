@@ -1,3 +1,4 @@
+import './css';
 import './json';
 import './postcss';
 import './postcssCssnext';
