@@ -47,10 +47,11 @@ export function enable(): Handle {
 		if (!disableHandle) {
 			return;
 		}
-		const emptyMap: { [mid: string]: any } = {};
+		const emptyMap: { [mid: string]: undefined } = {};
 		for (const mid in map) {
 			require.undef(mid, true);
 			emptyMap[mid] = undefined;
+			delete map[mid];
 		}
 		require.cache(emptyMap);
 		require.cache({});

@@ -81,6 +81,7 @@ registerSuite({
 	},
 
 	teardown() {
+		console.log('teardown Editor');
 		delete global.monaco;
 		sandbox.restore();
 		mockHandle.destroy();
