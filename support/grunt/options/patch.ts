@@ -25,7 +25,7 @@ export = function(grunt: IGrunt) {
 				patch: 'support/grunt/patches/worker-proxy.js.patch'
 			},
 			files: {
-				'dist/worker-proxy.js': 'dist/worker-proxy.js'
+				'dist/support/worker-proxy.js': 'dist/support/worker-proxy.js'
 			}
 		}
 	};

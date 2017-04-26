@@ -1,15 +1,15 @@
-diff --git a/worker-proxy.js b/worker-proxy.js
+diff --git a/support/worker-proxy.js b/support/worker-proxy.js
 index 1f0d4db..ec31930 100644
---- a/worker-proxy.js
-+++ b/worker-proxy.js
+--- a/support/worker-proxy.js
++++ b/support/worker-proxy.js
 @@ -3,7 +3,7 @@
   * in the background
   */
  self.MonacoEnvironment = {
--    baseUrl: '../../node_modules/monaco-editor/min/'
-+    baseUrl: './node_modules/monaco-editor/min/'
+-    baseUrl: '../../../node_modules/monaco-editor/min/'
++    baseUrl: './../node_modules/monaco-editor/min/'
  };
--importScripts('../../node_modules/monaco-editor/min/vs/base/worker/workerMain.js');
-+importScripts('./node_modules/monaco-editor/min/vs/base/worker/workerMain.js');
+-importScripts('../../../node_modules/monaco-editor/min/vs/base/worker/workerMain.js');
++importScripts('./../node_modules/monaco-editor/min/vs/base/worker/workerMain.js');
  //# sourceMappingURL=worker-proxy.js.map
 \ No newline at end of file
