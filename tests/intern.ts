@@ -41,7 +41,7 @@ export const loaderOptions = {
 	]
 };
 
-export const suites = [ '@dojo/test-extras/support/loadJsdom', 'tests/unit/all' ];
+export const suites = [ '@dojo/shim/Promise', '@dojo/test-extras/support/loadJsdom', 'tests/unit/all' ];
 
 export const functionalSuites = [ 'tests/functional/all' ];
 

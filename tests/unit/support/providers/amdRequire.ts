@@ -1,5 +1,3 @@
-import '@dojo/shim/Promise'; /* imported for side effects */
-
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import loadModule from '../../../support/loadModule';

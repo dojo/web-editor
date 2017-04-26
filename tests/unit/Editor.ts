@@ -1,5 +1,3 @@
-import '@dojo/shim/Promise'; /* imported for side effects */
-
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import global from '@dojo/core/global';
@@ -83,6 +81,7 @@ registerSuite({
 	},
 
 	teardown() {
+		delete global.monaco;
 		sandbox.restore();
 		mockHandle.destroy();
 	},
