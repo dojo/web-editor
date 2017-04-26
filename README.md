@@ -21,7 +21,8 @@ The `web-editor` provides three main errors of functionality:
 
 This package is inteded to be integrated into a website which would provide a more rich user interface to allow editing and running
 the project in a browser.  There is a minimal API implemented in `examples/index.html` which allows the loading of example projects
-that are included in this package in `projects`.
+that are included in this package in `projects`.  This example is available at
+[dojo.github.io/web-editor/](https://dojo.github.io/web-editor/)
 
 ### project
 
