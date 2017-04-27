@@ -16,7 +16,7 @@
         }
         return files.map(function (_a) {
             var name = _a.name, text = _a.text;
-            return { name: name, text: "define([], function () { return '" + JSON.stringify(JSON.parse(text)) + "'; });", type: 4 /* JavaScript */ };
+            return { name: name + '.js', text: "define([], function () { return '" + JSON.stringify(JSON.parse(text)) + "'; });", type: 4 /* JavaScript */ };
         });
     }
     exports.getEmit = getEmit;

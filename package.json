@@ -17,9 +17,11 @@
   },
   "homepage": "https://github.com/dojo/web-editor#readme",
   "devDependencies": {
-    "@dojo/cli-export-project": "2.0.0-pre",
+    "@dojo/cli-export-project": ">=2.0.0-alpha.1",
+    "@dojo/i18n": "beta1",
     "@dojo/interfaces": "beta1",
     "@dojo/test-extras": ">=2.0.0-alpha.1",
+    "@dojo/widget-core": "beta1",
     "@types/glob": "^5.0.30",
     "@types/grunt": "^0.4.21",
     "@types/node": "^7.0.12",
@@ -39,6 +41,7 @@
     "grunt-webpack": "^2.0.1",
     "intern": "^3.4.3",
     "istanbul": "^0.4.5",
+    "maquette": "2.4.3",
     "postcss": "^5.2.17",
     "postcss-cssnext": "^2.10.0",
     "postcss-modules": "^0.6.4",
@@ -46,7 +49,7 @@
     "sinon": "^2.1.0",
     "ts-node": "^3.0.2",
     "tslint": "^5.0.0",
-    "typescript": "^2.2.2",
+    "typescript": "^2.3.1",
     "webpack": "^2.4.1"
   },
   "dependencies": {

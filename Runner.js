@@ -17,8 +17,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -49,13 +49,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/Evented", "./project"], factory);
+        define(["require", "exports", "@dojo/has/has", "@dojo/core/Evented", "@dojo/core/lang", "./project", "./support/DOMParser"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    var has_1 = require("@dojo/has/has");
     var Evented_1 = require("@dojo/core/Evented");
+    var lang_1 = require("@dojo/core/lang");
     var project_1 = require("./project");
+    var DOMParser_1 = require("./support/DOMParser");
     /**
      * A map of custom package data that needs to be added if this package is part of project that is being run
      */
@@ -74,8 +77,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
      * @param dependencies A map of package dependencies required
      * @param modules Any modules to be injected into the page
      */
-    function docSrc(strings, scripts, css, bodyAttributes, html, dependencies, packages, modules) {
-        var preScripts = strings[0], preCss = strings[1], preBodyAttributes = strings[2], preHtml = strings[3], preDependencies = strings[4], prePackages = strings[5], preModules = strings[6], postscript = strings.slice(7);
+    function docSrc(strings, scripts, css, bodyAttributes, html, loaderSrc, dependencies, packages, modules) {
         var paths = [];
         for (var pkg in dependencies) {
             paths.push("'" + pkg + "': 'https://unpkg.com/" + pkg + "@" + dependencies[pkg] + "'");
@@ -101,8 +103,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         for (var attr in bodyAttributes) {
             bodyAttributesText += " $[attr]=\"" + bodyAttributes[attr] + "\"";
         }
-        return preScripts + scriptsText + preCss + cssText + preBodyAttributes + bodyAttributesText + preHtml + html
-            + preDependencies + pathsText + prePackages + packagesText + preModules + modulesText + postscript.join('\n');
+        var parts = [scriptsText, cssText, bodyAttributesText, html, loaderSrc, pathsText, packagesText, modulesText];
+        var text = parts
+            .reduce(function (previous, text, index) {
+            return previous + strings[index] + text + '\n';
+        }, '');
+        return text + strings.slice(parts.length).join('\n');
     }
     /**
      * Return the information for packages based on dependencies for the project
@@ -123,7 +129,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
      * @param content The source HTML content
      */
     function parseHtml(content) {
-        var parser = new DOMParser();
+        var parser = new DOMParser_1.default();
         var doc = parser.parseFromString(content, 'text/html');
         var scriptNodes = doc.querySelectorAll('script');
         var scripts = [];
@@ -148,27 +154,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             scripts: scripts
         };
     }
-    /**
-     * Writes to the document of an `iframe`
-     * @param iframe The target `iframe`
-     * @param source The source to be written
-     */
-    function writeIframeDoc(iframe, source) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve) {
-                        function onLoadListener() {
-                            iframe.contentWindow.document.write(source);
-                            iframe.contentWindow.document.close();
-                            iframe.removeEventListener('load', onLoadListener);
-                            resolve();
-                        }
-                        iframe.addEventListener('load', onLoadListener);
-                        iframe.contentWindow.location.reload();
-                    })];
-            });
-        });
-    }
     var Runner = (function (_super) {
         __extends(Runner, _super);
         /**
@@ -177,16 +162,60 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
          */
         function Runner(iframe) {
             var _this = _super.call(this) || this;
+            /**
+             * A private handler for re-emitting iframe errors
+             * @param evt The iframe's contentWindow error event
+             */
+            _this._onIframeError = function (evt) {
+                evt.preventDefault();
+                _this.emit(lang_1.assign({}, evt));
+            };
             _this._iframe = iframe;
+            _this.own(lang_1.createHandle(function () {
+                if (_this._iframe.contentWindow) {
+                    _this._iframe.contentWindow.removeEventListener('error', _this._onIframeError);
+                }
+            }));
             return _this;
         }
+        /**
+         * Writes to the document of an `iframe`
+         * @param iframe The target `iframe`
+         * @param source The source to be written
+         */
+        Runner.prototype._writeIframeDoc = function (source) {
+            return __awaiter(this, void 0, void 0, function () {
+                var iframe, onIframeError;
+                return __generator(this, function (_a) {
+                    iframe = this._iframe;
+                    onIframeError = this._onIframeError;
+                    return [2 /*return*/, new Promise(function (resolve, reject) {
+                            function onLoadListener() {
+                                iframe.removeEventListener('load', onLoadListener);
+                                iframe.contentWindow.document.write(source);
+                                iframe.contentWindow.document.close();
+                                iframe.contentWindow.addEventListener('error', onIframeError);
+                                resolve();
+                            }
+                            iframe.contentWindow.removeEventListener('error', onIframeError);
+                            iframe.addEventListener('load', onLoadListener);
+                            if (has_1.default('host-node')) {
+                                onLoadListener();
+                            }
+                            else {
+                                iframe.contentWindow.location.reload();
+                            }
+                        })];
+                });
+            });
+        };
         /**
          * Generate the document
          * @param param0 The options to use
          */
         Runner.prototype.getDoc = function (_a) {
-            var _b = _a.css, css = _b === void 0 ? [] : _b, _c = _a.bodyAttributes, bodyAttributes = _c === void 0 ? {} : _c, dependencies = _a.dependencies, _d = _a.html, html = _d === void 0 ? '' : _d, modules = _a.modules, _e = _a.scripts, scripts = _e === void 0 ? [] : _e;
-            return (_f = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"https://unpkg.com/@dojo/loader/loader.min.js\"></script>\n\t\t\t\t<script>\n\t\t\t\t\trequire.config({\n\t\t\t\t\t\tpaths: ", ",\n\t\t\t\t\t\tpackages: ", "\n\t\t\t\t\t});\n\t\t\t\t\t", "\n\t\t\t\t\trequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\t\t\t\t\t\tvar request = require('@dojo/core/request').default;\n\t\t\t\t\t\tvar getProvider = require('../support/providers/amdRequire').default;\n\t\t\t\t\t\trequest.setDefaultProvider(getProvider(require));\n\t\t\t\t\t\trequire([ 'src/main' ], function () { });\n\t\t\t\t\t});\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], _f.raw = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"https://unpkg.com/@dojo/loader/loader.min.js\"></script>\n\t\t\t\t<script>\n\t\t\t\t\trequire.config({\n\t\t\t\t\t\tpaths: ", ",\n\t\t\t\t\t\tpackages: ", "\n\t\t\t\t\t});\n\t\t\t\t\t", "\n\t\t\t\t\trequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\t\t\t\t\t\tvar request = require('@dojo/core/request').default;\n\t\t\t\t\t\tvar getProvider = require('../support/providers/amdRequire').default;\n\t\t\t\t\t\trequest.setDefaultProvider(getProvider(require));\n\t\t\t\t\t\trequire([ 'src/main' ], function () { });\n\t\t\t\t\t});\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], docSrc(_f, scripts, css, bodyAttributes, html, dependencies, getPackages(dependencies), modules));
+            var _b = _a.css, css = _b === void 0 ? [] : _b, _c = _a.bodyAttributes, bodyAttributes = _c === void 0 ? {} : _c, dependencies = _a.dependencies, loaderSrc = _a.loaderSrc, _d = _a.html, html = _d === void 0 ? '' : _d, modules = _a.modules, _e = _a.scripts, scripts = _e === void 0 ? [] : _e;
+            return (_f = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"", "\"></script>\n\t\t\t\t<script>\n\t\t\t\t\trequire.config({\n\t\t\t\t\t\tpaths: ", ",\n\t\t\t\t\t\tpackages: ", "\n\t\t\t\t\t});\n\t\t\t\t\t", "\n\t\t\t\t\trequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\t\t\t\t\t\tvar request = require('@dojo/core/request').default;\n\t\t\t\t\t\tvar getProvider = require('../support/providers/amdRequire').default;\n\t\t\t\t\t\trequest.setDefaultProvider(getProvider(require));\n\t\t\t\t\t\trequire([ 'src/main' ], function () { });\n\t\t\t\t\t});\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], _f.raw = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"", "\"></script>\n\t\t\t\t<script>\n\t\t\t\t\trequire.config({\n\t\t\t\t\t\tpaths: ", ",\n\t\t\t\t\t\tpackages: ", "\n\t\t\t\t\t});\n\t\t\t\t\t", "\n\t\t\t\t\trequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\t\t\t\t\t\tvar request = require('@dojo/core/request').default;\n\t\t\t\t\t\tvar getProvider = require('../support/providers/amdRequire').default;\n\t\t\t\t\t\trequest.setDefaultProvider(getProvider(require));\n\t\t\t\t\t\trequire([ 'src/main' ], function () { });\n\t\t\t\t\t});\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], docSrc(_f, scripts, css, bodyAttributes, html, loaderSrc, dependencies, getPackages(dependencies), modules));
             var _f;
         };
         /**
@@ -232,10 +261,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                                 css: css,
                                 html: html,
                                 dependencies: dependencies,
+                                loaderSrc: 'https://unpkg.com/@dojo/loader/loader.min.js',
                                 modules: modules,
                                 scripts: scripts
                             });
-                            return [4 /*yield*/, writeIframeDoc(this._iframe, source)];
+                            return [4 /*yield*/, this._writeIframeDoc(source)];
                         case 2:
                             _b.sent();
                             return [2 /*return*/];

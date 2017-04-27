@@ -1,5 +1,9 @@
 # @dojo/web-editor
 
+[![Build Status](https://travis-ci.org/dojo/web-editor.svg?branch=master)](https://travis-ci.org/dojo/web-editor)
+[![codecov.io](http://codecov.io/github/dojo/web-editor/coverage.svg?branch=master)](http://codecov.io/github/dojo/web-editor?branch=master)
+[![npm version](https://badge.fury.io/js/%40dojo%2Fweb-editor.svg)](http://badge.fury.io/js/%40dojo%2Fweb-editor)
+
 A package that provides editing and running of Dojo 2 projects in browser.
 
 **WARNING** This is _alpha_ software. This is not yet production ready, so you should use at your own risk.
@@ -17,7 +21,8 @@ The `web-editor` provides three main errors of functionality:
 
 This package is inteded to be integrated into a website which would provide a more rich user interface to allow editing and running
 the project in a browser.  There is a minimal API implemented in `examples/index.html` which allows the loading of example projects
-that are included in this package in `projects`.
+that are included in this package in `projects`.  This example is available at
+[dojo.github.io/web-editor/](https://dojo.github.io/web-editor/)
 
 ### project
 
@@ -103,7 +108,7 @@ The class has one method of note:
 <html>
 <head><title>Example</title></head>
 <body>
-	<iframe src="@dojo/web-worker/support/blank.html" id="runner"></iframe>
+	<iframe src="@dojo/web-editor/support/blank.html" id="runner"></iframe>
 </body>
 </html>
 ```
@@ -118,23 +123,6 @@ import Runner from '@dojo/web-editor/Runner';
 	await runner.run();
 	console.log('Ran!');
 })();
-```
-
-### worker-proxy
-
-This is script which will setup the `monaco-editor` web workers to be able to provide better performance when editing and running
-projects.  This file should be configured up in the `monaco-editor` environment before attempting to load the rest of `monaco-editor`.
-
-For example, you might have something like this in your web-editor page:
-
-```html
-<script>
-	window.MonacoEnvironment = {
-		getWorkerUrl: function () {
-			return 'node_modules/@dojo/web-editor/worker-proxy.js';
-		}
-	};
-</script>
 ```
 
 ### external/postcss-bundle
@@ -194,6 +182,23 @@ This module provides the ability to _inline_ JSON to the AMD loader so that loca
 ### support/postcss, support/postcssCssnext, support/postcssModules
 
 These are modules which export the exposed globals from the `postcss-bundle`.
+
+### support/worker-proxy
+
+This is script which will setup the `monaco-editor` web workers to be able to provide better performance when editing and running
+projects.  This file should be configured up in the `monaco-editor` environment before attempting to load the rest of `monaco-editor`.
+
+For example, you might have something like this in your web-editor page:
+
+```html
+<script>
+	window.MonacoEnvironment = {
+		getWorkerUrl: function () {
+			return 'node_modules/@dojo/web-editor/support/worker-proxy.js';
+		}
+	};
+</script>
+```
 
 ## Installation
 
