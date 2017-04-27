@@ -1,11 +1,15 @@
 import { ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
+import has from '@dojo/has/has';
 import Evented from '@dojo/core/Evented';
+import { assign, createHandle } from '@dojo/core/lang';
 import project from './project';
+import DOMParser from './support/DOMParser';
 
 export interface GetDocOptions {
 	css?: { name: string; text: string; }[];
 	bodyAttributes?: { [attr: string]: string; };
 	dependencies: { [pkg: string]: string; };
+	loaderSrc: string;
 	html?: string;
 	modules: { [mid: string]: string; };
 	scripts?: string[];
@@ -36,12 +40,11 @@ function docSrc(
 	css: { name: string; text: string; }[],
 	bodyAttributes: { [attr: string]: string; },
 	html: string,
+	loaderSrc: string,
 	dependencies: { [pkg: string]: string; },
 	packages: string[],
 	modules: { [mid: string]: string }
 ): string {
-	const [ preScripts, preCss, preBodyAttributes, preHtml, preDependencies, prePackages, preModules, ...postscript ] = strings;
-
 	const paths: string[] = [];
 	for (const pkg in dependencies) {
 		paths.push(`'${pkg}': 'https://unpkg.com/${pkg}@${dependencies[pkg]}'`);
@@ -74,8 +77,14 @@ function docSrc(
 		bodyAttributesText += ` $[attr]="${bodyAttributes[attr]}"`;
 	}
 
-	return preScripts + scriptsText + preCss + cssText + preBodyAttributes + bodyAttributesText + preHtml + html
-		+ preDependencies + pathsText + prePackages + packagesText + preModules + modulesText + postscript.join('\n');
+	const parts = [ scriptsText, cssText, bodyAttributesText, html, loaderSrc, pathsText, packagesText, modulesText ];
+
+	const text = parts
+		.reduce((previous, text, index) => {
+			return previous + strings[index] + text + '\n';
+		}, '');
+
+	return text + strings.slice(parts.length).join('\n');
 }
 
 /**
@@ -124,30 +133,21 @@ function parseHtml(content: string): { css: string, body: string, scripts: strin
 	};
 }
 
-/**
- * Writes to the document of an `iframe`
- * @param iframe The target `iframe`
- * @param source The source to be written
- */
-async function writeIframeDoc(iframe: HTMLIFrameElement, source: string): Promise<void> {
-	return new Promise<void>((resolve) => {
-		function onLoadListener () {
-			iframe.contentWindow.document.write(source);
-			iframe.contentWindow.document.close();
-			iframe.removeEventListener('load', onLoadListener);
-			resolve();
-		}
-
-		iframe.addEventListener('load', onLoadListener);
-		iframe.contentWindow.location.reload();
-	});
-}
-
 export default class Runner extends Evented {
+
 	/**
 	 * The private iframe that the project will run in
 	 */
 	private _iframe: HTMLIFrameElement;
+
+	/**
+	 * A private handler for re-emitting iframe errors
+	 * @param evt The iframe's contentWindow error event
+	 */
+	private _onIframeError = (evt: ErrorEvent) => {
+		evt.preventDefault();
+		this.emit(assign({}, evt));
+	}
 
 	/**
 	 * Create a runner instance attached to a specific `iframe`
@@ -156,13 +156,46 @@ export default class Runner extends Evented {
 	constructor(iframe: HTMLIFrameElement) {
 		super();
 		this._iframe = iframe;
+		this.own(createHandle(() => {
+			if (this._iframe.contentWindow) {
+				this._iframe.contentWindow.removeEventListener('error', this._onIframeError);
+			}
+		}));
+	}
+
+	/**
+	 * Writes to the document of an `iframe`
+	 * @param iframe The target `iframe`
+	 * @param source The source to be written
+	 */
+	private async _writeIframeDoc(source: string): Promise<void> {
+		const iframe = this._iframe;
+		const onIframeError = this._onIframeError;
+		return new Promise<void>((resolve, reject) => {
+			function onLoadListener() {
+				iframe.removeEventListener('load', onLoadListener);
+				iframe.contentWindow.document.write(source);
+				iframe.contentWindow.document.close();
+				iframe.contentWindow.addEventListener('error', onIframeError);
+				resolve();
+			}
+
+			iframe.contentWindow.removeEventListener('error', onIframeError);
+			iframe.addEventListener('load', onLoadListener);
+			if (has('host-node')) {
+				onLoadListener();
+			}
+			else {
+				iframe.contentWindow.location.reload();
+			}
+		});
 	}
 
 	/**
 	 * Generate the document
 	 * @param param0 The options to use
 	 */
-	getDoc({ css = [], bodyAttributes = {}, dependencies, html = '', modules, scripts = [] }: GetDocOptions): string {
+	getDoc({ css = [], bodyAttributes = {}, dependencies, loaderSrc, html = '', modules, scripts = [] }: GetDocOptions): string {
 		return docSrc`<!DOCTYPE html>
 			<html>
 			<head>
@@ -171,7 +204,7 @@ export default class Runner extends Evented {
 			</head>
 			<body${bodyAttributes}>
 				${html}
-				<script src="https://unpkg.com/@dojo/loader/loader.min.js"></script>
+				<script src="${loaderSrc}"></script>
 				<script>
 					require.config({
 						paths: ${dependencies},
@@ -221,9 +254,10 @@ export default class Runner extends Evented {
 			css,
 			html,
 			dependencies,
+			loaderSrc: 'https://unpkg.com/@dojo/loader/loader.min.js',
 			modules,
 			scripts
 		});
-		await writeIframeDoc(this._iframe, source);
+		await this._writeIframeDoc(source);
 	}
 }
