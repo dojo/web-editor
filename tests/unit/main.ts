@@ -16,16 +16,22 @@ registerSuite({
 	name: 'main',
 
 	async setup() {
-		project = function project() { };
+		Editor = {};
+		project = {};
+		Runner = {};
+
+		register('src/Editor', {
+			default: Editor
+		});
 		register('src/project', {
 			default: project
 		});
+		register('src/Runner', {
+			default: Runner
+		});
 		handle = enable();
 
-		Editor = (await loadModule('../../src/Editor')).default;
-		Runner = (await loadModule('../../src/Runner')).default;
-
-		main = await loadModule('../../src/main');
+		main = await loadModule('../../src/main', require);
 	},
 
 	teardown() {

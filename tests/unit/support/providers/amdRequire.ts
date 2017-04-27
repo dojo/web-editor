@@ -18,8 +18,8 @@ registerSuite({
 	async setup() {
 		sandbox = sinonSandbox.create();
 
+		const xhrModule = await loadModule('@dojo/core/request/providers/xhr', require);
 		getProvider = (await loadModule('../../../../src/support/providers/amdRequire', require)).default;
-		const xhrModule = await loadModule('@dojo/core/request/providers/xhr');
 		xhrStub = sandbox.stub(xhrModule, 'default');
 		requireStub = <any> sandbox.spy((dependencies: string[], callback: (...modules: any[]) => void) => {
 			const modules = dependencies.map((mid) => {

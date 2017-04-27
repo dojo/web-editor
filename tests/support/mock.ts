@@ -20,9 +20,10 @@ declare global {
  * @param mock The mock definition of the module
  */
 export function register(mid: string, mock: any): Handle {
-	map[mid] = () => {
-		define([], mock);
-	};
+	if (disableHandle) {
+		throw new Error('Cannot register modules while mock is enabled.');
+	}
+	map[mid] = () => define(mid, [], () => mock);
 	return createHandle(() => {
 		if (disableHandle) {
 			require.undef(mid);
@@ -41,6 +42,9 @@ export function enable(): Handle {
 	if (disableHandle) {
 		return disableHandle;
 	}
+	for (const mid in map) {
+		require.undef(mid);
+	}
 	require.cache(map);
 	require.cache({});
 	return disableHandle = createHandle(() => {
@@ -49,7 +53,7 @@ export function enable(): Handle {
 		}
 		const emptyMap: { [mid: string]: undefined } = {};
 		for (const mid in map) {
-			require.undef(mid, true);
+			require.undef(mid);
 			emptyMap[mid] = undefined;
 			delete map[mid];
 		}
@@ -57,16 +61,4 @@ export function enable(): Handle {
 		require.cache({});
 		disableHandle = undefined;
 	});
-}
-
-/**
- * Clear out all the mocked modules.
- */
-export function clear(): void {
-	if (disableHandle) {
-		disableHandle.destroy();
-	}
-	for (const mid in map) {
-		delete map[mid];
-	}
 }

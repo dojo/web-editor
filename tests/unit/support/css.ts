@@ -64,7 +64,6 @@ registerSuite({
 	},
 
 	teardown() {
-		console.log('teardown css');
 		sandbox.restore();
 		mockHandle.destroy();
 	},
