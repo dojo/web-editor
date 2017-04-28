@@ -49,25 +49,25 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/has/has", "@dojo/core/Evented", "@dojo/core/lang", "./project", "./support/DOMParser"], factory);
+        define(["require", "exports", "@dojo/core/Evented", "@dojo/core/lang", "./project", "./support/DOMParser"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var has_1 = require("@dojo/has/has");
     var Evented_1 = require("@dojo/core/Evented");
     var lang_1 = require("@dojo/core/lang");
     var project_1 = require("./project");
     var DOMParser_1 = require("./support/DOMParser");
+    var TSLIB_SEMVER = '^1.6.0';
     /**
      * A map of custom package data that needs to be added if this package is part of project that is being run
      */
     var PACKAGE_DATA = {
-        cldrjs: "{ name: 'cldr', location: 'https://unpkg.com/cldrjs@^0.4.6/dist/cldr', main: '../cldr' }",
+        cldrjs: "{ name: 'cldr', location: 'https://unpkg.com/cldrjs@<%SEMVER>/dist/cldr', main: '../cldr' }",
         globalize: "{ name: 'globalize', main: '/dist/globalize' }",
         maquette: "{ name: 'maquette', main: '/dist/maquette.min' }",
         pepjs: "{ name: 'pepjs', main: 'dist/pep' }",
-        tslib: "{ name: 'tslib', location: 'https://unpkg.com/tslib@^1.6.0/', main: 'tslib' }"
+        tslib: "{ name: 'tslib', location: 'https://unpkg.com/tslib@" + TSLIB_SEMVER + "/', main: 'tslib' }"
     };
     /**
      * Generate an HTML document source
@@ -101,7 +101,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         });
         var bodyAttributesText = '';
         for (var attr in bodyAttributes) {
-            bodyAttributesText += " $[attr]=\"" + bodyAttributes[attr] + "\"";
+            bodyAttributesText += " " + attr + "=\"" + bodyAttributes[attr] + "\"";
         }
         var parts = [scriptsText, cssText, bodyAttributesText, html, loaderSrc, pathsText, packagesText, modulesText];
         var text = parts
@@ -118,7 +118,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         var packages = [];
         Object.keys(PACKAGE_DATA).forEach(function (key) {
             if (key in dependencies && key !== 'tslib') {
-                packages.push(PACKAGE_DATA[key]);
+                packages.push(PACKAGE_DATA[key].replace('<%SEMVER>', dependencies[key]));
             }
         });
         packages.push(PACKAGE_DATA['tslib']); /* we are always going to inject this one */
@@ -144,7 +144,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         var styles = doc.querySelectorAll('style');
         for (var i = 0; i < styles.length; i++) {
             var style = styles[i];
-            if (style.textContent) {
+            if (style.textContent && style.getAttribute('scoped') === null) {
                 css.push(style.textContent);
             }
         }
@@ -168,7 +168,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
              */
             _this._onIframeError = function (evt) {
                 evt.preventDefault();
-                _this.emit(lang_1.assign({}, evt));
+                _this.emit(evt);
             };
             _this._iframe = iframe;
             _this.own(lang_1.createHandle(function () {
@@ -199,12 +199,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                             }
                             iframe.contentWindow.removeEventListener('error', onIframeError);
                             iframe.addEventListener('load', onLoadListener);
-                            if (has_1.default('host-node')) {
-                                onLoadListener();
-                            }
-                            else {
-                                iframe.contentWindow.location.reload();
-                            }
+                            iframe.contentWindow.location.reload();
                         })];
                 });
             });
