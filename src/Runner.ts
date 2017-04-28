@@ -1,6 +1,6 @@
 import { ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
 import Evented from '@dojo/core/Evented';
-import { assign, createHandle } from '@dojo/core/lang';
+import { createHandle } from '@dojo/core/lang';
 import project from './project';
 import DOMParser from './support/DOMParser';
 
@@ -14,15 +14,17 @@ export interface GetDocOptions {
 	scripts?: string[];
 }
 
+const TSLIB_SEMVER = '^1.6.0';
+
 /**
  * A map of custom package data that needs to be added if this package is part of project that is being run
  */
 const PACKAGE_DATA: { [pkg: string]: string } = {
-	cldrjs: `{ name: 'cldr', location: 'https://unpkg.com/cldrjs@^0.4.6/dist/cldr', main: '../cldr' }`,
+	cldrjs: `{ name: 'cldr', location: 'https://unpkg.com/cldrjs@<%SEMVER>/dist/cldr', main: '../cldr' }`,
 	globalize: `{ name: 'globalize', main: '/dist/globalize' }`,
 	maquette: `{ name: 'maquette', main: '/dist/maquette.min' }`,
 	pepjs: `{ name: 'pepjs', main: 'dist/pep' }`,
-	tslib: `{ name: 'tslib', location: 'https://unpkg.com/tslib@^1.6.0/', main: 'tslib' }`
+	tslib: `{ name: 'tslib', location: 'https://unpkg.com/tslib@${TSLIB_SEMVER}/', main: 'tslib' }`
 };
 
 /**
@@ -73,7 +75,7 @@ function docSrc(
 
 	let bodyAttributesText = '';
 	for (const attr in bodyAttributes) {
-		bodyAttributesText += ` $[attr]="${bodyAttributes[attr]}"`;
+		bodyAttributesText += ` ${attr}="${bodyAttributes[attr]}"`;
 	}
 
 	const parts = [ scriptsText, cssText, bodyAttributesText, html, loaderSrc, pathsText, packagesText, modulesText ];
@@ -94,7 +96,7 @@ function getPackages(dependencies: { [pkg: string]: string; }): string[] {
 	const packages: string[] = [];
 	Object.keys(PACKAGE_DATA).forEach((key) => {
 		if (key in dependencies && key !== 'tslib') {
-			packages.push(PACKAGE_DATA[key]);
+			packages.push(PACKAGE_DATA[key].replace('<%SEMVER>', dependencies[key]));
 		}
 	});
 	packages.push(PACKAGE_DATA['tslib']); /* we are always going to inject this one */
@@ -121,7 +123,7 @@ function parseHtml(content: string): { css: string, body: string, scripts: strin
 	const styles = doc.querySelectorAll('style');
 	for (let i = 0; i < styles.length; i++) {
 		const style = styles[i];
-		if (style.textContent) {
+		if (style.textContent && style.getAttribute('scoped') === null) {
 			css.push(style.textContent);
 		}
 	}
@@ -145,7 +147,7 @@ export default class Runner extends Evented {
 	 */
 	private _onIframeError = (evt: ErrorEvent) => {
 		evt.preventDefault();
-		this.emit(assign({}, evt));
+		this.emit(evt);
 	}
 
 	/**

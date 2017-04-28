@@ -44,7 +44,6 @@ export default function createMockIframe(): HTMLIFrameElement {
 
 			dispatchEvent(evt: Event): boolean {
 				const listeners = iframeData.get(iframe).contentWindowEventListeners[evt.type];
-				console.log(listeners);
 				if (listeners) {
 					return listeners.some((listener) => {
 						(<any> listener).call(iframe.contentWindow, evt);
