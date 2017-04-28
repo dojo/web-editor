@@ -1,5 +1,4 @@
 import { ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
-import has from '@dojo/has/has';
 import Evented from '@dojo/core/Evented';
 import { assign, createHandle } from '@dojo/core/lang';
 import project from './project';
@@ -182,12 +181,7 @@ export default class Runner extends Evented {
 
 			iframe.contentWindow.removeEventListener('error', onIframeError);
 			iframe.addEventListener('load', onLoadListener);
-			if (has('host-node')) {
-				onLoadListener();
-			}
-			else {
-				iframe.contentWindow.location.reload();
-			}
+			iframe.contentWindow.location.reload();
 		});
 	}
 
