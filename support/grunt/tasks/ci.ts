@@ -4,7 +4,8 @@ export = function(grunt: IGrunt) {
 
 		grunt.task.run('dev');
 		grunt.task.run('intern:node');
-		grunt.task.run('intern');
+		const flags = Object.keys(this.flags);
+		flags.forEach((flag) => grunt.task.run(`intern:${flag}`));
 		grunt.task.run('remapIstanbul:ci');
 		grunt.task.run('uploadCoverage');
 		grunt.task.run('clean:coverage');

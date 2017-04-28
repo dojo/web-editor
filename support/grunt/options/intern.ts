@@ -10,6 +10,8 @@ export = function(grunt: IGrunt) {
 			]
 		},
 
+		browserstack: {},
+
 		local: {
 			options: {
 				config: '<%= devDirectory %>/tests/intern-local'
