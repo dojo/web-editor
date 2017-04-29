@@ -171,6 +171,7 @@ registerSuite({
 					console.log('PWN ME!');
 				</script>
 				<script src="./foo/bar.js"></script>
+				<script src="${window.location.protocol}//${window.location.hostname}/bar.js"></script>
 			</body></html>`;
 			await runner.run();
 			const doc = getDocFromString(getDocumentStrings(iframe)[0]);
