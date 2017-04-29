@@ -1,5 +1,3 @@
-import '@dojo/shim/Promise'; /* imported for side effects */
-
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import global from '@dojo/core/global';
@@ -15,7 +13,6 @@ let Editor: typeof UnitUnderTest;
 
 let sandbox: SinonSandbox;
 let mockHandle: Handle;
-let projectStub: SinonStub;
 let monacoEditorCreateElement: HTMLElement;
 let monacoEditorCreateOptions: any;
 let setModelStub: SinonStub;
@@ -34,22 +31,19 @@ registerSuite({
 		setModelStub = sandbox.stub();
 		onDidChangeModelContentDisposeStub = sandbox.stub();
 		onDidChangeModelContentStub = sandbox.stub();
-		projectStub = sandbox.stub();
 		disposeStub = sandbox.stub();
 		setFileDirtyStub = sandbox.stub();
 
-		register('src/project', () => {
-			return {
-				default: {
-					includes: sandbox.spy((filename: string) => {
-						return projectFileMap[filename];
-					}),
-					getFileModel: sandbox.spy((filename: string) => {
-						return 'model';
-					}),
-					setFileDirty: setFileDirtyStub
-				}
-			};
+		register('src/project', {
+			default: {
+				includes: sandbox.spy((filename: string) => {
+					return projectFileMap[filename];
+				}),
+				getFileModel: sandbox.spy((filename: string) => {
+					return 'model';
+				}),
+				setFileDirty: setFileDirtyStub
+			}
 		});
 
 		global.monaco = {
@@ -83,6 +77,7 @@ registerSuite({
 	},
 
 	teardown() {
+		delete global.monaco;
 		sandbox.restore();
 		mockHandle.destroy();
 	},

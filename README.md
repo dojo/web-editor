@@ -108,7 +108,7 @@ The class has one method of note:
 <html>
 <head><title>Example</title></head>
 <body>
-	<iframe src="@dojo/web-worker/support/blank.html" id="runner"></iframe>
+	<iframe src="@dojo/web-editor/support/blank.html" id="runner"></iframe>
 </body>
 </html>
 ```
@@ -123,23 +123,6 @@ import Runner from '@dojo/web-editor/Runner';
 	await runner.run();
 	console.log('Ran!');
 })();
-```
-
-### worker-proxy
-
-This is script which will setup the `monaco-editor` web workers to be able to provide better performance when editing and running
-projects.  This file should be configured up in the `monaco-editor` environment before attempting to load the rest of `monaco-editor`.
-
-For example, you might have something like this in your web-editor page:
-
-```html
-<script>
-	window.MonacoEnvironment = {
-		getWorkerUrl: function () {
-			return 'node_modules/@dojo/web-editor/worker-proxy.js';
-		}
-	};
-</script>
 ```
 
 ### external/postcss-bundle
@@ -199,6 +182,23 @@ This module provides the ability to _inline_ JSON to the AMD loader so that loca
 ### support/postcss, support/postcssCssnext, support/postcssModules
 
 These are modules which export the exposed globals from the `postcss-bundle`.
+
+### support/worker-proxy
+
+This is script which will setup the `monaco-editor` web workers to be able to provide better performance when editing and running
+projects.  This file should be configured up in the `monaco-editor` environment before attempting to load the rest of `monaco-editor`.
+
+For example, you might have something like this in your web-editor page:
+
+```html
+<script>
+	window.MonacoEnvironment = {
+		getWorkerUrl: function () {
+			return 'node_modules/@dojo/web-editor/support/worker-proxy.js';
+		}
+	};
+</script>
+```
 
 ## Installation
 

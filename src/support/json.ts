@@ -3,6 +3,6 @@ import { EmitFile } from '../interfaces';
 
 export function getEmit(...files: ProjectFile[]): EmitFile[] {
 	return files.map(({ name, text }) => {
-		return { name, text: `define([], function () { return '${JSON.stringify(JSON.parse(text))}'; });`, type: ProjectFileType.JavaScript };
+		return { name: name + '.js', text: `define([], function () { return '${JSON.stringify(JSON.parse(text))}'; });`, type: ProjectFileType.JavaScript };
 	});
 }

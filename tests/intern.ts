@@ -12,11 +12,11 @@ export const environments = [
 	{ browserName: 'edge', platform: 'WINDOWS' },
 	{ browserName: 'firefox', platform: 'WINDOWS' },
 	{ browserName: 'chrome', platform: 'WINDOWS' },
-	{ browserName: 'safari', platform: 'MAC' },
-	{ browserName: 'iPad' }
+	{ browserName: 'safari', version: '10', platform: 'MAC' },
+	{ browserName: 'iPad', version: '9.1' }
 ];
 
-export const maxConcurrency = 2;
+export const maxConcurrency = 5;
 
 export const tunnel = 'BrowserStackTunnel';
 
@@ -41,8 +41,8 @@ export const loaderOptions = {
 	]
 };
 
-export const suites = [ '@dojo/test-extras/support/loadJsdom', 'tests/unit/all' ];
+export const suites = [ '@dojo/shim/Promise', '@dojo/test-extras/support/loadJsdom', 'tests/unit/all' ];
 
 export const functionalSuites = [ 'tests/functional/all' ];
 
-export const excludeInstrumentation = /(?:node_modules|tests|external)[\/\\]/;
+export const excludeInstrumentation = /(?:(?:node_modules|tests|examples|external)[\/\\]|worker-proxy\.js$)/;

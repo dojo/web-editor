@@ -21,6 +21,10 @@ const editor = new Editor(editorDiv, {
 /* create a runner */
 const runnerDiv = <HTMLIFrameElement> document.getElementById('runner');
 const runner = new Runner(runnerDiv);
+runner.on('error', (evt) => {
+	console.error('Runner Error');
+	console.error(evt.error);
+});
 
 /**
  * Listener that will be attached to the load project button click

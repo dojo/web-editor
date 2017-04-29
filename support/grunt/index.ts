@@ -46,7 +46,5 @@ export function initConfig(grunt: IGrunt, otherOptions: any) {
 
 	grunt.registerTask('dist', [ 'clean:dist', 'ts:dist', 'copy:dist', 'patch', 'webpack:dist', 'auto_install:dist' ]);
 
-	grunt.registerTask('ci', [ 'dev', 'intern:node', 'intern:saucelabs', 'remapIstanbul:ci', 'uploadCoverage', 'clean:coverage' ]);
-
 	grunt.registerTask('default', [ 'dev' ]);
 }
