@@ -56,8 +56,8 @@ Typical usage would be something like this:
 import project from '@dojo/web-editor/project';
 
 (async () => {
-	await project.load('some.project.json');
-	console.log('Loaded!');
+    await project.load('some.project.json');
+    console.log('Loaded!');
 })();
 ```
 
@@ -84,9 +84,9 @@ import project from '@dojo/web-editor/project';
 import Editor from '@dojo/web-editor/Editor';
 
 (async () => {
-	await project.load('some.project.json');
-	const editor = new Editor(document.getElementById('editor'));
-	editor.display('./src/somefile.ts');
+    await project.load('some.project.json');
+    const editor = new Editor(document.getElementById('editor'));
+    editor.display('./src/somefile.ts');
 })();
 ```
 
@@ -108,7 +108,7 @@ The class has one method of note:
 <html>
 <head><title>Example</title></head>
 <body>
-	<iframe src="@dojo/web-editor/support/blank.html" id="runner"></iframe>
+    <iframe src="@dojo/web-editor/support/blank.html" id="runner"></iframe>
 </body>
 </html>
 ```
@@ -118,11 +118,47 @@ import project from '@dojo/web-editor/project';
 import Runner from '@dojo/web-editor/Runner';
 
 (async () => {
-	await project.load('some.project.json');
-	const runner = new Runner(document.getElementById('runner'));
-	await runner.run();
-	console.log('Ran!');
+    await project.load('some.project.json');
+    const runner = new Runner(document.getElementById('runner'));
+    await runner.run();
+    console.log('Ran!');
 })();
+```
+
+### routing
+
+This module wraps `@dojo/routing` in a way that works well for the `web-editor`.
+
+The `web-editor` allows integration with GitHub's Gists, allowing storage of the `project.json` in a Gist which can then be used to load
+the project into the editor.
+
+#### setPath()
+
+Set the path on the current page.  Intended to be used, when a project is loaded to update the path to reflect the Gist's ID.
+
+#### startGistRouter()
+
+`startGistRouter()` is function that will configure and start the router, returning a pausable handle.  The function takes a single `options` argument which has two required properties:
+
+* `onGist` - Called when the location is `/{id}`, intended to note a change in the Gist ID.
+* `onRoot` - Called when the location is `/`, intended to note that no Gist has been loaded.
+
+Typical usage would look like:
+
+```ts
+import { startGistRouter } from '@dojo/web-editor/routing';
+
+startGistRouter({
+    onGist(request) {
+        // request.params.id contains the requested Gist ID
+        // so if the project is not loaded, load the project with the supplied ID
+    },
+
+    onRoot() {
+        // navigation has occured to the root, if the project is not loaded,
+        // enable UI elements to allow a user to select a project
+    }
+});
 ```
 
 ### external/postcss-bundle
@@ -139,24 +175,24 @@ the AMD `require()`.  It should look something like this:
 <!DOCTYPE html>
 <html><title>Example</title></html>
 <body>
-	<script src="node_modules/@dojo/web-editor/external/postcss-bundle.js"></script>
-	<script src="node_modules/@dojo/web-editor/node_modules/monaco-editor/min/vs/loader.js"></script>
-	<script>
-		window.MonacoEnvironment = {
-			getWorkerUrl: function () {
-				return '../worker-proxy.js';
-			}
-		};
+    <script src="node_modules/@dojo/web-editor/external/postcss-bundle.js"></script>
+    <script src="node_modules/@dojo/web-editor/node_modules/monaco-editor/min/vs/loader.js"></script>
+    <script>
+        window.MonacoEnvironment = {
+            getWorkerUrl: function () {
+                return '../worker-proxy.js';
+            }
+        };
 
-		require.config({
-			paths: {
-				'vs': 'node_modules/@dojo/web-editor/node_modules/monaco-editor/min/vs',
-				'@dojo': 'node_modules/@dojo'
-			}
-		});
+        require.config({
+            paths: {
+                'vs': 'node_modules/@dojo/web-editor/node_modules/monaco-editor/min/vs',
+                '@dojo': 'node_modules/@dojo'
+            }
+        });
 
-		require([ './example' ], function () {});
-	</script>
+        require([ './example' ], function () {});
+    </script>
 </body>
 ```
 
@@ -175,6 +211,46 @@ will be injected, like the other transpiled modules, which resolve local resourc
 This module provides the transpilation of CSS for a runner application.  It provides the ability to run the CSS through CSSNext and also
 provides the necessary information to allow CSS Modules to work in Dojo 2 applications.
 
+### support/DOMParser
+
+A module where the default export is a reference to the global `DOMParser`.
+
+### support/gists
+
+A module that provides tools for working with `project.json` files that are stored in GitHub Gists.
+
+#### getById()
+
+An async function that resolves to a description and a URL to a `package.json` for a given Gist ID.
+
+An example of usage:
+
+```ts
+import { getById } from '@dojo/web-editor/support/gists';
+
+(async () => {
+    const gist = await getById(someId);
+    await project.load(gist.projectJson);
+})();
+```
+
+#### getByUsername()
+
+An async function that resolves to an array of descriptions, IDs, and URLs to a `package.json` files stored in Gists for a given user.
+
+An example of usage:
+
+```ts
+import { getByUsername } from '@dojo/web-editor/support/gists';
+
+(async () => {
+    const gists = await getById(someUsername);
+    gists.forEach((gist) => {
+        // populate a UI with available Gists
+    });
+})();
+```
+
 ### support/json
 
 This module provides the ability to _inline_ JSON to the AMD loader so that local project resources are available to the runner application.
@@ -192,11 +268,11 @@ For example, you might have something like this in your web-editor page:
 
 ```html
 <script>
-	window.MonacoEnvironment = {
-		getWorkerUrl: function () {
-			return 'node_modules/@dojo/web-editor/support/worker-proxy.js';
-		}
-	};
+    window.MonacoEnvironment = {
+        getWorkerUrl: function () {
+            return 'node_modules/@dojo/web-editor/support/worker-proxy.js';
+        }
+    };
 </script>
 ```
 

@@ -1,11 +1,11 @@
-import Route from '@dojo/routing/Route';
 import Map from '@dojo/shim/Map';
 import Editor from '../Editor';
 import project from '../project';
 import Runner from '../Runner';
 import { getByUsername, getById } from '../support/gists';
-import router, { GistParameters } from './router';
+import { startGistRouter, setPath } from '../routing';
 
+/* References to page elements */
 const titleH2 = document.getElementById('title') as HTMLHeadingElement;
 const githubUsernameDiv = document.getElementById('github-username') as HTMLDivElement;
 const usernameInput = document.getElementById('username') as HTMLInputElement;
@@ -20,11 +20,19 @@ const runButton = document.getElementById('run') as HTMLButtonElement;
 const editorDiv = document.getElementById('editor') as HTMLDivElement;
 const runnerIframe = document.getElementById('runner') as HTMLIFrameElement;
 
+/* The editor and runner instances for the page */
 const editor = new Editor(editorDiv);
 const runner = new Runner(runnerIframe);
 
+/**
+ * A map for storing project.json URLs mapped to the gist ID
+ */
 const gistIDMap = new Map<string, string>();
 
+/**
+ * Listener that runs the project in the runner
+ * @param evt The click event
+ */
 async function runButtonClick(evt: Event) {
 	evt.preventDefault();
 	runButton.setAttribute('disabled', 'disabled');
@@ -32,11 +40,19 @@ async function runButtonClick(evt: Event) {
 	runButton.removeAttribute('disabled');
 }
 
+/**
+ * Listener that changes the editor's current file
+ * @param evt The change event
+ */
 function selectFileSelectChange(evt: Event) {
 	evt.preventDefault();
 	editor.display(selectFileSelect.value);
 }
 
+/**
+ * Load the project and populate the UI with the project files
+ * @param filename A filename URL that should be loaded
+ */
 async function loadProject(filename: string) {
 	await project.load(filename);
 	const projectBundle = project.get()!;
@@ -60,14 +76,21 @@ async function loadProject(filename: string) {
 	fileListDiv.classList.remove('hidden');
 }
 
+/**
+ * Listener that uses the value from the project select to load the project
+ */
 async function loadProjectButtonClick() {
 	projectSelect.setAttribute('disabled', 'disabled');
 	loadProjectButton.setAttribute('disabled', 'disabled');
 	await loadProject(projectSelect.value);
 	titleH2.textContent = projectSelect.selectedOptions[0].text;
-	router.setPath(gistIDMap.get(projectSelect.value!)!);
+	setPath(gistIDMap.get(projectSelect.value!)!);
 }
 
+/**
+ * Use the username input to retrieve all the public gists for a user, loking for those that contain a
+ * `package.json` that can be loaded.
+ */
 async function loadGistsButtonClick() {
 	const username = usernameInput.value;
 	console.log(`Loading gists for "${username}"...`);
@@ -93,19 +116,10 @@ async function loadGistsButtonClick() {
 	projectListDiv.classList.remove('hidden');
 }
 
-router.append(new Route({
-	path: '/',
-
-	async exec() {
-		loadGistsButton.addEventListener('click', loadGistsButtonClick);
-		githubUsernameDiv.classList.remove('hidden');
-	}
-}));
-
-router.append(new Route<any, GistParameters>({
-	path: '/{id}',
-
-	async exec(request) {
+/* Start the router that will handle taking a gist id and potentially loading the project,
+ * or enabling the UI when there is no gist loaded yet */
+startGistRouter({
+	async onGist(request) {
 		if (!project.isLoaded()) {
 			const { id } = request.params;
 			const gist = await getById(id);
@@ -117,7 +131,12 @@ router.append(new Route<any, GistParameters>({
 				titleH2.textContent = '[Unfound Gist]';
 			}
 		}
-	}
-}));
+	},
 
-router.start();
+	onRoot() {
+		if (!project.isLoaded()) {
+			loadGistsButton.addEventListener('click', loadGistsButtonClick);
+			githubUsernameDiv.classList.remove('hidden');
+		}
+	}
+});
