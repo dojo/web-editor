@@ -27,7 +27,7 @@ async function runButtonClick(evt: Event) {
 
 function selectFileSelectChange(evt: Event) {
 	evt.preventDefault();
-	editor.display(selectFileSelect.getAttribute('value')!);
+	editor.display(selectFileSelect.value);
 }
 
 async function loadProjectButtonClick() {
