@@ -1,7 +1,7 @@
 import request from '@dojo/core/request';
 import Task from '@dojo/core/async/Task';
 
-interface GistFile {
+export interface GistFile {
 	'filename': string;
 	'type': string;
 	'language': string;
@@ -9,7 +9,7 @@ interface GistFile {
 	'size': number;
 }
 
-interface Gist {
+export interface Gist {
 	'url': string;
 	'forks_url': string;
 	'commits_url': string;
@@ -51,11 +51,25 @@ const API_GITHUB = 'https://api.github.com/';
 const GIST_REPLACEMENT_HOST = 'rawgit.com';
 const GIST_SOURCE_HOST = 'gist.githubusercontent.com';
 
+export async function getById(id: string): Task<{ description: string, projectJson: string; } | undefined> {
+	const response = await request.get(`${API_GITHUB}gists/${id}`);
+	const { description, files } = await response.json<Gist>();
+	for (const key in files) {
+		const file = files[key];
+		if (file.filename.toLowerCase() === 'project.json' && file.type === 'application/json') {
+			return {
+				description,
+				projectJson: file['raw_url'].replace(GIST_SOURCE_HOST, GIST_REPLACEMENT_HOST)
+			};
+		}
+	}
+}
+
 /**
  * Return an array of objects which describe gists that contain `project.json` files that can be loaded
  * @param username The GitHub username to retrieve the gists for
  */
-export default async function getGists(username: string): Task<{ description: string; projectJson: string; }[]> {
+export async function getByUsername(username: string): Task<{ description: string; id: string, projectJson: string; }[]> {
 	const response = await request.get(`${API_GITHUB}users/${username}/gists`);
 	const gists = await response.json<Gist[]>();
 	return gists
@@ -74,6 +88,7 @@ export default async function getGists(username: string): Task<{ description: st
 			}
 			return {
 				description: gist.description,
+				id: gist.id,
 				projectJson
 			};
 		});

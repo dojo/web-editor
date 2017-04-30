@@ -1,8 +1,13 @@
+import Route from '@dojo/routing/Route';
+import Map from '@dojo/shim/Map';
 import Editor from '../Editor';
 import project from '../project';
 import Runner from '../Runner';
-import getGists from '../support/getGists';
+import { getByUsername, getById } from '../support/gists';
+import router, { GistParameters } from './router';
 
+const titleH2 = document.getElementById('title') as HTMLHeadingElement;
+const githubUsernameDiv = document.getElementById('github-username') as HTMLDivElement;
 const usernameInput = document.getElementById('username') as HTMLInputElement;
 const loadGistsButton = document.getElementById('load-gists') as HTMLButtonElement;
 const projectListDiv = document.getElementById('project-list') as HTMLDivElement;
@@ -18,6 +23,8 @@ const runnerIframe = document.getElementById('runner') as HTMLIFrameElement;
 const editor = new Editor(editorDiv);
 const runner = new Runner(runnerIframe);
 
+const gistIDMap = new Map<string, string>();
+
 async function runButtonClick(evt: Event) {
 	evt.preventDefault();
 	runButton.setAttribute('disabled', 'disabled');
@@ -30,10 +37,8 @@ function selectFileSelectChange(evt: Event) {
 	editor.display(selectFileSelect.value);
 }
 
-async function loadProjectButtonClick() {
-	projectSelect.setAttribute('disabled', 'disabled');
-	loadProjectButton.setAttribute('disabled', 'disabled');
-	await project.load(projectSelect.value);
+async function loadProject(filename: string) {
+	await project.load(filename);
 	const projectBundle = project.get()!;
 	console.log(`Loaded. Project contains ${projectBundle.files.length + projectBundle.environmentFiles.length} files.`);
 
@@ -55,6 +60,14 @@ async function loadProjectButtonClick() {
 	fileListDiv.classList.remove('hidden');
 }
 
+async function loadProjectButtonClick() {
+	projectSelect.setAttribute('disabled', 'disabled');
+	loadProjectButton.setAttribute('disabled', 'disabled');
+	await loadProject(projectSelect.value);
+	titleH2.textContent = projectSelect.selectedOptions[0].text;
+	router.setPath(gistIDMap.get(projectSelect.value!)!);
+}
+
 async function loadGistsButtonClick() {
 	const username = usernameInput.value;
 	console.log(`Loading gists for "${username}"...`);
@@ -62,23 +75,49 @@ async function loadGistsButtonClick() {
 		return;
 	}
 	loadGistsButton.setAttribute('disabled', 'disabled');
-	const gists = await getGists(username);
+	const gists = await getByUsername(username);
 	if (!gists.length) {
 		console.warn('No valid gists found.');
 		loadGistsButton.removeAttribute('disabled');
 		return;
 	}
 	loadGistsButton.removeEventListener('click', loadGistsButtonClick);
-	gists.forEach(({ description, projectJson }) => {
+	gists.forEach(({ description, id, projectJson }) => {
 		const option = document.createElement('option');
 		option.value = projectJson;
 		option.text = description;
+		gistIDMap.set(projectJson, id);
 		projectSelect.appendChild(option);
 	});
 	loadProjectButton.addEventListener('click', loadProjectButtonClick);
 	projectListDiv.classList.remove('hidden');
 }
 
-loadGistsButton.addEventListener('click', loadGistsButtonClick);
+router.append(new Route({
+	path: '/',
 
-loadGistsButton.removeAttribute('disabled');
+	async exec() {
+		loadGistsButton.addEventListener('click', loadGistsButtonClick);
+		githubUsernameDiv.classList.remove('hidden');
+	}
+}));
+
+router.append(new Route<any, GistParameters>({
+	path: '/{id}',
+
+	async exec(request) {
+		if (!project.isLoaded()) {
+			const { id } = request.params;
+			const gist = await getById(id);
+			if (gist) {
+				titleH2.textContent = gist.description;
+				await loadProject(gist.projectJson);
+			}
+			else {
+				titleH2.textContent = '[Unfound Gist]';
+			}
+		}
+	}
+}));
+
+router.start();
