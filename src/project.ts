@@ -9,6 +9,7 @@ import WeakMap from '@dojo/shim/WeakMap';
 import { DiagnosticMessageChain, OutputFile } from 'typescript';
 import { getDefinitions, getEmit as getCssEmit } from './support/css';
 import { getEmit as getJsonEmit } from './support/json';
+import xhr from './support/providers/xhr';
 
 import { EmitFile, PromiseLanguageService, TypeScriptWorker } from './interfaces';
 
@@ -32,6 +33,9 @@ interface ProjectFileData {
 	 */
 	model?: monaco.editor.IModel;
 }
+
+/* Changes to a provider that doesn't have issue https://github.com/dojo/core/issues/328 */
+request.setDefaultProvider(xhr);
 
 /**
  * Flatten a TypeScript diagnostic message
@@ -171,7 +175,7 @@ export class Project extends Evented {
 	 * @param filename The filename to load the bundle from
 	 */
 	private async _loadBundle(filename: string): Promise<void> {
-		this._project = JSON.parse(await (await request(filename)).text());
+		this._project = await (await request(filename)).json<ProjectJson>();
 	}
 
 	/**
@@ -454,13 +458,13 @@ export class Project extends Evented {
 	/**
 	 * An async function which loads a project JSON bundle file and sets the monaco-editor environment to be
 	 * to edit the project.
-	 * @param filename The project bundle to load
+	 * @param filenameOrUrl The project file name or URL to load
 	 */
-	async load(filename: string): Promise<void> {
+	async load(filenameOrUrl: string): Promise<void> {
 		if (this._project) {
 			throw new Error('Project is already loaded.');
 		}
-		await this._loadBundle(filename);
+		await this._loadBundle(filenameOrUrl);
 		this._setTypeScriptEnvironment();
 		this._setEnvironmentFiles();
 		this._setProjectFiles();
