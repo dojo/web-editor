@@ -78,7 +78,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
     function selectFileSelectChange(evt) {
         evt.preventDefault();
-        editor.display(selectFileSelect.getAttribute('value'));
+        editor.display(selectFileSelect.value);
     }
     function loadProjectButtonClick() {
         return __awaiter(this, void 0, void 0, function () {
