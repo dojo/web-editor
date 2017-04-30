@@ -39,16 +39,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/request", "@dojo/core/async/Task", "../Editor", "../project", "../Runner"], factory);
+        define(["require", "exports", "../Editor", "../project", "../Runner", "../support/getGists"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var request_1 = require("@dojo/core/request");
-    var Task_1 = require("@dojo/core/async/Task");
     var Editor_1 = require("../Editor");
     var project_1 = require("../project");
     var Runner_1 = require("../Runner");
+    var getGists_1 = require("../support/getGists");
     var usernameInput = document.getElementById('username');
     var loadGistsButton = document.getElementById('load-gists');
     var projectListDiv = document.getElementById('project-list');
@@ -61,41 +60,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var runnerIframe = document.getElementById('runner');
     var editor = new Editor_1.default(editorDiv);
     var runner = new Runner_1.default(runnerIframe);
-    function getGists(username) {
-        return __awaiter(this, void 0, Task_1.default, function () {
-            var response, gists;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, request_1.default.get("https://api.github.com/users/" + username + "/gists")];
-                    case 1:
-                        response = _a.sent();
-                        return [4 /*yield*/, response.json()];
-                    case 2:
-                        gists = _a.sent();
-                        return [2 /*return*/, gists
-                                .filter(function (gist) {
-                                for (var key in gist.files) {
-                                    return gist.files[key].type === 'application/json' && gist.files[key].filename.toLowerCase() === 'project.json';
-                                }
-                            })
-                                .map(function (gist) {
-                                var projectJson = '';
-                                for (var key in gist.files) {
-                                    var file = gist.files[key];
-                                    if (file.type === 'application/json' && file.filename.toLowerCase() === 'project.json') {
-                                        projectJson = file['raw_url'].replace('gist.githubusercontent.com', 'rawgit.com');
-                                    }
-                                }
-                                console.log(gist.description, projectJson);
-                                return {
-                                    description: gist.description,
-                                    projectJson: projectJson
-                                };
-                            })];
-                }
-            });
-        });
-    }
     function runButtonClick(evt) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -159,10 +123,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                             return [2 /*return*/];
                         }
                         loadGistsButton.setAttribute('disabled', 'disabled');
-                        return [4 /*yield*/, getGists(username)];
+                        return [4 /*yield*/, getGists_1.default(username)];
                     case 1:
                         gists = _a.sent();
-                        console.log(gists);
                         if (!gists.length) {
                             console.warn('No valid gists found.');
                             loadGistsButton.removeAttribute('disabled');
