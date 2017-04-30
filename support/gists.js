@@ -49,11 +49,37 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var API_GITHUB = 'https://api.github.com/';
     var GIST_REPLACEMENT_HOST = 'rawgit.com';
     var GIST_SOURCE_HOST = 'gist.githubusercontent.com';
+    function getById(id) {
+        return __awaiter(this, void 0, Task_1.default, function () {
+            var response, _a, description, files, key, file;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, request_1.default.get(API_GITHUB + "gists/" + id)];
+                    case 1:
+                        response = _b.sent();
+                        return [4 /*yield*/, response.json()];
+                    case 2:
+                        _a = _b.sent(), description = _a.description, files = _a.files;
+                        for (key in files) {
+                            file = files[key];
+                            if (file.filename.toLowerCase() === 'project.json' && file.type === 'application/json') {
+                                return [2 /*return*/, {
+                                        description: description,
+                                        projectJson: file['raw_url'].replace(GIST_SOURCE_HOST, GIST_REPLACEMENT_HOST)
+                                    }];
+                            }
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
+    exports.getById = getById;
     /**
      * Return an array of objects which describe gists that contain `project.json` files that can be loaded
      * @param username The GitHub username to retrieve the gists for
      */
-    function getGists(username) {
+    function getByUsername(username) {
         return __awaiter(this, void 0, Task_1.default, function () {
             var response, gists;
             return __generator(this, function (_a) {
@@ -80,6 +106,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                                 }
                                 return {
                                     description: gist.description,
+                                    id: gist.id,
                                     projectJson: projectJson
                                 };
                             })];
@@ -87,6 +114,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             });
         });
     }
-    exports.default = getGists;
+    exports.getByUsername = getByUsername;
 });
-//# sourceMappingURL=getGists.js.map
+//# sourceMappingURL=gists.js.map

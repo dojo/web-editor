@@ -39,15 +39,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../Editor", "../project", "../Runner", "../support/getGists"], factory);
+        define(["require", "exports", "@dojo/routing/Route", "@dojo/shim/Map", "../Editor", "../project", "../Runner", "../support/gists", "./router"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    var Route_1 = require("@dojo/routing/Route");
+    var Map_1 = require("@dojo/shim/Map");
     var Editor_1 = require("../Editor");
     var project_1 = require("../project");
     var Runner_1 = require("../Runner");
-    var getGists_1 = require("../support/getGists");
+    var gists_1 = require("../support/gists");
+    var router_1 = require("./router");
+    var titleH2 = document.getElementById('title');
+    var githubUsernameDiv = document.getElementById('github-username');
     var usernameInput = document.getElementById('username');
     var loadGistsButton = document.getElementById('load-gists');
     var projectListDiv = document.getElementById('project-list');
@@ -60,6 +65,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var runnerIframe = document.getElementById('runner');
     var editor = new Editor_1.default(editorDiv);
     var runner = new Runner_1.default(runnerIframe);
+    var gistIDMap = new Map_1.default();
     function runButtonClick(evt) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -80,15 +86,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         evt.preventDefault();
         editor.display(selectFileSelect.value);
     }
-    function loadProjectButtonClick() {
+    function loadProject(filename) {
         return __awaiter(this, void 0, void 0, function () {
             var projectBundle;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        projectSelect.setAttribute('disabled', 'disabled');
-                        loadProjectButton.setAttribute('disabled', 'disabled');
-                        return [4 /*yield*/, project_1.default.load(projectSelect.value)];
+                    case 0: return [4 /*yield*/, project_1.default.load(filename)];
                     case 1:
                         _a.sent();
                         projectBundle = project_1.default.get();
@@ -111,6 +114,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             });
         });
     }
+    function loadProjectButtonClick() {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        projectSelect.setAttribute('disabled', 'disabled');
+                        loadProjectButton.setAttribute('disabled', 'disabled');
+                        return [4 /*yield*/, loadProject(projectSelect.value)];
+                    case 1:
+                        _a.sent();
+                        titleH2.textContent = projectSelect.selectedOptions[0].text;
+                        router_1.default.setPath(gistIDMap.get(projectSelect.value));
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
     function loadGistsButtonClick() {
         return __awaiter(this, void 0, void 0, function () {
             var username, gists;
@@ -123,7 +143,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                             return [2 /*return*/];
                         }
                         loadGistsButton.setAttribute('disabled', 'disabled');
-                        return [4 /*yield*/, getGists_1.default(username)];
+                        return [4 /*yield*/, gists_1.getByUsername(username)];
                     case 1:
                         gists = _a.sent();
                         if (!gists.length) {
@@ -133,10 +153,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         }
                         loadGistsButton.removeEventListener('click', loadGistsButtonClick);
                         gists.forEach(function (_a) {
-                            var description = _a.description, projectJson = _a.projectJson;
+                            var description = _a.description, id = _a.id, projectJson = _a.projectJson;
                             var option = document.createElement('option');
                             option.value = projectJson;
                             option.text = description;
+                            gistIDMap.set(projectJson, id);
                             projectSelect.appendChild(option);
                         });
                         loadProjectButton.addEventListener('click', loadProjectButtonClick);
@@ -146,7 +167,46 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             });
         });
     }
-    loadGistsButton.addEventListener('click', loadGistsButtonClick);
-    loadGistsButton.removeAttribute('disabled');
+    router_1.default.append(new Route_1.default({
+        path: '/',
+        exec: function () {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    loadGistsButton.addEventListener('click', loadGistsButtonClick);
+                    githubUsernameDiv.classList.remove('hidden');
+                    return [2 /*return*/];
+                });
+            });
+        }
+    }));
+    router_1.default.append(new Route_1.default({
+        path: '/{id}',
+        exec: function (request) {
+            return __awaiter(this, void 0, void 0, function () {
+                var id, gist;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (!!project_1.default.isLoaded()) return [3 /*break*/, 4];
+                            id = request.params.id;
+                            return [4 /*yield*/, gists_1.getById(id)];
+                        case 1:
+                            gist = _a.sent();
+                            if (!gist) return [3 /*break*/, 3];
+                            titleH2.textContent = gist.description;
+                            return [4 /*yield*/, loadProject(gist.projectJson)];
+                        case 2:
+                            _a.sent();
+                            return [3 /*break*/, 4];
+                        case 3:
+                            titleH2.textContent = '[Unfound Gist]';
+                            _a.label = 4;
+                        case 4: return [2 /*return*/];
+                    }
+                });
+            });
+        }
+    }));
+    router_1.default.start();
 });
 //# sourceMappingURL=gist.js.map
