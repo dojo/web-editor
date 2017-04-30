@@ -49,7 +49,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "vs/editor/editor.main", "@dojo/core/Evented", "@dojo/core/lang", "@dojo/core/request", "@dojo/shim/array", "@dojo/shim/WeakMap", "./support/css", "./support/json"], factory);
+        define(["require", "exports", "vs/editor/editor.main", "@dojo/core/Evented", "@dojo/core/lang", "@dojo/core/request", "@dojo/shim/array", "@dojo/shim/WeakMap", "./support/css", "./support/json", "./support/providers/xhr"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -62,6 +62,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var WeakMap_1 = require("@dojo/shim/WeakMap");
     var css_1 = require("./support/css");
     var json_1 = require("./support/json");
+    var xhr_1 = require("./support/providers/xhr");
+    /* Changes to a provider that doesn't have issue https://github.com/dojo/core/issues/328 */
+    request_1.default.setDefaultProvider(xhr_1.default);
     /**
      * Flatten a TypeScript diagnostic message
      *
@@ -202,16 +205,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
          */
         Project.prototype._loadBundle = function (filename) {
             return __awaiter(this, void 0, void 0, function () {
-                var _a, _b, _c;
-                return __generator(this, function (_d) {
-                    switch (_d.label) {
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
                         case 0:
                             _a = this;
-                            _c = (_b = JSON).parse;
                             return [4 /*yield*/, request_1.default(filename)];
-                        case 1: return [4 /*yield*/, (_d.sent()).text()];
+                        case 1: return [4 /*yield*/, (_b.sent()).json()];
                         case 2:
-                            _a._project = _c.apply(_b, [_d.sent()]);
+                            _a._project = _b.sent();
                             return [2 /*return*/];
                     }
                 });
@@ -568,9 +570,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         /**
          * An async function which loads a project JSON bundle file and sets the monaco-editor environment to be
          * to edit the project.
-         * @param filename The project bundle to load
+         * @param filenameOrUrl The project file name or URL to load
          */
-        Project.prototype.load = function (filename) {
+        Project.prototype.load = function (filenameOrUrl) {
             return __awaiter(this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -578,7 +580,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                             if (this._project) {
                                 throw new Error('Project is already loaded.');
                             }
-                            return [4 /*yield*/, this._loadBundle(filename)];
+                            return [4 /*yield*/, this._loadBundle(filenameOrUrl)];
                         case 1:
                             _a.sent();
                             this._setTypeScriptEnvironment();

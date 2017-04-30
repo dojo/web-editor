@@ -125,6 +125,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         return packages;
     }
     /**
+     * Determine if a string is a local or remote URI, returning `true` if remote, otherwise `false`
+     * @param text string of text to check
+     */
+    function isRemoteURI(text) {
+        var currenthost = window.location.protocol + "//" + window.location.hostname;
+        if (text.indexOf(currenthost) >= 0) {
+            return false;
+        }
+        return /^http(?:s)?:\/{2}/.test(text);
+    }
+    /**
      * Extract some specific content from an HTML document and return it
      * @param content The source HTML content
      */
@@ -136,7 +147,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         for (var i = 0; i < scriptNodes.length; i++) {
             var script = scriptNodes[i];
             script.parentElement && script.parentElement.removeChild(script);
-            if (script.src && /^http(?:s)?:\/{2}/.test(script.src)) {
+            if (script.src && isRemoteURI(script.src)) {
                 scripts.push(script.src);
             }
         }
