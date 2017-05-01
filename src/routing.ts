@@ -26,7 +26,7 @@ export interface GistRouterOptions {
 
 const router = new Router<GistParameters>({ history: new HashHistory() });
 
-export const { setPath } = router;
+export const setPath = router.setPath.bind(router);
 
 /**
  * Configure and start a router which handles routes as references to gists
