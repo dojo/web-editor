@@ -35,6 +35,7 @@ export const loaders = {
 export const loaderOptions = {
 	packages: [
 		{ name: '@dojo', location: 'node_modules/@dojo' },
+		{ name: 'dojo', location: 'node_modules/intern/browser_modules/dojo' },
 		{ name: 'src', location: 'dev/src' },
 		{ name: 'sinon', location: 'node_modules/sinon/pkg', main: 'sinon' },
 		{ name: 'tests', location: 'dev/tests' }
@@ -45,4 +46,4 @@ export const suites = [ '@dojo/shim/Promise', '@dojo/test-extras/support/loadJsd
 
 export const functionalSuites = [ 'tests/functional/all' ];
 
-export const excludeInstrumentation = /(?:(?:node_modules|tests|examples|external)[\/\\]|worker-proxy\.js$)/;
+export const excludeInstrumentation = /(?:(?:node_modules|tests|examples|external)[\/\\]|worker-proxy\.js$|providers[\/\\]xhr\.js)/;

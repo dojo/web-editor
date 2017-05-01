@@ -53,6 +53,9 @@ const GIST_SOURCE_HOST = 'gist.githubusercontent.com';
 
 export async function getById(id: string): Task<{ description: string, projectJson: string; } | undefined> {
 	const response = await request.get(`${API_GITHUB}gists/${id}`);
+	if (!response.ok) {
+		return;
+	}
 	const { description, files } = await response.json<Gist>();
 	for (const key in files) {
 		const file = files[key];
@@ -71,12 +74,18 @@ export async function getById(id: string): Task<{ description: string, projectJs
  */
 export async function getByUsername(username: string): Task<{ description: string; id: string, projectJson: string; }[]> {
 	const response = await request.get(`${API_GITHUB}users/${username}/gists`);
+	if (!response.ok) {
+		return [];
+	}
 	const gists = await response.json<Gist[]>();
 	return gists
 		.filter((gist) => {
 			for (const key in gist.files) {
-				return gist.files[key].type === 'application/json' && gist.files[key].filename.toLowerCase() === 'project.json';
+				if (gist.files[key].type === 'application/json' && gist.files[key].filename.toLowerCase() === 'project.json') {
+					return true;
+				}
 			}
+			return false;
 		})
 		.map((gist) => {
 			let projectJson = '';
