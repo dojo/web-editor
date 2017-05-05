@@ -112,15 +112,6 @@ export async function getEmit(...files: ProjectFile[]): Promise<EmitFile[]> {
 			type: ProjectFileType.CSS
 		});
 
-		/* add source maps */
-		if (result.map) {
-			emitFiles.push({
-				name: file.name + '.map',
-				text: result.map.toString(),
-				type: ProjectFileType.SourceMap
-			});
-		}
-
 		if (mappedClasses) {
 			/* get the basename and strip the extension to be used as the key for the localised CSS */
 			const key = file.name.split('/').pop()!.replace(/(\.m)?\.css$/, '');
