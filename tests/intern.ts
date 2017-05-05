@@ -38,6 +38,7 @@ export const loaderOptions = {
 		{ name: 'dojo', location: 'node_modules/intern/browser_modules/dojo' },
 		{ name: 'src', location: 'dev/src' },
 		{ name: 'sinon', location: 'node_modules/sinon/pkg', main: 'sinon' },
+		{ name: 'source-map', location: 'node_modules/source-map/dist', main: 'source-map.debug' },
 		{ name: 'tests', location: 'dev/tests' }
 	]
 };

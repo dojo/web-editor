@@ -1,3 +1,4 @@
+import './base64';
 import './css';
 import './DOMParser';
 import './gists';
@@ -5,4 +6,5 @@ import './json';
 import './postcss';
 import './postcssCssnext';
 import './postcssModules';
+import './sourceMap';
 import './providers/all';

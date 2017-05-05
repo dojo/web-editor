@@ -2,7 +2,9 @@ import { ProjectFileType } from '@dojo/cli-export-project/interfaces/project.jso
 import Evented from '@dojo/core/Evented';
 import { createHandle } from '@dojo/core/lang';
 import project from './project';
+import * as base64 from './support/base64';
 import DOMParser from './support/DOMParser';
+import { wrapCode } from './support/sourceMap';
 
 export interface GetDocOptions {
 	css?: { name: string; text: string; }[];
@@ -10,7 +12,7 @@ export interface GetDocOptions {
 	dependencies: { [pkg: string]: string; };
 	loaderSrc: string;
 	html?: string;
-	modules: { [mid: string]: string; };
+	modules: { [mid: string]: { code: string; map: string; } };
 	scripts?: string[];
 }
 
@@ -44,7 +46,7 @@ function docSrc(
 	loaderSrc: string,
 	dependencies: { [pkg: string]: string; },
 	packages: string[],
-	modules: { [mid: string]: string }
+	modules: { [mid: string]: { code: string, map: string } }
 ): string {
 	const paths: string[] = [];
 	for (const pkg in dependencies) {
@@ -56,16 +58,28 @@ function docSrc(
 							${packages.join(',\n\t\t\t\t\t\t\t')}
 						]`;
 
-	let modulesText = `var cache = {\n`;
+	let modulesText = '';
 	for (const mid in modules) {
-		modulesText += `\t'${mid}': function () {\n${modules[mid]}\n},\n`;
+		/* inject each source module as it's own <script> block */
+		const filename = mid + '.js';
+		modulesText += '<script>';
+		const source = wrapCode(`cache['${mid}'] = function () {\n`, modules[mid], '\n};\n');
+		modulesText += source.code;
+		/* if we have a sourcemap then we encode it and add it to the page */
+		if (modules[mid].map) {
+			const map = source.map.toJSON();
+			map.file = filename;
+			modulesText += `//# sourceMappingURL=data:application/json;base64,${base64.encode(JSON.stringify(map))}\n`;
+		}
+		/* adding the sourceURL gives debuggers a "name" for this block of code */
+		modulesText += `//# sourceURL=${filename}\n`;
+		modulesText += '</script>\n';
 	}
-	modulesText += `};\nrequire.cache(cache);\n/* workaround for dojo/loader#124 */\nrequire.cache({});\n`;
 
 	const cssText = css.map(({ name, text }) => {
 		/* when external CSS is brought into a document, its URL URIs might not be encoded, this will encode them */
 		const encoded = text.replace(/url\(['"]?(.*?)["']?\)/ig, (match, p1: string) => `url('${encodeURI(p1)}')`);
-		return `<style>\n/* from: ${name} */\n\n${encoded}\n</style>`;
+		return `<style>\n${encoded}\n</style>`;
 	}).join('\n');
 
 	let scriptsText = '';
@@ -213,18 +227,26 @@ export default class Runner extends Evented {
 			<body${bodyAttributes}>
 				${html}
 				<script src="${loaderSrc}"></script>
-				<script>
-					require.config({
-						paths: ${dependencies},
-						packages: ${getPackages(dependencies)}
-					});
-					${modules}
-					require([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {
-						var request = require('@dojo/core/request').default;
-						var getProvider = require('../support/providers/amdRequire').default;
-						request.setDefaultProvider(getProvider(require));
-						require([ 'src/main' ], function () { });
-					});
+				<script>require.config({
+	paths: ${dependencies},
+	packages: ${getPackages(dependencies)}
+});
+
+var cache = {};
+//# sourceURL=web-editor/config.js
+				</script>
+				${modules}
+				<script>require.cache(cache);
+/* workaround for dojo/loader#124 */
+require.cache({});
+
+require([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {
+	var request = require('@dojo/core/request').default;
+	var getProvider = require('../support/providers/amdRequire').default;
+	request.setDefaultProvider(getProvider(require));
+	require([ 'src/main' ], function () { });
+});
+//# sourceURL=web-editor/bootstrap.js
 				</script>
 			</body>
 			</html>`;
@@ -241,11 +263,15 @@ export default class Runner extends Evented {
 		const program = await project.emit();
 
 		const modules = program
-			.filter(({ type }) => type === ProjectFileType.JavaScript)
-			.reduce((map, { name, text }) => {
-				map[name.replace(/\.js$/, '')] = text;
+			.filter(({ type }) => type === ProjectFileType.JavaScript || type === ProjectFileType.SourceMap)
+			.reduce((map, { name, text, type }) => {
+				const mid = name.replace(/\.js(?:\.map)?$/, '');
+				if (!(mid in map)) {
+					map[mid] = { code: '', map: '' };
+				}
+				map[mid][type === ProjectFileType.JavaScript ? 'code' : 'map'] = text;
 				return map;
-			}, {} as { [mid: string]: string });
+			}, {} as { [mid: string]: { code: string; map: string; } });
 
 		const css = program
 			.filter(({ type }) => type === ProjectFileType.CSS)
