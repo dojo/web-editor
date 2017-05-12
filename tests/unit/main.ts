@@ -11,6 +11,7 @@ let main: any;
 let Editor: any;
 let project: any;
 let Runner: any;
+let routing: any;
 
 registerSuite({
 	name: 'main',
@@ -18,6 +19,7 @@ registerSuite({
 	async setup() {
 		Editor = {};
 		project = {};
+		routing = {};
 		Runner = {};
 
 		register('src/Editor', {
@@ -26,6 +28,7 @@ registerSuite({
 		register('src/project', {
 			default: project
 		});
+		register('src/routing', routing);
 		register('src/Runner', {
 			default: Runner
 		});
@@ -41,7 +44,8 @@ registerSuite({
 	async 'validate API'() {
 		assert.strictEqual(main.Editor, Editor);
 		assert.strictEqual(main.project, project);
+		assert.strictEqual(main.routing, routing);
 		assert.strictEqual(main.Runner, Runner);
-		assert.lengthOf(Object.keys(main), 3, 'should have only 3 exports');
+		assert.lengthOf(Object.keys(main), 4, 'should have only 3 exports');
 	}
 });

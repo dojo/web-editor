@@ -56,6 +56,7 @@
     "@dojo/core": "beta1",
     "@dojo/has": "beta1",
     "@dojo/loader": "beta1",
+    "@dojo/routing": "beta1",
     "@dojo/shim": "beta1",
     "monaco-editor": "^0.8.3"
   }
