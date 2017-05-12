@@ -12,7 +12,7 @@ export const environments = [
 	{ browserName: 'edge', platform: 'WINDOWS' },
 	{ browserName: 'firefox', platform: 'WINDOWS' },
 	{ browserName: 'chrome', platform: 'WINDOWS' },
-	{ browserName: 'safari', version: '10', platform: 'MAC' },
+	{ browserName: 'safari', version: '9.1', platform: 'MAC' },
 	{ browserName: 'iPad', version: '9.1' }
 ];
 
