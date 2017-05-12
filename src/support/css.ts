@@ -98,7 +98,14 @@ export async function getEmit(...files: ProjectFile[]): Promise<EmitFile[]> {
 	for (let i = 0; i < files.length; i++) {
 		const file = files[i];
 		mappedClasses = undefined;
-		const result = await processor.process(file.text);
+		const result = await processor.process(`/* from: ${file.name} */\n\n` + file.text, {
+			from: file.name,
+			map: {
+				sourcesContent: true
+			}
+		});
+
+		/* add emitted css text */
 		emitFiles.push({
 			name: file.name,
 			text: result.css,

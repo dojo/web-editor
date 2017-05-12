@@ -27,6 +27,17 @@ let projectIndexHtml = '';
 let iframe: HTMLIFrameElement;
 let runner: UnitUnderTest;
 
+const testJS = `define(["require", "exports"], function (require, exports) {
+    "use strict";
+    exports.__esModule = true;
+    function foo() { console.log('bar'); }
+    exports.foo = foo;
+    ;
+});
+`;
+
+const testMap = `{"version":3,"file":"test.js","sourceRoot":"","sources":["test.ts"],"names":[],"mappings":";;;IAAA,iBAAwB,OAAO,CAAC,GAAG,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC;IAA7C,kBAA6C;IAAA,CAAC","sourcesContent":["export function foo() { console.log('bar'); };\\n"]}`;
+
 registerSuite({
 	name: 'Runner',
 
@@ -85,7 +96,7 @@ registerSuite({
 			assert.lengthOf(strings, 1, 'should have the proper number of strings');
 			const doc = getDocFromString(strings[0]);
 			const scripts = doc.querySelectorAll('script');
-			assert.lengthOf(scripts, 2, 'should have had two blocks of script injected');
+			assert.lengthOf(scripts, 3, 'should have had three blocks of script injected');
 			const styles = doc.querySelectorAll('style');
 			assert.lengthOf(styles, 0, 'should have no styles in header');
 		},
@@ -98,14 +109,33 @@ registerSuite({
 		async 'adds modules to run iframe'() {
 			projectEmit.push({
 				name: 'src/foo.js',
-				text: 'define([], function () { console.log("foo"); });',
+				text: testJS,
 				type: ProjectFileType.JavaScript
 			});
 			await runner.run();
 			const doc = getDocFromString(getDocumentStrings(iframe)[0]);
 			const scripts = doc.querySelectorAll('script');
-			assert.include(scripts[1].text, `'src/foo': function`, 'should have exported module');
-			assert.include(scripts[1].text, 'define([], function () { console.log("foo"); });', 'should include module text');
+			assert.include(scripts[2].text, `cache['src/foo'] = function`, 'should have exported module');
+			assert.include(scripts[2].text, testJS, 'should include module text');
+			assert.include(scripts[2].text, '//# sourceURL=src/foo.js', 'should include a source URL');
+		},
+
+		async 'adds modules with source maps to run in iframe'() {
+			projectEmit.push({
+				name: 'src/foo.js',
+				text: testJS,
+				type: ProjectFileType.JavaScript
+			});
+			projectEmit.push({
+				name: 'src/foo.js.map',
+				text: testMap,
+				type: ProjectFileType.SourceMap
+			});
+			await runner.run();
+			const doc = getDocFromString(getDocumentStrings(iframe)[0]);
+			const scripts = doc.querySelectorAll('script');
+			assert.include(scripts[2].text, testJS, 'should include module text');
+			assert.include(scripts[2].text, '//# sourceMappingURL=data:application/json;base64,', 'should include an inline sourcemap');
 		},
 
 		async 'adds css to run iframe'() {
@@ -117,7 +147,6 @@ registerSuite({
 			await runner.run();
 			const doc = getDocFromString(getDocumentStrings(iframe)[0]);
 			const styles = doc.querySelectorAll('style');
-			assert.include(styles[0].textContent!, '/* from: src/main.css */', 'should have comment added');
 			assert.include(styles[0].textContent!, 'body { font-size: 48px }', 'should have text added');
 		},
 
@@ -143,7 +172,6 @@ registerSuite({
 			await runner.run();
 			const doc = getDocFromString(getDocumentStrings(iframe)[0]);
 			const styles = doc.querySelectorAll('style');
-			assert.include(styles[0].textContent!, '/* from: project index */', 'should have comment added');
 			assert.include(styles[0].textContent!, 'body { font-size: 12px; }', 'should have text added');
 			assert.include(styles[0].textContent!, '.foo { font-size: 24px; }', 'should have text added');
 			assert.include(styles[0].textContent!, '.bar { font-size: 72px; }', 'should have text added');
@@ -176,7 +204,7 @@ registerSuite({
 			await runner.run();
 			const doc = getDocFromString(getDocumentStrings(iframe)[0]);
 			const scripts = doc.querySelectorAll('script');
-			assert.lengthOf(scripts, 4, 'should have four script nodes');
+			assert.lengthOf(scripts, 5, 'should have five script nodes');
 			assert.isNotTrue(scripts[0].text, 'script node should not have text');
 			assert.isNotTrue(scripts[1].text, 'script node should not have text');
 			assert.strictEqual(scripts[0].src, 'http://foo.bar/index.js', 'should have proper src attribute');
@@ -240,7 +268,7 @@ registerSuite({
 				});
 				const doc = getDocFromString(text);
 				const scripts = doc.querySelectorAll('script');
-				assert.lengthOf(scripts, 2, 'should have two script blocks');
+				assert.lengthOf(scripts, 3, 'should have three script blocks');
 				assert.strictEqual(scripts[0].getAttribute('src'), 'foo.bar.js\n', 'should set proper loader source');
 			},
 
