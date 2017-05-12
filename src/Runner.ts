@@ -60,7 +60,7 @@ function docSrc(
 
 	let modulesText = '';
 	for (const mid in modules) {
-		/* inject each source module as it's own <script> block */
+		/* inject each source module as its own <script> block */
 		const filename = mid + '.js';
 		modulesText += '<script>';
 		const source = wrapCode(`cache['${mid}'] = function () {\n`, modules[mid], '\n};\n');

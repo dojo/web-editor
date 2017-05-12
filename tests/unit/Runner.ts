@@ -204,7 +204,7 @@ registerSuite({
 			await runner.run();
 			const doc = getDocFromString(getDocumentStrings(iframe)[0]);
 			const scripts = doc.querySelectorAll('script');
-			assert.lengthOf(scripts, 5, 'should have four script nodes');
+			assert.lengthOf(scripts, 5, 'should have five script nodes');
 			assert.isNotTrue(scripts[0].text, 'script node should not have text');
 			assert.isNotTrue(scripts[1].text, 'script node should not have text');
 			assert.strictEqual(scripts[0].src, 'http://foo.bar/index.js', 'should have proper src attribute');
