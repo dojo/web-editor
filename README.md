@@ -134,7 +134,7 @@ the project into the editor.
 
 #### setPath()
 
-Set the path on the current page.  Intended to be used, when a project is loaded to update the path to reflect the Gist's ID.
+Set the path on the current page.  When a project is loaded, this is used to update the path to reflect the Gist's ID.
 
 #### startGistRouter()
 

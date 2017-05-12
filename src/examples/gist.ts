@@ -88,7 +88,7 @@ async function loadProjectButtonClick() {
 }
 
 /**
- * Use the username input to retrieve all the public gists for a user, loking for those that contain a
+ * Use the username input to retrieve all the public gists for a user, looking for those that contain a
  * `package.json` that can be loaded.
  */
 async function loadGistsButtonClick() {
