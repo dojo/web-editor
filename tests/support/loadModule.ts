@@ -6,7 +6,7 @@
  */
 export default async function loadModule(mid: string, req: NodeRequire = require, noUndef: boolean = false): Promise<any> {
 	if (!noUndef) {
-		req.undef(mid);
+		req.undef(req.toAbsMid(mid));
 	}
 	return new Promise((resolve, reject) => {
 		try {

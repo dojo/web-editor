@@ -67,5 +67,6 @@ const requestStub = function request(url: string, options?: any): Task<ResponseS
 } as any as typeof request;
 
 requestStub.get = requestStub;
+requestStub.setDefaultProvider = function (provider: any) { };
 
 export default requestStub;

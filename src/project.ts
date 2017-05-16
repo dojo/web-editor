@@ -271,7 +271,7 @@ export class Project extends Evented {
 	 * @param cssModuleFile The CSS Module to update
 	 */
 	private async _updateCssModule(cssModuleFile: ProjectFile): Promise<void> {
-		cssModuleFile.text = this._getProjectFileData(cssModuleFile).model!.getValue();
+		cssModuleFile.text = this.getFileText(cssModuleFile.name);
 		let definitionFile = (await getDefinitions(cssModuleFile))[0];
 		const existingDefinition = find(this._project!.files, (({ name }) => name === definitionFile.name));
 		if (existingDefinition) {
@@ -475,14 +475,14 @@ export class Project extends Evented {
 	 * @param filename The file name
 	 * @param reset Set to `true` to unset the _dirty_ flag on the file
 	 */
-	setFileDirty(filename: string, reset?: boolean): void {
+	async setFileDirty(filename: string, reset?: boolean): Promise<void> {
 		const file = this.getFile(filename);
 		if (!file) {
 			throw new Error(`File "${filename}" is not part of the project.`);
 		}
 		if (file.type === ProjectFileType.CSS) {
 			/* the functionality of this method negates setting the dirty flag, so we won't */
-			this._updateCssModule(file);
+			await this._updateCssModule(file);
 		}
 		else {
 			this._getProjectFileData(file).dirty = !reset;
