@@ -1,22 +1,48 @@
-import { ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
-import Evented from '@dojo/core/Evented';
 import { createHandle } from '@dojo/core/lang';
-import project from './project';
+import { v } from '@dojo/widget-core/d';
+import { DNode, WidgetProperties } from '@dojo/widget-core/interfaces';
+import WidgetBase, { afterRender } from '@dojo/widget-core/WidgetBase';
+import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
+import { Program } from './project';
+import * as css from './styles/runner.m.css';
 import * as base64 from './support/base64';
 import DOMParser from './support/DOMParser';
 import { wrapCode } from './support/sourceMap';
 
-export interface GetDocOptions {
-	css?: { name: string; text: string; }[];
-	bodyAttributes?: { [attr: string]: string; };
-	dependencies: { [pkg: string]: string; };
-	loaderSrc: string;
-	html?: string;
-	modules: { [mid: string]: { code: string; map: string; } };
-	scripts?: string[];
+/**
+ * @type RunnerProperties
+ *
+ * Properties that can be set on a Runner widget
+ *
+ * @property loader A URI that points to an AMD loader which will be used when running the program.
+ *                  Defaults to `https://unpkg.com/@dojo/loader/loader.min.js`
+ * @property src A URI that points to the `src` to set on the Runner's `iframe`. Defaults to
+ *               `../support/blank.html`
+ * @property onError A method that will be called whenever there is an error in the running program
+ * @property onInitIframe A method that will be called when the `iframe` is initiailized
+ * @property onRun A method that will be called when the `Runner` has fully loaded the program.  *Note* this does not
+ *                 represent the state of the running program, it simply indicates that the `Runner` no longer has
+ *                 involvement in the process of loading the program
+ */
+export interface RunnerProperties extends Partial<Program>, WidgetProperties, ThemeableProperties {
+	loader?: string;
+	src?: string;
+
+	onError?(err: Error): void;
+	onInitIframe?(iframe: HTMLIFrameElement): HTMLIFrameElement | undefined;
+	onRun?(): void;
 }
 
+/**
+ * The semver for the `tslib` package, which provides the TypeScript helper functions
+ */
 const TSLIB_SEMVER = '^1.6.0';
+
+/**
+ * The default URI for the AMD loader to use when running a program
+ */
+const DEFAULT_LOADER_URI = 'https://unpkg.com/@dojo/loader/loader.min.js';
+const DEFAULT_IFRAME_SRC = '../support/blank.html';
 
 /**
  * A map of custom package data that needs to be added if this package is part of project that is being run
@@ -36,6 +62,7 @@ const PACKAGE_DATA: { [pkg: string]: string } = {
  * @param html The HTML to be used in the body of the document
  * @param dependencies A map of package dependencies required
  * @param modules Any modules to be injected into the page
+ * @return The generated HTML document
  */
 function docSrc(
 	strings: TemplateStringsArray,
@@ -118,115 +145,24 @@ function getPackages(dependencies: { [pkg: string]: string; }): string[] {
 }
 
 /**
- * Determine if a string is a local or remote URI, returning `true` if remote, otherwise `false`
- * @param text string of text to check
+ * Generate an HTML page which represents the Runner properties
+ * @param param0 Properties from the Runner to be used to specify the document
  */
-function isRemoteURI(text: string): boolean {
-	const currenthost = `${window.location.protocol}//${window.location.hostname}`;
-	if (text.indexOf(currenthost) >= 0) {
-		return false;
-	}
-	return /^http(?:s)?:\/{2}/.test(text);
-}
-
-/**
- * Extract some specific content from an HTML document and return it
- * @param content The source HTML content
- */
-function parseHtml(content: string): { css: string, body: string, scripts: string[] } {
-	const parser = new DOMParser();
-	const doc = parser.parseFromString(content, 'text/html');
-	const scriptNodes = doc.querySelectorAll('script');
-	const scripts: string[] = [];
-	for (let i = 0; i < scriptNodes.length; i++) {
-		const script = scriptNodes[i];
-		script.parentElement && script.parentElement.removeChild(script);
-		if (script.src && isRemoteURI(script.src)) {
-			scripts.push(script.src);
-		}
-	}
-	const css: string[] = [];
-	const styles = doc.querySelectorAll('style');
-	for (let i = 0; i < styles.length; i++) {
-		const style = styles[i];
-		if (style.textContent && style.getAttribute('scoped') === null) {
-			css.push(style.textContent);
-		}
-	}
-	return {
-		css: css.join('\n'),
-		body: doc.body && doc.body.innerHTML || '',
-		scripts
-	};
-}
-
-export default class Runner extends Evented {
-
-	/**
-	 * The private iframe that the project will run in
-	 */
-	private _iframe: HTMLIFrameElement;
-
-	/**
-	 * A private handler for re-emitting iframe errors
-	 * @param evt The iframe's contentWindow error event
-	 */
-	private _onIframeError = (evt: ErrorEvent) => {
-		evt.preventDefault();
-		this.emit(evt);
+function getSource({ css = [], dependencies = {}, loader = DEFAULT_LOADER_URI, html = '', modules = {} }: RunnerProperties): string {
+	const { attributes, body, css: text, scripts } = parseHtml(html);
+	if (text) {
+		css.unshift({ name: 'project index', text });
 	}
 
-	/**
-	 * Create a runner instance attached to a specific `iframe`
-	 * @param iframe The `iframe` that should be used
-	 */
-	constructor(iframe: HTMLIFrameElement) {
-		super();
-		this._iframe = iframe;
-		this.own(createHandle(() => {
-			if (this._iframe.contentWindow) {
-				this._iframe.contentWindow.removeEventListener('error', this._onIframeError);
-			}
-		}));
-	}
-
-	/**
-	 * Writes to the document of an `iframe`
-	 * @param iframe The target `iframe`
-	 * @param source The source to be written
-	 */
-	private async _writeIframeDoc(source: string): Promise<void> {
-		const iframe = this._iframe;
-		const onIframeError = this._onIframeError;
-		return new Promise<void>((resolve, reject) => {
-			function onLoadListener() {
-				iframe.removeEventListener('load', onLoadListener);
-				iframe.contentWindow.document.write(source);
-				iframe.contentWindow.document.close();
-				iframe.contentWindow.addEventListener('error', onIframeError);
-				resolve();
-			}
-
-			iframe.contentWindow.removeEventListener('error', onIframeError);
-			iframe.addEventListener('load', onLoadListener);
-			iframe.contentWindow.location.reload();
-		});
-	}
-
-	/**
-	 * Generate the document
-	 * @param param0 The options to use
-	 */
-	getDoc({ css = [], bodyAttributes = {}, dependencies, loaderSrc, html = '', modules, scripts = [] }: GetDocOptions): string {
-		return docSrc`<!DOCTYPE html>
+	return docSrc`<!DOCTYPE html>
 			<html>
 			<head>
 				${scripts}
 				${css}
 			</head>
-			<body${bodyAttributes}>
-				${html}
-				<script src="${loaderSrc}"></script>
+			<body${attributes}>
+				${body}
+				<script src="${loader}"></script>
 				<script>require.config({
 	paths: ${dependencies},
 	packages: ${getPackages(dependencies)}
@@ -250,48 +186,134 @@ require([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], fu
 				</script>
 			</body>
 			</html>`;
+}
+
+/**
+ * Determine if a string is a local or remote URI, returning `true` if remote, otherwise `false`
+ * @param text string of text to check
+ */
+function isRemoteURI(text: string): boolean {
+	const currenthost = `${window.location.protocol}//${window.location.hostname}`;
+	if (text.indexOf(currenthost) >= 0) {
+		return false;
+	}
+	return /^http(?:s)?:\/{2}/.test(text);
+}
+
+/**
+ * Extract some specific content from an HTML document and return it
+ * @param content The source HTML content
+ */
+function parseHtml(content: string): { attributes: { [attr: string]: string }, body: string, css: string, scripts: string[] } {
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(content, 'text/html');
+	const scriptNodes = doc.querySelectorAll('script');
+	const scripts: string[] = [];
+	for (let i = 0; i < scriptNodes.length; i++) {
+		const script = scriptNodes[i];
+		script.parentElement && script.parentElement.removeChild(script);
+		if (script.src && isRemoteURI(script.src)) {
+			scripts.push(script.src);
+		}
+	}
+	const css: string[] = [];
+	const styles = doc.querySelectorAll('style');
+	for (let i = 0; i < styles.length; i++) {
+		const style = styles[i];
+		if (style.textContent && style.getAttribute('scoped') === null) {
+			css.push(style.textContent);
+		}
+	}
+	const attributes: { [attr: string]: string } = {};
+	for (let i = 0; i < doc.body.attributes.length; i++) {
+		attributes[doc.body.attributes[i].name] = doc.body.attributes[i].value;
+	}
+	return {
+		attributes, // not implmeneted yet
+		body: doc.body && doc.body.innerHTML || '',
+		css: css.join('\n'),
+		scripts
+	};
+}
+
+/**
+ * Write out the provided `source` to the target `iframe` and register an event listener for the `error` event on the `iframe`
+ * @param iframe The `iframe` to have its document written to
+ * @param source The document text to be written
+ * @param errorListener The error listener that will be attached to the content window's error event
+ */
+async function writeIframeDoc(iframe: HTMLIFrameElement, source: string, errorListener: (evt: ErrorEvent) => void): Promise<void> {
+	return new Promise<void>((resolve, reject) => {
+		function onLoadListener() {
+			iframe.removeEventListener('load', onLoadListener);
+			iframe.contentWindow.document.write(source);
+			iframe.contentWindow.document.close();
+			iframe.contentWindow.addEventListener('error', errorListener);
+			resolve();
+		}
+
+		iframe.contentWindow.removeEventListener('error', errorListener);
+		iframe.addEventListener('load', onLoadListener);
+		iframe.contentWindow.location.reload();
+	});
+}
+
+/* tslint:disable:variable-name */
+const RunnerBase = ThemeableMixin(WidgetBase);
+/* tslint:enable:variable-name */
+
+/**
+ * A widget which will render its properties into a _runnable_ application within an `iframe`
+ */
+@theme(css)
+export default class Runner extends RunnerBase<RunnerProperties> {
+	private _iframe: HTMLIFrameElement | undefined;
+	private _onIframeError = (evt: ErrorEvent) => {
+		evt.preventDefault();
+		const { onError } = this.properties;
+		onError && onError(evt.error);
+	}
+	private _updating = false;
+
+	private _initIframe(iframe: HTMLIFrameElement) {
+		const { onInitIframe } = this.properties;
+		this._iframe = onInitIframe && onInitIframe(iframe) || iframe;
+		this.own(createHandle(() => {
+			if (iframe.contentWindow) {
+				iframe.contentWindow.removeEventListener('error', this._onIframeError);
+			}
+		}));
+		this.updateSource();
 	}
 
-	/**
-	 * Get the emit from the current project and run it in the runner's `iframe`
-	 */
-	async run(): Promise<void> {
-		if (!project.isLoaded()) {
-			throw new Error('Project not loaded.');
+	@afterRender()
+	public updateSource(node?: DNode): DNode | undefined {
+		if (!this._iframe) {
+			return node;
 		}
-
-		const program = await project.emit();
-
-		const modules = program
-			.filter(({ type }) => type === ProjectFileType.JavaScript || type === ProjectFileType.SourceMap)
-			.reduce((map, { name, text, type }) => {
-				const mid = name.replace(/\.js(?:\.map)?$/, '');
-				if (!(mid in map)) {
-					map[mid] = { code: '', map: '' };
-				}
-				map[mid][type === ProjectFileType.JavaScript ? 'code' : 'map'] = text;
-				return map;
-			}, {} as { [mid: string]: { code: string; map: string; } });
-
-		const css = program
-			.filter(({ type }) => type === ProjectFileType.CSS)
-			.map(({ name, text }) => { return { name, text }; });
-
-		const dependencies = project.getDependencies();
-
-		const { css: text, body: html, scripts } = parseHtml(project.getIndexHtml());
-		if (text) {
-			css.unshift({ name: 'project index', text });
+		if (this._updating) {
+			return node;
 		}
+		if (this.properties.modules) {
+			this._updating = true;
+			const source = getSource(this.properties);
+			writeIframeDoc(this._iframe, source, this._onIframeError)
+				.then(() => {
+					this._updating = false;
+					const { onRun } = this.properties;
+					onRun && onRun();
+				});
+		}
+		return node;
+	}
 
-		const source = this.getDoc({
-			css,
-			html,
-			dependencies,
-			loaderSrc: 'https://unpkg.com/@dojo/loader/loader.min.js',
-			modules,
-			scripts
-		});
-		await this._writeIframeDoc(source);
+	public render() {
+		return v('div', {
+			classes: this.classes(css.base)
+		}, [ v('iframe', {
+			afterCreate: this._initIframe,
+			classes: this.classes().fixed(css.iframe),
+			src: this.properties.src || DEFAULT_IFRAME_SRC
+		}) ]);
 	}
 }

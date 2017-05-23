@@ -9,12 +9,23 @@ import UnitUnderTest from '../../src/project';
 import { stub } from 'sinon';
 import cssStub, { definitionMap } from '../support/cssStub';
 import jsonStub from '../support/jsonStub';
-import monacoStub, { compilerOptionsDiagnostics, resetSandbox, setCompilerOptionsSpy } from '../support/monacoStub';
+import monacoStub, { compilerOptionsDiagnostics, outputFilesMap, resetSandbox, setCompilerOptionsSpy } from '../support/monacoStub';
 import requestStub, { responseMap } from '../support/requestStub';
 
 let project: typeof UnitUnderTest;
 let mockHandle: { destroy(): void; };
 let projectJson: ProjectJson;
+
+const testJS = `define(["require", "exports"], function (require, exports) {
+    "use strict";
+    exports.__esModule = true;
+    function foo() { console.log('bar'); }
+    exports.foo = foo;
+    ;
+});
+`;
+
+const testMap = `{"version":3,"file":"test.js","sourceRoot":"","sources":["test.ts"],"names":[],"mappings":";;;IAAA,iBAAwB,OAAO,CAAC,GAAG,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC;IAA7C,kBAA6C;IAAA,CAAC","sourcesContent":["export function foo() { console.log('bar'); };\\n"]}`;
 
 registerSuite({
 	name: 'project',
@@ -256,7 +267,7 @@ registerSuite({
 	async 'emit()'() {
 		await project.load('project.json');
 		const emit = await project.emit();
-		assert.lengthOf(emit, 5, 'should have correct number of files emitted');
+		assert.lengthOf(emit, 6, 'should have correct number of files emitted');
 	},
 
 	async 'emit() with diagnostic errors'() {
@@ -293,8 +304,41 @@ registerSuite({
 			code: 0
 		});
 		await project.emit();
-		console.log(warnSpy.lastCall.args);
+		assert.strictEqual(warnSpy.lastCall.args[0], 'Error: Error foo\n  Error bar');
 		warnSpy.restore();
+	},
+
+	async 'getProgram()'() {
+		await project.load('project.json');
+		outputFilesMap.set('file:///src/main.ts', [
+			{
+				name: 'file:///src/main.js',
+				writeByteOrderMark: false,
+				text: testJS
+			}, {
+				name: 'file:///src/main.js.map',
+				writeByteOrderMark: false,
+				text: testMap
+			}
+		]);
+		const program = await project.getProgram();
+		assert.deepEqual(program, {
+			css: [
+				{
+					name: 'file:///src/main.css',
+					text: '.foo { font-size: 48px; }'
+				}, {
+					name: 'file:///src/theme.css',
+					text: '.bar { font-size: 48px; }'
+				}
+			],
+			dependencies: { foo: '1.0.0' },
+			html: '<!DOCTYPE html><html></html>',
+			modules: {
+				'': { code: '', map: '' },
+				'src/main': { code: testJS, map: testMap }
+			}
+		});
 	},
 
 	'error conditions': {

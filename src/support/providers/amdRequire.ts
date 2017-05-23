@@ -58,7 +58,9 @@ export default function getProvider(req: NodeRequire = require): Provider {
 			return new Task<AMDRequireResponse>((resolve, reject) => {
 				const mid = url.replace(i18nUri, 'src/');
 				try {
-					req([ mid ], (module) => resolve(new AMDRequireResponse(mid, module)));
+					(req as any)([ mid ], (module: any) => {
+						resolve(new AMDRequireResponse(mid, module));
+					});
 				}
 				catch (e) {
 					reject(e);

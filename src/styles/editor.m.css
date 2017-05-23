@@ -1,0 +1,9 @@
+/**
+ * A base class for the editor
+ */
+.base {
+	flex: 1;
+	margin: 1em 0.5em;
+	height: 600px;
+	border: 1px solid grey;
+}

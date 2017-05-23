@@ -6,6 +6,7 @@ const sandbox = sinonSandbox.create();
 export const extraLibMap = new Map<string, string>();
 
 export const compilerOptionsDiagnostics: Diagnostic[] = [];
+export const outputFilesMap = new Map<string, { name: string; writeByteOrderMark: boolean, text: string; }[]>();
 
 export const createModelSpy = sandbox.spy((text: string, language: string, filename: string) => {
 	return {
@@ -13,7 +14,10 @@ export const createModelSpy = sandbox.spy((text: string, language: string, filen
 			return text;
 		}),
 		uri: {
-			fsPath: filename
+			fsPath: filename,
+			toString() {
+				return filename;
+			}
 		}
 	};
 });
@@ -33,9 +37,9 @@ export const addExtraLibSpy = sandbox.spy((text: string, filename: string) => {
 });
 export const setCompilerOptionsSpy = sandbox.spy();
 export const languageServiceStub = {
-	getEmitOutput() {
+	getEmitOutput(filename: string) {
 		return Promise.resolve({
-			outputFiles: [ {
+			outputFiles: outputFilesMap.get(filename) || [ {
 				name: '',
 				writeByteOrderMark: false,
 				text: ''
@@ -63,6 +67,10 @@ export const getTypeScriptWorkerSpy = sandbox.spy(() => {
 export function resetSandbox() {
 	sandbox.reset();
 	extraLibMap.clear();
+	while (compilerOptionsDiagnostics.length) {
+		compilerOptionsDiagnostics.pop();
+	}
+	outputFilesMap.clear();
 }
 
 export function restoreSandbox() {

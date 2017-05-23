@@ -14,55 +14,13 @@
 			display: flex;
 			align-items: center;
 		}
-
-		.box {
-			flex: 1;
-			margin: 1em 0.5em;
-			height: 600px;
-			border: 1px solid grey;
-		}
-
-		#runner {
-			border: none;
-			position: relative;
-			height: 100%;
-			width: 100%;
-		}
-
-		.hidden {
-			display: none;
-		}
 	</style>
+	<!-- manually include widget styles until converted fully to WebPack -->
+	<link href="../styles/editor.m.css" rel="stylesheet">
+	<link href="../styles/runner.m.css" rel="stylesheet">
 </head>
 <body>
 	<h1>@dojo/web-editor</h1>
-
-	<div>
-		<label for="project">Project to load:</label>
-		<select type="text" name="project" id="project" disabled>
-			<option value="dojo-test-app.project.json">Dojo2 Hello World</option>
-			<option value="dojo2-todo-mvc.project.json" selected>Dojo2 Todo MVC</option>
-			<option value="dojo2-todo-mvc-kitchensink.project.json">Dojo2 Kitchensink Todo MVC</option>
-		</select>
-		<button type="button" name="load-project" id="load-project" disabled>Load</button>
-	</div>
-
-	<div id="div-file" class="hidden">
-		<div>
-			<label for="select-file">File to display:</label>
-			<select name="select-file" id="select-file"></select>
-		</div>
-		<div>
-			<button type="button" name="run" id="run">Run</button>
-		</div>
-	</div>
-
-	<div class="wrap">
-		<div id="editor" class="box"></div>
-		<div class="box">
-			<iframe src="../support/blank.html" id="runner" name="runner"></iframe>
-		</div>
-	</div>
 
 	<!-- postcss is created a single bundle that exports `postcss`, `cssnext`, `postcssModules` to the global namespace -->
 	<script src="../external/postcss-bundle.js"></script>
@@ -75,7 +33,18 @@
 				return '../support/worker-proxy.js';
 			}
 		};
+
+		require.config({
+			paths: {
+				'vs': '../../../node_modules/monaco-editor/min/vs',
+				'@dojo': '../../../node_modules/@dojo',
+				'maquette': '../../../node_modules/maquette/dist/maquette.min',
+				'pepjs': '../../../node_modules/pepjs/dist/pep',
+				'source-map': '../../../node_modules/source-map/dist/source-map.min'
+			}
+		});
+
+		require([ './index' ], function () {});
 	</script>
-	<script src="./index.js"></script>
 </body>
 </html>

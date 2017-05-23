@@ -14,6 +14,31 @@ import xhr from './support/providers/xhr';
 import { EmitFile, PromiseLanguageService, TypeScriptWorker } from './interfaces';
 
 /**
+ * Interface that provides the data required to run a program.
+ */
+export interface Program {
+	/**
+	 * Blocks of CSS that the application requires to function properly
+	 */
+	css: { name: string; text: string; }[];
+
+	/**
+	 * Package dependencies which the program requires
+	 */
+	dependencies: { [pkg: string]: string; };
+
+	/**
+	 * The HTML document for the program
+	 */
+	html: string;
+
+	/**
+	 * Modules that make up the program, including their source maps
+	 */
+	modules: { [mid: string]: { code: string; map: string; } };
+}
+
+/**
  * Interface for private `ProjectFile` data the project needs to track for project files.
  */
 interface ProjectFileData {
@@ -428,6 +453,35 @@ export class Project extends Evented {
 			throw new Error('Project not loaded.');
 		}
 		return this.getFileText(this._project.index);
+	}
+
+	/**
+	 * Resolves with an object which represents the current program which can then be run in a browser
+	 */
+	async getProgram(): Promise<Program> {
+		const program = await this.emit();
+
+		const modules = program
+			.filter(({ type }) => type === ProjectFileType.JavaScript || type === ProjectFileType.SourceMap)
+			.reduce((map, { name, text, type }) => {
+				const mid = name.replace(/\.js(?:\.map)?$/, '');
+				if (!(mid in map)) {
+					map[mid] = { code: '', map: '' };
+				}
+				map[mid][type === ProjectFileType.JavaScript ? 'code' : 'map'] = text;
+				return map;
+			}, {} as { [mid: string]: { code: string; map: string; } });
+
+		const css = program
+			.filter(({ type }) => type === ProjectFileType.CSS)
+			.map(({ name, text }) => { return { name, text }; });
+
+		return {
+			css,
+			dependencies: this.getDependencies(),
+			html: this.getIndexHtml(),
+			modules
+		};
 	}
 
 	/**

@@ -36,6 +36,8 @@ export const loaderOptions = {
 	packages: [
 		{ name: '@dojo', location: 'node_modules/@dojo' },
 		{ name: 'dojo', location: 'node_modules/intern/browser_modules/dojo' },
+		{ name: 'maquette', location: 'node_modules/maquette/dist', main: 'maquette.min' },
+		{ name: 'pepjs', location: 'node_modules/pepjs/dist', main: 'pep' },
 		{ name: 'src', location: 'dev/src' },
 		{ name: 'sinon', location: 'node_modules/sinon/pkg', main: 'sinon' },
 		{ name: 'source-map', location: 'node_modules/source-map/dist', main: 'source-map.debug' },
@@ -47,4 +49,4 @@ export const suites = [ '@dojo/shim/Promise', '@dojo/test-extras/support/loadJsd
 
 export const functionalSuites = [ 'tests/functional/all' ];
 
-export const excludeInstrumentation = /(?:(?:node_modules|tests|examples|external)[\/\\]|worker-proxy\.js$|providers[\/\\]xhr\.js)/;
+export const excludeInstrumentation = /(?:(?:node_modules|tests|examples|external|styles)[\/\\]|worker-proxy\.js$|providers[\/\\]xhr\.js)/;
