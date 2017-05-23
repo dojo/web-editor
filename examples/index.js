@@ -27,7 +27,7 @@ var __extends = (this && this.__extends) || (function () {
     var project_1 = require("../project");
     var Runner_1 = require("../Runner");
     /* path to the project directory */
-    var PROJECT_DIRECTORY = '../../../projects/';
+    var PROJECT_DIRECTORY = '../projects/';
     /**
      * An example application widget that incorporates both the Editor and Runner widgets into a simplistic UI
      */
