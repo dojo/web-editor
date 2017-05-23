@@ -68,7 +68,9 @@ var __extends = (this && this.__extends) || (function () {
                 return new Task_1.default(function (resolve, reject) {
                     var mid = url.replace(i18nUri, 'src/');
                     try {
-                        req([mid], function (module) { return resolve(new AMDRequireResponse(mid, module)); });
+                        req([mid], function (module) {
+                            resolve(new AMDRequireResponse(mid, module));
+                        });
                     }
                     catch (e) {
                         reject(e);

@@ -8,6 +8,12 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -49,16 +55,28 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/Evented", "@dojo/core/lang", "./project", "./support/DOMParser"], factory);
+        define(["require", "exports", "@dojo/core/lang", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/mixins/Themeable", "./styles/runner.m.css", "./support/base64", "./support/DOMParser", "./support/sourceMap"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var Evented_1 = require("@dojo/core/Evented");
     var lang_1 = require("@dojo/core/lang");
-    var project_1 = require("./project");
+    var d_1 = require("@dojo/widget-core/d");
+    var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
+    var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
+    var css = require("./styles/runner.m.css");
+    var base64 = require("./support/base64");
     var DOMParser_1 = require("./support/DOMParser");
+    var sourceMap_1 = require("./support/sourceMap");
+    /**
+     * The semver for the `tslib` package, which provides the TypeScript helper functions
+     */
     var TSLIB_SEMVER = '^1.6.0';
+    /**
+     * The default URI for the AMD loader to use when running a program
+     */
+    var DEFAULT_LOADER_URI = 'https://unpkg.com/@dojo/loader/loader.min.js';
+    var DEFAULT_IFRAME_SRC = '../support/blank.html';
     /**
      * A map of custom package data that needs to be added if this package is part of project that is being run
      */
@@ -76,6 +94,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
      * @param html The HTML to be used in the body of the document
      * @param dependencies A map of package dependencies required
      * @param modules Any modules to be injected into the page
+     * @return The generated HTML document
      */
     function docSrc(strings, scripts, css, bodyAttributes, html, loaderSrc, dependencies, packages, modules) {
         var paths = [];
@@ -84,16 +103,28 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         }
         var pathsText = "{\n\t\t\t\t\t\t\t" + paths.join(',\n\t\t\t\t\t\t\t') + "\n\t\t\t\t\t\t}";
         var packagesText = "[\n\t\t\t\t\t\t\t" + packages.join(',\n\t\t\t\t\t\t\t') + "\n\t\t\t\t\t\t]";
-        var modulesText = "var cache = {\n";
+        var modulesText = '';
         for (var mid in modules) {
-            modulesText += "\t'" + mid + "': function () {\n" + modules[mid] + "\n},\n";
+            /* inject each source module as its own <script> block */
+            var filename = mid + '.js';
+            modulesText += '<script>';
+            var source = sourceMap_1.wrapCode("cache['" + mid + "'] = function () {\n", modules[mid], '\n};\n');
+            modulesText += source.code;
+            /* if we have a sourcemap then we encode it and add it to the page */
+            if (modules[mid].map) {
+                var map = source.map.toJSON();
+                map.file = filename;
+                modulesText += "//# sourceMappingURL=data:application/json;base64," + base64.encode(JSON.stringify(map)) + "\n";
+            }
+            /* adding the sourceURL gives debuggers a "name" for this block of code */
+            modulesText += "//# sourceURL=" + filename + "\n";
+            modulesText += '</script>\n';
         }
-        modulesText += "};\nrequire.cache(cache);\n/* workaround for dojo/loader#124 */\nrequire.cache({});\n";
         var cssText = css.map(function (_a) {
             var name = _a.name, text = _a.text;
             /* when external CSS is brought into a document, its URL URIs might not be encoded, this will encode them */
             var encoded = text.replace(/url\(['"]?(.*?)["']?\)/ig, function (match, p1) { return "url('" + encodeURI(p1) + "')"; });
-            return "<style>\n/* from: " + name + " */\n\n" + encoded + "\n</style>";
+            return "<style>\n" + encoded + "\n</style>";
         }).join('\n');
         var scriptsText = '';
         scripts.forEach(function (src) {
@@ -123,6 +154,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         });
         packages.push(PACKAGE_DATA['tslib']); /* we are always going to inject this one */
         return packages;
+    }
+    /**
+     * Generate an HTML page which represents the Runner properties
+     * @param param0 Properties from the Runner to be used to specify the document
+     */
+    function getSource(_a) {
+        var _b = _a.css, css = _b === void 0 ? [] : _b, _c = _a.dependencies, dependencies = _c === void 0 ? {} : _c, _d = _a.loader, loader = _d === void 0 ? DEFAULT_LOADER_URI : _d, _e = _a.html, html = _e === void 0 ? '' : _e, _f = _a.modules, modules = _f === void 0 ? {} : _f;
+        var _g = parseHtml(html), attributes = _g.attributes, body = _g.body, text = _g.css, scripts = _g.scripts;
+        if (text) {
+            css.unshift({ name: 'project index', text: text });
+        }
+        return (_h = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"", "\"></script>\n\t\t\t\t<script>require.config({\n\tpaths: ", ",\n\tpackages: ", "\n});\n\nvar cache = {};\n//# sourceURL=web-editor/config.js\n\t\t\t\t</script>\n\t\t\t\t", "\n\t\t\t\t<script>require.cache(cache);\n/* workaround for dojo/loader#124 */\nrequire.cache({});\n\nrequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\tvar request = require('@dojo/core/request').default;\n\tvar getProvider = require('../support/providers/amdRequire').default;\n\trequest.setDefaultProvider(getProvider(require));\n\trequire([ 'src/main' ], function () { });\n});\n//# sourceURL=web-editor/bootstrap.js\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], _h.raw = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"", "\"></script>\n\t\t\t\t<script>require.config({\n\tpaths: ", ",\n\tpackages: ", "\n});\n\nvar cache = {};\n//# sourceURL=web-editor/config.js\n\t\t\t\t</script>\n\t\t\t\t", "\n\t\t\t\t<script>require.cache(cache);\n/* workaround for dojo/loader#124 */\nrequire.cache({});\n\nrequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\tvar request = require('@dojo/core/request').default;\n\tvar getProvider = require('../support/providers/amdRequire').default;\n\trequest.setDefaultProvider(getProvider(require));\n\trequire([ 'src/main' ], function () { });\n});\n//# sourceURL=web-editor/bootstrap.js\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], docSrc(_h, scripts, css, attributes, body, loader, dependencies, getPackages(dependencies), modules));
+        var _h;
     }
     /**
      * Determine if a string is a local or remote URI, returning `true` if remote, otherwise `false`
@@ -159,128 +203,107 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 css.push(style.textContent);
             }
         }
+        var attributes = {};
+        for (var i = 0; i < doc.body.attributes.length; i++) {
+            attributes[doc.body.attributes[i].name] = doc.body.attributes[i].value;
+        }
         return {
-            css: css.join('\n'),
+            attributes: attributes,
             body: doc.body && doc.body.innerHTML || '',
+            css: css.join('\n'),
             scripts: scripts
         };
     }
+    /**
+     * Write out the provided `source` to the target `iframe` and register an event listener for the `error` event on the `iframe`
+     * @param iframe The `iframe` to have its document written to
+     * @param source The document text to be written
+     * @param errorListener The error listener that will be attached to the content window's error event
+     */
+    function writeIframeDoc(iframe, source, errorListener) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        function onLoadListener() {
+                            iframe.removeEventListener('load', onLoadListener);
+                            iframe.contentWindow.document.write(source);
+                            iframe.contentWindow.document.close();
+                            iframe.contentWindow.addEventListener('error', errorListener);
+                            resolve();
+                        }
+                        iframe.contentWindow.removeEventListener('error', errorListener);
+                        iframe.addEventListener('load', onLoadListener);
+                        iframe.contentWindow.location.reload();
+                    })];
+            });
+        });
+    }
+    /* tslint:disable:variable-name */
+    var RunnerBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
+    /* tslint:enable:variable-name */
+    /**
+     * A widget which will render its properties into a _runnable_ application within an `iframe`
+     */
     var Runner = (function (_super) {
         __extends(Runner, _super);
-        /**
-         * Create a runner instance attached to a specific `iframe`
-         * @param iframe The `iframe` that should be used
-         */
-        function Runner(iframe) {
-            var _this = _super.call(this) || this;
-            /**
-             * A private handler for re-emitting iframe errors
-             * @param evt The iframe's contentWindow error event
-             */
+        function Runner() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
             _this._onIframeError = function (evt) {
                 evt.preventDefault();
-                _this.emit(evt);
+                var onError = _this.properties.onError;
+                onError && onError(evt.error);
             };
-            _this._iframe = iframe;
-            _this.own(lang_1.createHandle(function () {
-                if (_this._iframe.contentWindow) {
-                    _this._iframe.contentWindow.removeEventListener('error', _this._onIframeError);
-                }
-            }));
+            _this._updating = false;
             return _this;
         }
-        /**
-         * Writes to the document of an `iframe`
-         * @param iframe The target `iframe`
-         * @param source The source to be written
-         */
-        Runner.prototype._writeIframeDoc = function (source) {
-            return __awaiter(this, void 0, void 0, function () {
-                var iframe, onIframeError;
-                return __generator(this, function (_a) {
-                    iframe = this._iframe;
-                    onIframeError = this._onIframeError;
-                    return [2 /*return*/, new Promise(function (resolve, reject) {
-                            function onLoadListener() {
-                                iframe.removeEventListener('load', onLoadListener);
-                                iframe.contentWindow.document.write(source);
-                                iframe.contentWindow.document.close();
-                                iframe.contentWindow.addEventListener('error', onIframeError);
-                                resolve();
-                            }
-                            iframe.contentWindow.removeEventListener('error', onIframeError);
-                            iframe.addEventListener('load', onLoadListener);
-                            iframe.contentWindow.location.reload();
-                        })];
-                });
-            });
+        Runner.prototype._initIframe = function (iframe) {
+            var _this = this;
+            var onInitIframe = this.properties.onInitIframe;
+            this._iframe = onInitIframe && onInitIframe(iframe) || iframe;
+            this.own(lang_1.createHandle(function () {
+                if (iframe.contentWindow) {
+                    iframe.contentWindow.removeEventListener('error', _this._onIframeError);
+                }
+            }));
+            this.updateSource();
         };
-        /**
-         * Generate the document
-         * @param param0 The options to use
-         */
-        Runner.prototype.getDoc = function (_a) {
-            var _b = _a.css, css = _b === void 0 ? [] : _b, _c = _a.bodyAttributes, bodyAttributes = _c === void 0 ? {} : _c, dependencies = _a.dependencies, loaderSrc = _a.loaderSrc, _d = _a.html, html = _d === void 0 ? '' : _d, modules = _a.modules, _e = _a.scripts, scripts = _e === void 0 ? [] : _e;
-            return (_f = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"", "\"></script>\n\t\t\t\t<script>\n\t\t\t\t\trequire.config({\n\t\t\t\t\t\tpaths: ", ",\n\t\t\t\t\t\tpackages: ", "\n\t\t\t\t\t});\n\t\t\t\t\t", "\n\t\t\t\t\trequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\t\t\t\t\t\tvar request = require('@dojo/core/request').default;\n\t\t\t\t\t\tvar getProvider = require('../support/providers/amdRequire').default;\n\t\t\t\t\t\trequest.setDefaultProvider(getProvider(require));\n\t\t\t\t\t\trequire([ 'src/main' ], function () { });\n\t\t\t\t\t});\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], _f.raw = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"", "\"></script>\n\t\t\t\t<script>\n\t\t\t\t\trequire.config({\n\t\t\t\t\t\tpaths: ", ",\n\t\t\t\t\t\tpackages: ", "\n\t\t\t\t\t});\n\t\t\t\t\t", "\n\t\t\t\t\trequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\t\t\t\t\t\tvar request = require('@dojo/core/request').default;\n\t\t\t\t\t\tvar getProvider = require('../support/providers/amdRequire').default;\n\t\t\t\t\t\trequest.setDefaultProvider(getProvider(require));\n\t\t\t\t\t\trequire([ 'src/main' ], function () { });\n\t\t\t\t\t});\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], docSrc(_f, scripts, css, bodyAttributes, html, loaderSrc, dependencies, getPackages(dependencies), modules));
-            var _f;
-        };
-        /**
-         * Get the emit from the current project and run it in the runner's `iframe`
-         */
-        Runner.prototype.run = function () {
-            return __awaiter(this, void 0, void 0, function () {
-                var program, modules, css, dependencies, _a, text, html, scripts, source;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0:
-                            if (!project_1.default.isLoaded()) {
-                                throw new Error('Project not loaded.');
-                            }
-                            return [4 /*yield*/, project_1.default.emit()];
-                        case 1:
-                            program = _b.sent();
-                            modules = program
-                                .filter(function (_a) {
-                                var type = _a.type;
-                                return type === 4 /* JavaScript */;
-                            })
-                                .reduce(function (map, _a) {
-                                var name = _a.name, text = _a.text;
-                                map[name.replace(/\.js$/, '')] = text;
-                                return map;
-                            }, {});
-                            css = program
-                                .filter(function (_a) {
-                                var type = _a.type;
-                                return type === 5 /* CSS */;
-                            })
-                                .map(function (_a) {
-                                var name = _a.name, text = _a.text;
-                                return { name: name, text: text };
-                            });
-                            dependencies = project_1.default.getDependencies();
-                            _a = parseHtml(project_1.default.getIndexHtml()), text = _a.css, html = _a.body, scripts = _a.scripts;
-                            if (text) {
-                                css.unshift({ name: 'project index', text: text });
-                            }
-                            source = this.getDoc({
-                                css: css,
-                                html: html,
-                                dependencies: dependencies,
-                                loaderSrc: 'https://unpkg.com/@dojo/loader/loader.min.js',
-                                modules: modules,
-                                scripts: scripts
-                            });
-                            return [4 /*yield*/, this._writeIframeDoc(source)];
-                        case 2:
-                            _b.sent();
-                            return [2 /*return*/];
-                    }
+        Runner.prototype.updateSource = function (node) {
+            var _this = this;
+            if (!this._iframe) {
+                return node;
+            }
+            if (this._updating) {
+                return node;
+            }
+            if (this.properties.modules) {
+                this._updating = true;
+                var source = getSource(this.properties);
+                writeIframeDoc(this._iframe, source, this._onIframeError)
+                    .then(function () {
+                    _this._updating = false;
+                    var onRun = _this.properties.onRun;
+                    onRun && onRun();
                 });
-            });
+            }
+            return node;
+        };
+        Runner.prototype.render = function () {
+            return d_1.v('div', {
+                classes: this.classes(css.base)
+            }, [d_1.v('iframe', {
+                    afterCreate: this._initIframe,
+                    classes: this.classes().fixed(css.iframe),
+                    src: this.properties.src || DEFAULT_IFRAME_SRC
+                })]);
         };
         return Runner;
-    }(Evented_1.default));
+    }(RunnerBase));
+    __decorate([
+        WidgetBase_1.afterRender()
+    ], Runner.prototype, "updateSource", null);
+    Runner = __decorate([
+        Themeable_1.theme(css)
+    ], Runner);
     exports.default = Runner;
 });
 //# sourceMappingURL=Runner.js.map

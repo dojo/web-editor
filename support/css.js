@@ -158,9 +158,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         if (!(i < files.length)) return [3 /*break*/, 4];
                         file = files[i];
                         mappedClasses = undefined;
-                        return [4 /*yield*/, processor.process(file.text)];
+                        return [4 /*yield*/, processor.process("/* from: " + file.name + " */\n\n" + file.text, {
+                                from: file.name,
+                                map: {
+                                    sourcesContent: true
+                                }
+                            })];
                     case 2:
                         result = _a.sent();
+                        /* add emitted css text */
                         emitFiles.push({
                             name: file.name,
                             text: result.css,

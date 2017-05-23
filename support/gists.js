@@ -57,6 +57,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     case 0: return [4 /*yield*/, request_1.default.get(API_GITHUB + "gists/" + id)];
                     case 1:
                         response = _b.sent();
+                        if (!response.ok) {
+                            return [2 /*return*/];
+                        }
                         return [4 /*yield*/, response.json()];
                     case 2:
                         _a = _b.sent(), description = _a.description, files = _a.files;
@@ -87,14 +90,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     case 0: return [4 /*yield*/, request_1.default.get(API_GITHUB + "users/" + username + "/gists")];
                     case 1:
                         response = _a.sent();
+                        if (!response.ok) {
+                            return [2 /*return*/, []];
+                        }
                         return [4 /*yield*/, response.json()];
                     case 2:
                         gists = _a.sent();
                         return [2 /*return*/, gists
                                 .filter(function (gist) {
                                 for (var key in gist.files) {
-                                    return gist.files[key].type === 'application/json' && gist.files[key].filename.toLowerCase() === 'project.json';
+                                    if (gist.files[key].type === 'application/json' && gist.files[key].filename.toLowerCase() === 'project.json') {
+                                        return true;
+                                    }
                                 }
+                                return false;
                             })
                                 .map(function (gist) {
                                 var projectJson = '';

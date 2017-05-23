@@ -314,7 +314,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            cssModuleFile.text = this._getProjectFileData(cssModuleFile).model.getValue();
+                            cssModuleFile.text = this.getFileText(cssModuleFile.name);
                             return [4 /*yield*/, css_1.getDefinitions(cssModuleFile)];
                         case 1:
                             definitionFile = (_a.sent())[0];
@@ -546,6 +546,50 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             return this.getFileText(this._project.index);
         };
         /**
+         * Resolves with an object which represents the current program which can then be run in a browser
+         */
+        Project.prototype.getProgram = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var program, modules, css;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, this.emit()];
+                        case 1:
+                            program = _a.sent();
+                            modules = program
+                                .filter(function (_a) {
+                                var type = _a.type;
+                                return type === 4 /* JavaScript */ || type === 10 /* SourceMap */;
+                            })
+                                .reduce(function (map, _a) {
+                                var name = _a.name, text = _a.text, type = _a.type;
+                                var mid = name.replace(/\.js(?:\.map)?$/, '');
+                                if (!(mid in map)) {
+                                    map[mid] = { code: '', map: '' };
+                                }
+                                map[mid][type === 4 /* JavaScript */ ? 'code' : 'map'] = text;
+                                return map;
+                            }, {});
+                            css = program
+                                .filter(function (_a) {
+                                var type = _a.type;
+                                return type === 5 /* CSS */;
+                            })
+                                .map(function (_a) {
+                                var name = _a.name, text = _a.text;
+                                return { name: name, text: text };
+                            });
+                            return [2 /*return*/, {
+                                    css: css,
+                                    dependencies: this.getDependencies(),
+                                    html: this.getIndexHtml(),
+                                    modules: modules
+                                }];
+                    }
+                });
+            });
+        };
+        /**
          * Return `true` if the specified file name is part of the project, otherwise `false`.
          * @param filename The file name
          */
@@ -597,17 +641,29 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
          * @param reset Set to `true` to unset the _dirty_ flag on the file
          */
         Project.prototype.setFileDirty = function (filename, reset) {
-            var file = this.getFile(filename);
-            if (!file) {
-                throw new Error("File \"" + filename + "\" is not part of the project.");
-            }
-            if (file.type === 5 /* CSS */) {
-                /* the functionality of this method negates setting the dirty flag, so we won't */
-                this._updateCssModule(file);
-            }
-            else {
-                this._getProjectFileData(file).dirty = !reset;
-            }
+            return __awaiter(this, void 0, void 0, function () {
+                var file;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            file = this.getFile(filename);
+                            if (!file) {
+                                throw new Error("File \"" + filename + "\" is not part of the project.");
+                            }
+                            if (!(file.type === 5 /* CSS */)) return [3 /*break*/, 2];
+                            /* the functionality of this method negates setting the dirty flag, so we won't */
+                            return [4 /*yield*/, this._updateCssModule(file)];
+                        case 1:
+                            /* the functionality of this method negates setting the dirty flag, so we won't */
+                            _a.sent();
+                            return [3 /*break*/, 3];
+                        case 2:
+                            this._getProjectFileData(file).dirty = !reset;
+                            _a.label = 3;
+                        case 3: return [2 /*return*/];
+                    }
+                });
+            });
         };
         return Project;
     }(Evented_1.default));
