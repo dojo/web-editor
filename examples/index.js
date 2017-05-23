@@ -64,7 +64,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var Runner_1 = require("../Runner");
     var themes_1 = require("../support/themes");
     /* path to the project directory */
-    var PROJECT_DIRECTORY = '../../../projects/';
+    var PROJECT_DIRECTORY = '../projects/';
     var theme;
     /**
      * An example application widget that incorporates both the Editor and Runner widgets into a simplistic UI
