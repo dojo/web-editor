@@ -1,8 +1,9 @@
 import { createHandle } from '@dojo/core/lang';
-import { v } from '@dojo/widget-core/d';
-import { DNode, WidgetProperties } from '@dojo/widget-core/interfaces';
+import { v, w } from '@dojo/widget-core/d';
+import { Constructor, DNode, VirtualDomProperties, WidgetProperties } from '@dojo/widget-core/interfaces';
 import WidgetBase, { afterRender } from '@dojo/widget-core/WidgetBase';
 import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
+import DomWrapper from '@dojo/widget-core/util/DomWrapper';
 import { Program } from './project';
 import * as css from './styles/runner.m.css';
 import * as base64 from './support/base64';
@@ -19,7 +20,6 @@ import { wrapCode } from './support/sourceMap';
  * @property src A URI that points to the `src` to set on the Runner's `iframe`. Defaults to
  *               `../support/blank.html`
  * @property onError A method that will be called whenever there is an error in the running program
- * @property onInitIframe A method that will be called when the `iframe` is initiailized
  * @property onRun A method that will be called when the `Runner` has fully loaded the program.  *Note* this does not
  *                 represent the state of the running program, it simply indicates that the `Runner` no longer has
  *                 involvement in the process of loading the program
@@ -29,7 +29,6 @@ export interface RunnerProperties extends Partial<Program>, WidgetProperties, Th
 	src?: string;
 
 	onError?(err: Error): void;
-	onInitIframe?(iframe: HTMLIFrameElement): HTMLIFrameElement | undefined;
 	onRun?(): void;
 }
 
@@ -258,16 +257,15 @@ async function writeIframeDoc(iframe: HTMLIFrameElement, source: string, errorLi
 	});
 }
 
-/* tslint:disable:variable-name */
 const RunnerBase = ThemeableMixin(WidgetBase);
-/* tslint:enable:variable-name */
 
 /**
  * A widget which will render its properties into a _runnable_ application within an `iframe`
  */
 @theme(css)
 export default class Runner extends RunnerBase<RunnerProperties> {
-	private _iframe: HTMLIFrameElement | undefined;
+	private _iframe: HTMLIFrameElement;
+	private _IframeDom: Constructor<WidgetBase<VirtualDomProperties & WidgetProperties>>;
 	private _onIframeError = (evt: ErrorEvent) => {
 		evt.preventDefault();
 		const { onError } = this.properties;
@@ -275,22 +273,24 @@ export default class Runner extends RunnerBase<RunnerProperties> {
 	}
 	private _updating = false;
 
-	private _initIframe(iframe: HTMLIFrameElement) {
-		const { onInitIframe } = this.properties;
-		this._iframe = onInitIframe && onInitIframe(iframe) || iframe;
+	constructor() {
+		super();
+		const iframe = this._iframe = document.createElement('iframe');
+		iframe.setAttribute('src', DEFAULT_IFRAME_SRC);
+
+		/* TODO: Remove when https://github.com/dojo/widget-core/issues/553 resolved */
+		iframe.classList.add(css.iframe);
+
+		this._IframeDom = DomWrapper(iframe);
 		this.own(createHandle(() => {
 			if (iframe.contentWindow) {
 				iframe.contentWindow.removeEventListener('error', this._onIframeError);
 			}
 		}));
-		this.updateSource();
 	}
 
 	@afterRender()
 	public updateSource(node?: DNode): DNode | undefined {
-		if (!this._iframe) {
-			return node;
-		}
 		if (this._updating) {
 			return node;
 		}
@@ -310,9 +310,8 @@ export default class Runner extends RunnerBase<RunnerProperties> {
 	public render() {
 		return v('div', {
 			classes: this.classes(css.base)
-		}, [ v('iframe', {
-			afterCreate: this._initIframe,
-			classes: this.classes().fixed(css.iframe),
+		}, [ w(this._IframeDom, {
+			key: 'runner',
 			src: this.properties.src || DEFAULT_IFRAME_SRC
 		}) ]);
 	}

@@ -42,9 +42,9 @@ export function initConfig(grunt: IGrunt, otherOptions: any) {
 			require(`./tasks/${task}`)(grunt);
 		});
 
-	grunt.registerTask('dev', [ 'clean:dev', 'tcm', 'ts:dev', 'copy:dev', 'postcss:dev', 'webpack:dev' ]);
+	grunt.registerTask('dev', [ 'clean:dev', 'tcm', 'tslint', 'ts:dev', 'copy:dev', 'postcss:dev', 'webpack:dev' ]);
 
-	grunt.registerTask('dist', [ 'clean:dist', 'tcm', 'ts:dist', 'copy:dist', 'patch', 'postcss:dist', 'webpack:dist', 'auto_install:dist' ]);
+	grunt.registerTask('dist', [ 'clean:dist', 'tcm', 'tslint', 'ts:dist', 'copy:dist', 'patch', 'postcss:dist', 'webpack:dist', 'auto_install:dist' ]);
 
 	grunt.registerTask('default', [ 'dev' ]);
 }

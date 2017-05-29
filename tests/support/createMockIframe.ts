@@ -34,6 +34,10 @@ export default function createMockIframe(): HTMLIFrameElement {
 			iframeData.get(iframe).eventListeners[type].push(listener);
 		},
 
+		classList: {
+			add() {}
+		},
+
 		contentWindow: {
 			addEventListener(type: string, listener: EventListenerOrEventListenerObject, useCapture?: boolean | undefined): void {
 				if (!iframeData.get(iframe).contentWindowEventListeners[type]) {

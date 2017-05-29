@@ -70,9 +70,9 @@ This is a widget which wraps `monaco-editor`, allowing the editor to seemlessly 
 display files with the appropriate language intellisense as well as the file is edited, changes will automatically be sent to
 the project to keep it updated.
 
-The `Editor` properties have two key properties:
+The `Editor` has two key properties:
 
-* `filename` - This is the name of the file in the project which the editor should be displaying.
+* `filename` - This is the name of the file in the project which the editor should be displaying.  Changing this property will cause the widget to change the file that is currently being displayed.
 * `options` - Passed to the `monaco-editor` when it is created.  Needs to conform to the `monaco.editor.IEditorOptions` interface.
 
 `Editor` is a themeable widget, with the only themeable class being `editor.base`.
@@ -108,16 +108,16 @@ import WidgetBase from '@dojo/widget-core/WidgetBase';
 
 ### Runner
 
-This is a widget which can _run_ a program in an `iframe`.  Updating the properties related to the program on the widget will
+A widget _runs_ a program in an `iframe`.  Updating the properties related to the program on the widget will
 cause it to re-render the program.
 
 The `Runner` has several key properties which control its behaviour:
 
-* `css`, `dependencies`, `html`, and `modules` - Propties that a are part of a `Program` obtained from the returned promise of
+* `css`, `dependencies`, `html`, and `modules` - Properties that are part of a `Program` obtained from the returned promise of
   `project.getProgram()`.
 * `loader` - An optional property which specifies the URI for the AMD loader to use with the program.  It defaults to the latest
   version of the `@dojo/loader`.
-* `src` - Is an optional URI that will be the `src` of the `iframe` until a program is first run.  This needs to be a relative URI
+* `src` - An optional URI that will be the `src` of the `iframe` until a program is first run.  This needs to be a relative URI
   to the host in order to ensure that the run program is not impacted by cross-domain restrictions.
 * `onError` - When a program is running and generates an error, this method would be called, passing a single argument of the error.
 * `onInitIframe` - Called, with an argument of the `iframe` which is called when the `Runner` has configured the `iframe` in the DOM

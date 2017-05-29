@@ -2,10 +2,11 @@ import global from '@dojo/core/global';
 import { createHandle } from '@dojo/core/lang';
 import { queueTask } from '@dojo/core/queue';
 import { debounce } from '@dojo/core/util';
-import { v } from '@dojo/widget-core/d';
-import { DNode, WidgetProperties } from '@dojo/widget-core/interfaces';
-import WidgetBase, { afterRender } from '@dojo/widget-core/WidgetBase';
+import { v, w } from '@dojo/widget-core/d';
+import { Constructor, VirtualDomProperties, WidgetProperties } from '@dojo/widget-core/interfaces';
+import WidgetBase from '@dojo/widget-core/WidgetBase';
 import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
+import DomWrapper from '@dojo/widget-core/util/DomWrapper';
 import project from './project';
 import * as css from './styles/editor.m.css';
 
@@ -14,7 +15,7 @@ const globalMonaco: typeof monaco = global.monaco;
 /**
  * @type EditorProperties
  *
- * Properties that can be set on Editor widget
+ * Properties that can be set on an `Editor` widget
  *
  * @property filename The filename (from the current `project`) that the editor should be displaying for editing
  * @property options Editor options that should be passed to the monaco editor when it is created
@@ -29,61 +30,67 @@ export interface EditorProperties extends WidgetProperties, ThemeableProperties 
 	onEditorLayout?(): void;
 }
 
-/* tslint:disable:variable-name */
 const EditorBase = ThemeableMixin(WidgetBase);
-/* tslint:enable:variable-name */
 
 @theme(css)
 export default class Editor extends EditorBase<EditorProperties> {
-	private _editor: monaco.editor.IStandaloneCodeEditor;
+	private _editor: monaco.editor.IStandaloneCodeEditor | undefined;
+	private _EditorDom: Constructor<WidgetBase<VirtualDomProperties & WidgetProperties>>;
 	private _didChangeHandle: monaco.IDisposable;
+	private _onAfterRender = () => {
+		if (!this._editor) {
+			this._editor = globalMonaco.editor.create(this._root, this.properties.options);
+			this._didChangeHandle = this._editor.onDidChangeModelContent(debounce(this._onDidChangeModelContent, 1000));
+			const { onEditorInit } = this.properties;
+			this._setModel();
+			onEditorInit && onEditorInit(this._editor);
+
+			this.own(createHandle(() => {
+				if (this._editor) {
+					this._editor.dispose();
+					this._didChangeHandle.dispose();
+				}
+			}));
+		}
+		this._editor.layout();
+		this._queuedLayout = false;
+		const { onEditorLayout } = this.properties;
+		onEditorLayout && onEditorLayout();
+	}
 	private _onDidChangeModelContent = () => {
 		if (this.properties.filename) {
 			project.setFileDirty(this.properties.filename);
 		}
 	}
 	private _queuedLayout = false;
+	private _root: HTMLDivElement;
 
-	private _initEditor(element: HTMLDivElement) {
-		/* doing this async, during next macro task to help ensure the editor does a proper layout */
-		queueTask(() => {
-			this._editor = globalMonaco.editor.create(element, this.properties.options);
-			this._didChangeHandle = this._editor.onDidChangeModelContent(debounce(this._onDidChangeModelContent, 1000));
-			const { onEditorInit } = this.properties;
-			onEditorInit && onEditorInit(this._editor);
+	private _setModel() {
+		const { filename } = this.properties;
+		if (this._editor && filename && project.includes(filename)) {
+			this._editor.setModel(project.getFileModel(filename));
+		}
+	}
 
-			this.own(createHandle(() => {
-				this._editor.dispose();
-				this._didChangeHandle.dispose();
-			}));
-		});
+	constructor() {
+		super();
+		const root = this._root = document.createElement('div');
+		root.style.height = '100%';
+		root.style.width = '100%';
+		this._EditorDom = DomWrapper(root);
 	}
 
 	public render() {
-		return v('div', {
-			afterCreate: this._initEditor,
-			afterUpdate: this.updateEditor as any,
-			classes: this.classes(css.base)
-		});
-	}
-
-	@afterRender()
-	public updateEditor(node?: DNode): DNode | undefined {
-		if (!this._editor) {
-			return node;
-		}
-		if (this.properties.filename && project.includes(this.properties.filename)) {
-			this._editor.setModel(project.getFileModel(this.properties.filename));
-		}
+		/* TODO: Refactor when https://github.com/dojo/widget-core/pull/548 published */
 		if (!this._queuedLayout) {
+			/* doing this async, during the next major task, to allow the widget to actually render */
 			this._queuedLayout = true;
-			queueTask(() => {
-				this._editor.layout();
-				this._queuedLayout = false;
-				const { onEditorLayout } = this.properties;
-				onEditorLayout && onEditorLayout();
-			});
+			queueTask(this._onAfterRender);
 		}
-		return node;
+		this._setModel();
+		/* TODO: Create single node when https://github.com/dojo/widget-core/issues/553 resolved */
+		return v('div', {
+			classes: this.classes(css.base)
+		}, [ w(this._EditorDom, { key: 'editor' }) ]);
 	}
 }

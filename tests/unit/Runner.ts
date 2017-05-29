@@ -1,8 +1,9 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { assign } from '@dojo/core/lang';
-import { v } from '@dojo/widget-core/d';
 import harness, { Harness } from '@dojo/test-extras/harness';
+import { HNode, WNode } from '@dojo/widget-core/interfaces';
+import { stub, SinonStub } from 'sinon';
 import createMockIframe, { callContentWindowListener, getDocumentStrings } from '../support/createMockIframe';
 import { Program } from '../../src/project';
 import Runner, { RunnerProperties } from '../../src/Runner';
@@ -10,6 +11,10 @@ import * as css from '../../src/styles/runner.m.css';
 import DOMParser from '../../src/support/DOMParser';
 
 let widget: Harness<RunnerProperties, typeof Runner>;
+let iframe: HTMLIFrameElement;
+
+const originalCreateElement = document.createElement.bind(document);
+let stubCreateElement: SinonStub;
 
 const testJS = `define(["require", "exports"], function (require, exports) {
     "use strict";
@@ -37,10 +42,6 @@ function createProgram(overrides?: Partial<Program>): Program {
 }
 
 function getRunnerDoc(program?: Partial<Program>): Promise<Document> {
-	const iframe = createMockIframe();
-	function onInitIframe() {
-		return iframe;
-	}
 	return new Promise<Document>((resolve, reject) => {
 			function onRun() {
 				try {
@@ -52,7 +53,10 @@ function getRunnerDoc(program?: Partial<Program>): Promise<Document> {
 				}
 			}
 
-			widget.setProperties(assign(createProgram(program), { onInitIframe, onRun }));
+			widget.setProperties({
+				...createProgram(program),
+				onRun
+			});
 			widget.getRender();
 		});
 }
@@ -60,35 +64,41 @@ function getRunnerDoc(program?: Partial<Program>): Promise<Document> {
 registerSuite({
 	name: 'Runner',
 
+	setup() {
+		stubCreateElement = stub(document, 'createElement').callsFake((elementName: string) => {
+			if (elementName === 'iframe') {
+				return iframe = createMockIframe();
+			}
+			return originalCreateElement(elementName);
+		});
+	},
+
+	teardown() {
+		stubCreateElement.restore();
+	},
+
 	beforeEach() {
 		widget = harness(Runner);
 	},
 
 	'default render'() {
-		widget.expectRender(v('div', {
-			classes: widget.classes(css.base)
-		}, [
-			v('iframe', {
-				afterCreate: widget.listener,
-				classes: widget.classes(css.iframe),
-				src: '../support/blank.html'
-			})
-		]));
+		/* decomposing this as the DomWrapper constructor function is not exposed and therefore can't put it in the
+		 * expected render */
+		const render = widget.getRender() as HNode;
+		assert.strictEqual(render.tag, 'div', 'should be a "div" tag');
+		assert.deepEqual(render.properties.classes, widget.classes(css.base)(), 'should have proper classes');
+		assert.lengthOf(render.children, 1, 'should have only one child');
+		assert.isFunction((render.children[0] as WNode).widgetConstructor, 'should be a function');
+		assert.strictEqual((render.children[0] as WNode).properties.key, 'runner', 'should have runner key set');
+		assert.strictEqual(((render.children[0] as WNode).properties as any).src, '../support/blank.html', 'should have src set to default');
 	},
 
 	'support setting src'() {
 		widget.setProperties({
 			src: 'foo.html'
 		});
-		widget.expectRender(v('div', {
-			classes: widget.classes(css.base)
-		}, [
-			v('iframe', {
-				afterCreate: widget.listener,
-				classes: widget.classes(css.iframe),
-				src: 'foo.html'
-			})
-		]));
+		const render = widget.getRender() as HNode;
+		assert.strictEqual(((render.children[0] as WNode).properties as any).src, 'foo.html', 'should have src set to default');
 	},
 
 	async 'render empty program'() {
@@ -230,10 +240,6 @@ registerSuite({
 
 	async 'iframe contentWindow errors are emitted from runner'() {
 		let called = false;
-		const iframe = createMockIframe();
-		function onInitIframe() {
-			return iframe;
-		}
 
 		function onError() {
 			called = true;
@@ -251,7 +257,7 @@ registerSuite({
 					}
 				}
 
-				widget.setProperties(assign(createProgram(), { onInitIframe, onRun, onError }));
+				widget.setProperties(assign(createProgram(), { onRun, onError }));
 				widget.getRender();
 			});
 	}

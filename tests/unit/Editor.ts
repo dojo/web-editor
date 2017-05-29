@@ -4,7 +4,7 @@ import global from '@dojo/core/global';
 import { assign } from '@dojo/core/lang';
 import { Handle } from '@dojo/interfaces/core';
 import harness, { Harness } from '@dojo/test-extras/harness';
-import { v } from '@dojo/widget-core/d';
+import { HNode, WNode } from '@dojo/widget-core/interfaces';
 import loadModule from '../support/loadModule';
 import * as css from '../../src/styles/editor.m.css';
 import UnitUnderTest, { EditorProperties } from '../../src/Editor';
@@ -108,19 +108,22 @@ registerSuite({
 	},
 
 	'expected render'() {
-		widget.expectRender(v('div', {
-			afterCreate: widget.listener,
-			afterUpdate: widget.listener,
-			classes: widget.classes(css.base)
-		}));
+		/* decomposing this as the DomWrapper constructor function is not exposed and therefore can't put it in the
+		 * expected render */
+		const render = widget.getRender() as HNode;
+		assert.strictEqual(render.tag, 'div', 'should be a "div" tag');
+		assert.deepEqual(render.properties.classes, widget.classes(css.base)(), 'should have proper classes');
+		assert.lengthOf(render.children, 1, 'should have only one child');
+		assert.isFunction((render.children[0] as WNode).widgetConstructor, 'should be a function');
+		assert.strictEqual((render.children[0] as WNode).properties.key, 'editor', 'should have editor key set');
 	},
 
 	async 'editor is initalized'() {
 		const editor = await getMonacoEditor();
 		const createSpy = monaco.editor.create as SinonSpy;
-		assert(editor, 'editor should be exist');
+		assert(editor, 'editor should exist');
 		assert.isTrue(createSpy.called, 'create should have been called');
-		assert.strictEqual(monacoEditorCreateElement, widget.getDom(), 'should have passed its root element to create');
+		assert.instanceOf(monacoEditorCreateElement, global.window.HTMLDivElement);
 	},
 
 	async 'editor passes options'() {
@@ -155,14 +158,14 @@ registerSuite({
 	},
 
 	async 'does layout on re-renders'() {
-		let called = false;
+		let called = 0;
 		function onEditorLayout() {
-			called = true;
+			called++;
 		}
 		await getMonacoEditor({
 			onEditorLayout
 		});
-		assert.isFalse(called, 'should not have been called yet');
+		const currentCallCount = called;
 		widget.setProperties({
 			filename: './src/foo.ts',
 			onEditorLayout
@@ -171,7 +174,7 @@ registerSuite({
 		return new Promise((resolve, reject) => {
 			setTimeout(() => {
 				try {
-					assert.isTrue(called, 'should have called layout');
+					assert.strictEqual(called, currentCallCount + 1, 'should have called layout');
 					resolve();
 				}
 				catch (e) {
