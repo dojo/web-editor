@@ -25,7 +25,7 @@ export class AMDRequireResponse extends Response {
 			observer.error(new Error('Data not supported'));
 		});
 		this.download = new Observable<any>((observer) => {
-			observer.error(new Error('Data not supported'));
+			observer.error(new Error('Download not supported'));
 		});
 		this.url = (<any> require).toUrl(url);
 	}
@@ -52,7 +52,7 @@ export class AMDRequireResponse extends Response {
 
 	upload(): Observable<any> {
 		return new Observable<any>((observer) => {
-			observer.complete(new Error('Upload not supported'));
+			observer.error(new Error('Upload not supported'));
 		});
 	}
 }
@@ -80,7 +80,7 @@ export default function getProvider(req: NodeRequire = require): Provider {
 			});
 			assign(task, {
 				upload: new Observable<any>((observer) => {
-					observer.complete(new Error('Upload not supported'));
+					observer.error(new Error('Upload not supported'));
 				})
 			});
 			return task as UploadObservableTask<AMDRequireResponse>;

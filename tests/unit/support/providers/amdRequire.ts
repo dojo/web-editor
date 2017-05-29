@@ -164,6 +164,50 @@ registerSuite({
 					assert.instanceOf(e, Error);
 					assert.strictEqual(e.message, 'ArrayBuffer not supported');
 				}));
+		},
+
+		async 'data()'() {
+			const amdProvider = getProvider(requireStub);
+			const result = await amdProvider('src/foo');
+			result.data.subscribe(() => {
+				new Error('Unexepcted');
+			}, (error) => {
+				assert.instanceOf(error, Error, 'should be instance of error');
+				assert.strictEqual(error.message, 'Data not supported');
+			});
+		},
+
+		async 'download()'() {
+			const amdProvider = getProvider(requireStub);
+			const result = await amdProvider('src/foo');
+			result.download.subscribe(() => {
+				new Error('Unexepcted');
+			}, (error) => {
+				assert.instanceOf(error, Error, 'should be instance of error');
+				assert.strictEqual(error.message, 'Download not supported');
+			});
+		},
+
+		async 'upload()'() {
+			const amdProvider = getProvider(requireStub);
+			const result = await amdProvider('src/foo');
+			/* TODO: Remove cast when https://github.com/dojo/core/issues/340 resolved */
+			(result as any).upload().subscribe(() => {
+				new Error('Unexpected');
+			}, (error: Error) => {
+				assert.instanceOf(error, Error, 'should be instance of error');
+				assert.strictEqual(error.message, 'Upload not supported');
+			});
+		},
+
+		'observable task upload'() {
+			const amdProvider = getProvider(requireStub);
+			amdProvider('src/foo').upload.subscribe(() => {
+				new Error('Unexpected');
+			}, (error) => {
+				assert.instanceOf(error, Error, 'should be instance of error');
+				assert.strictEqual(error.message, 'Upload not supported');
+			});
 		}
 	},
 
