@@ -1,7 +1,7 @@
 .base {
 	flex: 1;
 	margin: 1em 0.5em;
-	height: 600px;
+	height: 100%;
 	border: 1px solid grey;
 }
 
