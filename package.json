@@ -43,7 +43,6 @@
     "grunt-webpack": "^2.0.1",
     "intern": "^3.4.3",
     "istanbul": "^0.4.5",
-    "maquette": "2.4.3",
     "postcss": "^5.2.17",
     "postcss-cssnext": "^2.10.0",
     "postcss-import": "^10.0.0",
@@ -63,6 +62,7 @@
     "@dojo/routing": "next",
     "@dojo/shim": "next",
     "@dojo/widget-core": "next",
+    "maquette": "kitsonk/maquette#build-master",
     "monaco-editor": "^0.8.3",
     "source-map": "^0.5.6"
   }
