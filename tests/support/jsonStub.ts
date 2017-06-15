@@ -1,3 +1,5 @@
 export default {
-	getEmit() {}
+	getEmit() {
+		return [];
+	}
 };

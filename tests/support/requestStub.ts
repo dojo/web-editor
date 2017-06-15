@@ -1,9 +1,8 @@
+import Observable from '@dojo/core/Observable';
 import Task from '@dojo/core/async/Task';
 import request, { Headers } from '@dojo/core/request';
-import { Response, ResponseEvents } from '@dojo/core/request/interfaces';
+import { Response } from '@dojo/core/request/interfaces';
 import Map from '@dojo/shim/Map';
-import { Handle } from '@dojo/interfaces/core';
-import { Evented, EventedListenerOrArray } from '@dojo/interfaces/bases';
 
 export const responseMap = new Map<string, any>();
 
@@ -17,17 +16,13 @@ interface StubResponseOptions {
 export class ResponseStub implements Response {
 	private _response: any;
 	readonly bodyUsed = false;
+	readonly data: Observable<any>;
+	readonly download: Observable<number>;
 	readonly headers: Headers;
 	readonly ok: boolean;
 	readonly status: number;
 	readonly statusText: string;
 	readonly url: string;
-
-	on = function(type: string, handler: EventedListenerOrArray<Evented, any>): Handle {
-		return {
-			destroy() { }
-		};
-	} as ResponseEvents;
 
 	constructor(url: string, { response, ok = true, status = 200, statusText = 'OK' }: StubResponseOptions) {
 		this._response = response;
@@ -36,6 +31,12 @@ export class ResponseStub implements Response {
 		this.status = status;
 		this.statusText = statusText;
 		this.url = url;
+		this.data = new Observable<any>((observer) => {
+			observer.error(new Error('Data not supported'));
+		});
+		this.download = new Observable<any>((observer) => {
+			observer.error(new Error('Data not supported'));
+		});
 	}
 
 	arrayBuffer(): Task<ArrayBuffer> {

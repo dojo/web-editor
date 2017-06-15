@@ -2,15 +2,6 @@ export = function(grunt: IGrunt) {
 	grunt.loadNpmTasks('grunt-patcher');
 
 	return {
-		editor: {
-			options: {
-				patch: 'support/grunt/patches/editor.js.patch'
-			},
-			files: {
-				'dist/examples/editor.js': 'dist/examples/editor.js'
-			}
-		},
-
 		indexJs: {
 			options: {
 				patch: 'support/grunt/patches/index.js.patch'

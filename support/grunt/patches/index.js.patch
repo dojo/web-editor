@@ -1,18 +1,13 @@
 diff --git a/examples/index.js b/examples/index.js
-index c272782..9b075a5 100644
+index 907b324..b028b2e 100644
 --- a/examples/index.js
 +++ b/examples/index.js
-@@ -1,10 +1,10 @@
- require.config({
-     paths: {
--        'vs': '../../../node_modules/monaco-editor/min/vs',
--        '@dojo': '../../../node_modules/@dojo'
-+        'vs': '../node_modules/monaco-editor/min/vs',
-+        '@dojo': '../node_modules/@dojo'
-     },
-     packages: [
--        { name: 'src', location: '../../..' }
-+        { name: 'src', location: '..' }
-     ]
- });
- require(['./editor'], function () { });
+@@ -27,7 +27,7 @@ var __extends = (this && this.__extends) || (function () {
+     var project_1 = require("../project");
+     var Runner_1 = require("../Runner");
+     /* path to the project directory */
+-    var PROJECT_DIRECTORY = '../../../projects/';
++    var PROJECT_DIRECTORY = '../projects/';
+     /**
+      * An example application widget that incorporates both the Editor and Runner widgets into a simplistic UI
+      */

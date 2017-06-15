@@ -18,6 +18,7 @@ The `web-editor` provides three main errors of functionality:
 * Provide an abstraction API to allow editing of those project files in the [`monaco-editor`](https://github.com/Microsoft/monaco-editor)
   in a browser.
 * Provide an API to allow the loaded project to be run in an `iframe`.
+* A router which understands GitHub gists ID for being able to load a project from a gist.
 
 This package is inteded to be integrated into a website which would provide a more rich user interface to allow editing and running
 the project in a browser.  There is a minimal API implemented in `examples/index.html` which allows the loading of example projects
@@ -47,6 +48,8 @@ There are several key methods of `project`:
   in the project, but you can specify as many different file types as arguments and only those types of files will be returned.
 * `.get(): ProjectJson | undefined` - Returns the object representation of the project JSON, including any changes that have been made
   while the project has been loaded.
+* `.getProgram(): Promise<Program>` - Returns an object which contains the properties of `css`, `dependencies`, `html`, and `modules`
+  which are designed to be used with the `Runner` widget as widget properties to specify the program to run.
 
 #### Usage
 
@@ -63,65 +66,97 @@ import project from '@dojo/web-editor/project';
 
 ### Editor
 
-This is a class which wraps `monaco-editor`, allowing the editor to seemlessly integrate with the project.  It will automatically
+This is a widget which wraps `monaco-editor`, allowing the editor to seemlessly integrate with the project.  It will automatically
 display files with the appropriate language intellisense as well as the file is edited, changes will automatically be sent to
 the project to keep it updated.
 
-The `Editor` constructor takes two arguments.  First, you need to provide a DOM element that will serve as the root for the editor.
-The second is an optional argument is a pass through of any options as specified in the `monaco.editor.IEditorOptions` interface.
+The `Editor` has two key properties:
 
-The class has only one method:
+* `filename` - This is the name of the file in the project which the editor should be displaying.  Changing this property will cause the widget to change the file that is currently being displayed.
+* `options` - Passed to the `monaco-editor` when it is created.  Needs to conform to the `monaco.editor.IEditorOptions` interface.
 
-* `.display(filename: string): void` - Displays the file based on the name supplied.  It will throw if the file is not part of the
-  currently loaded project.
+`Editor` is a themeable widget, with the only themeable class being `editor.base`.
 
 #### Usage
 
 Typical usage would be something like this:
 
-```typescript
+```ts
 import project from '@dojo/web-editor/project';
 import Editor from '@dojo/web-editor/Editor';
+import { v, w } from '@dojo/widget-core/d';
+import Projector from '@dojo/widget-core/mixins/Projector';
+import WidgetBase from '@dojo/widget-core/WidgetBase';
 
 (async () => {
     await project.load('some.project.json');
-    const editor = new Editor(document.getElementById('editor'));
-    editor.display('./src/somefile.ts');
+
+    class App extends WidgetBase {
+        render() {
+            return v('div', [
+                w(Editor, {
+                    filename: './src/main.ts'
+                })
+            ]);
+        }
+    }
+
+    const projector = new (Projector(App))();
+    projector.append();
 })();
 ```
 
 ### Runner
 
-This is a class which provides a simple API to run instances of a project within an `iframe` on a page.  It will automatically
-transpile the project and send the transpiled output to the `iframe`.
+A widget _runs_ a program in an `iframe`.  Updating the properties related to the program on the widget will
+cause it to re-render the program.
 
-The `Runner` constructor takes a single arugment, which is the `iframe` it should use to run the project in.
+The `Runner` has several key properties which control its behaviour:
 
-The class has one method of note:
+* `css`, `dependencies`, `html`, and `modules` - Properties that are part of a `Program` obtained from the returned promise of
+  `project.getProgram()`.
+* `loader` - An optional property which specifies the URI for the AMD loader to use with the program.  It defaults to the latest
+  version of the `@dojo/loader`.
+* `src` - An optional URI that will be the `src` of the `iframe` until a program is first run.  This needs to be a relative URI
+  to the host in order to ensure that the run program is not impacted by cross-domain restrictions.
+* `onError` - When a program is running and generates an error, this method would be called, passing a single argument of the error.
+* `onInitIframe` - Called, with an argument of the `iframe` which is called when the `Runner` has configured the `iframe` in the DOM
+* `onRun` - A method that is called when the `Runner` is finished standing up the program.  It does not reflect the actual state
+  of the program.
 
-* `.run(): Promise<void>` - an async function which will resolve when the project has been run.
+`Runner` is a themeable widget, with the only themeable class being `runner.base`.
 
 #### Usage
 
-```html
-<!DOCTYPE html>
-<html>
-<head><title>Example</title></head>
-<body>
-    <iframe src="@dojo/web-editor/support/blank.html" id="runner"></iframe>
-</body>
-</html>
-```
+```ts
+import { assign } from '@dojo/core/lang';
+import project, { Program } from '@dojo/web-editor/project';
+import Runner, { RunnerProperties } from '@dojo/web-editor/Runner';
+import { v, w } from '@dojo/widget-core/d';
+import { WidgetProperties } from '@dojo/widget-core/interfaces';
+import Projector from '@dojo/widget-core/mixins/Projector';
+import WidgetBase from '@dojo/widget-core/WidgetBase';
 
-```typescript
-import project from '@dojo/web-editor/project';
-import Runner from '@dojo/web-editor/Runner';
+interface AppProperties extends WidgetProperties {
+    program?: Program
+}
 
 (async () => {
     await project.load('some.project.json');
-    const runner = new Runner(document.getElementById('runner'));
-    await runner.run();
-    console.log('Ran!');
+
+    class App extends WidgetBase<AppProperties> {
+        render() {
+            return v('div', [
+                w(Runner, this.properties.program)
+            ]);
+        }
+    }
+
+    const projector = new (Projector(App))();
+    projector.append();
+
+    const program = await project.getProgram();
+    project.setProperties({ program });
 })();
 ```
 

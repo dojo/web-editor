@@ -24,9 +24,6 @@ export = function(grunt: IGrunt) {
 			options: {
 				process(content: string, srcpath: string) {
 					if (srcpath === 'src/examples/index.html') {
-						return content.replace('"../../../node_modules/', '"../node_modules/');
-					}
-					if (srcpath === 'src/examples/gist.html') {
 						return content
 							.replace(/(?:\.\.\/){3}node_modules\//g, `../node_modules/`)
 							.replace(`'../../..'`, `'..'`);
