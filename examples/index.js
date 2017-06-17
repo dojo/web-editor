@@ -49,23 +49,82 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/lang", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Projector", "@dojo/widget-core/WidgetBase", "../Editor", "../project", "../Runner", "../support/themes"], factory);
+        define(["require", "exports", "@dojo/core/lang", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Projector", "@dojo/widget-core/WidgetBase", "../Editor", "../FileBar", "../IconCss", "../TreePane", "../styles/treepane.m.css", "../project", "../Runner", "../support/icons", "../support/themes", "../themes/dark/theme"], factory);
     }
 })(function (require, exports) {
     "use strict";
     var _this = this;
     Object.defineProperty(exports, "__esModule", { value: true });
     var lang_1 = require("@dojo/core/lang");
+    var array_1 = require("@dojo/shim/array");
     var d_1 = require("@dojo/widget-core/d");
     var Projector_1 = require("@dojo/widget-core/mixins/Projector");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var Editor_1 = require("../Editor");
+    var FileBar_1 = require("../FileBar");
+    var IconCss_1 = require("../IconCss");
+    var TreePane_1 = require("../TreePane");
+    var css = require("../styles/treepane.m.css");
     var project_1 = require("../project");
     var Runner_1 = require("../Runner");
+    var icons_1 = require("../support/icons");
     var themes_1 = require("../support/themes");
+    var theme_1 = require("../themes/dark/theme");
     /* path to the project directory */
-    var PROJECT_DIRECTORY = '../projects/';
-    var theme;
+    var PROJECT_DIRECTORY = '../../../projects/';
+    var monacoTheme;
+    var icons;
+    var sourcePath = '../../extensions/vscode-material-icon-theme/out/src/material-icons.json';
+    function addFile(root, filename) {
+        if (!root) {
+            root = {
+                children: [],
+                id: '',
+                label: '',
+                title: ''
+            };
+        }
+        var endsWithPathMarker = /[\/\\]$/.test(filename);
+        var parts = filename.split(/[\/\\]/);
+        var deliminator = filename.split('/').length === parts.length ? '/' : '\\';
+        var idParts = [];
+        if (parts[0] === '.') {
+            idParts.push(parts.shift());
+            if (root.id === '') {
+                root = {
+                    children: [],
+                    id: '.',
+                    label: '.',
+                    title: '.'
+                };
+            }
+        }
+        var parent = root;
+        var _loop_1 = function () {
+            var currentPart = parts[0];
+            if (!parent.children) {
+                parent.children = [];
+            }
+            var item = array_1.find(parent.children, function (child) { return child.label === currentPart; });
+            if (!item) {
+                item = {
+                    id: idParts.concat(currentPart).join(deliminator),
+                    label: currentPart,
+                    title: idParts.concat(currentPart).join(deliminator)
+                };
+                parent.children.push(item);
+            }
+            parent = item;
+            idParts.push(parts.shift());
+        };
+        while (parts.length) {
+            _loop_1();
+        }
+        if (endsWithPathMarker && !parent.children) {
+            parent.children = [];
+        }
+        return root;
+    }
     /**
      * An example application widget that incorporates both the Editor and Runner widgets into a simplistic UI
      */
@@ -73,30 +132,35 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         __extends(App, _super);
         function App() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this._activeFileIndex = 0;
             _this._compiling = false;
             _this._editorFilename = '';
+            _this._expanded = ['/', '/src'];
             _this._projectValue = 'dojo2-todo-mvc.project.json';
+            _this._openFiles = [];
             return _this;
         }
-        /**
-         * Returns a set of virtual DOM nodes that are the options for the file select
-         */
-        App.prototype._getFileOptions = function () {
-            return project_1.default.getFileNames()
+        App.prototype._getTreeItems = function () {
+            var files = project_1.default.getFileNames();
+            return files
                 .sort(function (a, b) { return a < b ? -1 : 1; })
-                .map(function (filename) {
-                return d_1.v('option', { value: filename }, [filename]);
+                .reduce(function (previous, current) { return addFile(previous, current); }, {
+                id: '',
+                label: '',
+                title: ''
             });
         };
-        /**
-         * Handle when the file changes in the dropdown
-         * @param e The DOM `onchange` event
-         */
-        App.prototype._onchangeFile = function (e) {
-            e.preventDefault();
-            var select = e.target;
-            this._editorFilename = select.value;
-            this.invalidate();
+        App.prototype._getActiveFile = function () {
+            return this._activeFileIndex;
+        };
+        App.prototype._getFileItems = function () {
+            return this._openFiles.map(function (filename) {
+                return {
+                    closeable: true,
+                    key: filename,
+                    label: filename.split(/[\/\\]/).pop()
+                };
+            });
         };
         /**
          * Handle when the project name changes in the dropdown
@@ -141,6 +205,45 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 console.error(err);
             });
         };
+        App.prototype._onItemOpen = function (id) {
+            this._selected = id;
+            if (project_1.default.isLoaded() && project_1.default.includes(id)) {
+                if (array_1.includes(this._openFiles, id)) {
+                    this._activeFileIndex = this._openFiles.indexOf(id);
+                }
+                else {
+                    this._activeFileIndex = this._openFiles.push(id) - 1;
+                }
+                this._editorFilename = id;
+            }
+            this.invalidate();
+        };
+        App.prototype._onItemSelect = function (id) {
+            this._selected = id;
+            this.invalidate();
+        };
+        App.prototype._onItemToggle = function (id) {
+            if (array_1.includes(this._expanded, id)) {
+                this._expanded.splice(this._expanded.indexOf(id), 1);
+            }
+            else {
+                this._expanded.push(id);
+            }
+            this.invalidate();
+        };
+        App.prototype._onRequestTabClose = function (file, index) {
+            this._openFiles.splice(index, 1);
+            this._activeFileIndex = this._activeFileIndex >= this._openFiles.length ?
+                this._openFiles.length - 1 : this._activeFileIndex === index ?
+                index : this._activeFileIndex ?
+                this._activeFileIndex - 1 : 0;
+            this._editorFilename = this._openFiles[this._activeFileIndex];
+            this.invalidate();
+        };
+        App.prototype._onRequestTabChange = function (file, index) {
+            this._selected = this._editorFilename = this._openFiles[this._activeFileIndex = index];
+            this.invalidate();
+        };
         /**
          * Handles when the Runner widget finishes running the project
          */
@@ -160,30 +263,65 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 ]),
                 d_1.v('button', { type: 'button', name: 'load-project', id: 'load-project', onclick: this._onclickLoad, disabled: isProjectLoaded ? true : false }, ['Load'])
             ]);
-            var fileSelect = null;
+            var projectRun = null;
             /* If the project is loaded, then we will render a UI which allows selection of the file to edit and a button to run the project */
             if (isProjectLoaded) {
-                fileSelect = d_1.v('div', { key: 'fileSelect' }, [
-                    d_1.v('div', [
-                        d_1.v('label', { for: 'select-file' }, ['File to display:']),
-                        d_1.v('select', { name: 'select-file', id: 'select-file', onchange: this._onchangeFile }, this._getFileOptions())
-                    ]),
-                    d_1.v('div', [
-                        d_1.v('button', { type: 'button', name: 'run', id: 'run', onclick: this._onclickRun, disabled: this._compiling ? true : false }, ['Run'])
-                    ])
+                projectRun = d_1.v('div', { key: 'projectRun' }, [
+                    d_1.v('button', { type: 'button', name: 'run', id: 'run', onclick: this._onclickRun, disabled: this._compiling ? true : false }, ['Run'])
                 ]);
             }
-            var runnerProperties = lang_1.assign({}, this._program, { key: 'runner', onRun: this._onRun });
-            return d_1.v('div', [
+            var runnerProperties = lang_1.assign({}, this._program, { key: 'runner', onRun: this._onRun, theme: theme_1.default });
+            return d_1.v('div', {
+                classes: {
+                    'app': true
+                }
+            }, [
+                d_1.w(IconCss_1.default, {
+                    baseClass: css.labelFixed,
+                    icons: icons,
+                    key: 'iconcss',
+                    sourcePath: sourcePath
+                }),
                 projectLoad,
-                fileSelect,
+                projectRun,
                 d_1.v('div', {
                     classes: {
                         wrap: true
                     },
                     key: 'wrap'
                 }, [
-                    d_1.w(Editor_1.default, { filename: this._editorFilename, key: 'editor', options: { theme: theme } }),
+                    d_1.v('div', {
+                        styles: { flex: '1' }
+                    }, [d_1.w(TreePane_1.default, {
+                            expanded: this._expanded.slice(),
+                            icons: icons,
+                            key: 'treepane',
+                            selected: this._selected,
+                            sourcePath: sourcePath,
+                            root: isProjectLoaded ? this._getTreeItems() : undefined,
+                            onItemOpen: this._onItemOpen,
+                            onItemSelect: this._onItemSelect,
+                            onItemToggle: this._onItemToggle,
+                            theme: theme_1.default
+                        })]),
+                    d_1.v('div', {
+                        styles: { flex: '1', margin: '0 0.5em' }
+                    }, [
+                        this._openFiles.length ? d_1.w(FileBar_1.default, {
+                            activeIndex: this._getActiveFile(),
+                            files: this._getFileItems(),
+                            key: 'filebar',
+                            theme: theme_1.default,
+                            onRequestTabClose: this._onRequestTabClose,
+                            onRequestTabChange: this._onRequestTabChange
+                        }) : null,
+                        d_1.w(Editor_1.default, {
+                            filename: this._editorFilename,
+                            key: 'editor',
+                            options: { theme: monacoTheme },
+                            theme: theme_1.default
+                        })
+                    ]),
                     d_1.w(Runner_1.default, runnerProperties)
                 ])
             ]);
@@ -195,9 +333,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     (function () { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, themes_1.load('../themes/dojo2.json')];
+                case 0: return [4 /*yield*/, themes_1.load('../themes/editor-dark.json')];
                 case 1:
-                    theme = _a.sent();
+                    monacoTheme = _a.sent();
+                    return [4 /*yield*/, icons_1.load(sourcePath)];
+                case 2:
+                    icons = _a.sent();
                     /* Start the projector and append it to the document.body */
                     projector.append();
                     return [2 /*return*/];

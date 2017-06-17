@@ -14,11 +14,13 @@ var __extends = (this && this.__extends) || (function () {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/async/Task", "@dojo/core/request/Headers", "@dojo/core/request/Response", "@dojo/core/request/providers/xhr"], factory);
+        define(["require", "exports", "@dojo/core/lang", "@dojo/core/Observable", "@dojo/core/async/Task", "@dojo/core/request/Headers", "@dojo/core/request/Response", "@dojo/core/request/providers/xhr"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    var lang_1 = require("@dojo/core/lang");
+    var Observable_1 = require("@dojo/core/Observable");
     var Task_1 = require("@dojo/core/async/Task");
     var Headers_1 = require("@dojo/core/request/Headers");
     var Response_1 = require("@dojo/core/request/Response");
@@ -28,11 +30,17 @@ var __extends = (this && this.__extends) || (function () {
         function AMDRequireResponse(url, response) {
             var _this = _super.call(this) || this;
             _this.bodyUsed = false;
-            _this._response = response;
             _this.headers = new Headers_1.default();
             _this.ok = true;
             _this.status = 200;
             _this.statusText = 'OK';
+            _this._response = response;
+            _this.data = new Observable_1.default(function (observer) {
+                observer.error(new Error('Data not supported'));
+            });
+            _this.download = new Observable_1.default(function (observer) {
+                observer.error(new Error('Download not supported'));
+            });
             _this.url = require.toUrl(url);
             return _this;
         }
@@ -65,7 +73,7 @@ var __extends = (this && this.__extends) || (function () {
             var i18nUri = /^https:\/\/unpkg\.com\/@dojo\/i18n[^\/]*\/cldr\//i;
             var remoteUri = /^https?:\/\//i;
             if (i18nUri.test(url) || !remoteUri.test(url)) {
-                return new Task_1.default(function (resolve, reject) {
+                var task = new Task_1.default(function (resolve, reject) {
                     var mid = url.replace(i18nUri, 'src/');
                     try {
                         req([mid], function (module) {
@@ -76,6 +84,12 @@ var __extends = (this && this.__extends) || (function () {
                         reject(e);
                     }
                 });
+                lang_1.assign(task, {
+                    upload: new Observable_1.default(function (observer) {
+                        observer.error(new Error('Upload not supported'));
+                    })
+                });
+                return task;
             }
             return xhr_1.default(url, options);
         };

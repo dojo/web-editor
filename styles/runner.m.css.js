@@ -5,5 +5,5 @@ if (typeof define === 'function' && define.amd) {
 	module.exports = factory();
 }
 }(this, function () {
-	return {"base":"_2-NEcuf3","iframe":"_1qO3g4L9"," _key":"dojo-runner"};
+	return {"root":"_28Awlxd9","iframe":"_1qO3g4L9"," _key":"dojo-runner"};
 }));

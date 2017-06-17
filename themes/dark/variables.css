@@ -1,0 +1,59 @@
+:root {
+	/* Colors */
+	--dark-blue: #34495e;
+	--dark-light-blue: #86BBD8;
+	--dark-white: #FFFFFF;
+	--dark-off-white: #FBFBFB;
+	--dark-light-gray: #CCCCCC;
+	--dark-shade-gray: rgba(0, 0, 0, 0.3);
+	--dark-gray: #9E9E9E;
+	--dark-light-gray: #F2F2F2;
+	--dark-red: #ED5153;
+	--dark-green: #01D48E;
+	--dark-gray: #BBB;
+	--dark-black: #282c34;
+	--dark-light-black: #3F4552;
+
+	--dark-error-color: var(--dark-red);
+	--dark-success-color: var(--dark-green);
+
+	/* Shared values */
+	--base-font: 14px/1 sans-serif;
+	--input-font-size: 14px;
+	--title-bar-font-size: 20px;
+	--container-padding: 14px 35px;
+	--container-padding-thin: 14px;
+	--subtle-shadow: 0 0 7px 0px rgba(0, 0, 0, 0.25);
+	--rounded-corners: 2px;
+	--short-animation-duration: .2s;
+	--short-animation-easing: ease;
+
+	--block-spacing: 25px;
+	--line-spacing: 5px;
+	--border-thin: 1px;
+	--form-field-width: 200px;
+	--select-menu-height: 500px;
+	--input-padding: 0.5em 1em;
+	--border-thick: 5px;
+	--tab-width: 120px;
+	--min-container-height: 250px;
+
+	/* Composed values */
+	--title-bar-bg: var(--dark-blue);
+	--title-bar-color: var(--dark-white);
+	--header-padding: 5px;
+	--underlay-bg: var(--dark-shade-gray);
+	--input-focus-shadow: 0 0 4px 1px var(--dark-light-blue);
+	--input-border-color: var(--dark-gray);
+	--input-highlight-color: var(--dark-blue);
+	--button-bg: var(--dark-blue);
+	--button-hover-bg: var(--dark-light-blue);
+	--button-disabled-bg: var(--dark-shade-gray);
+	--button-color: var(--dark-white);
+	--button-icon-font: 'iconFont';
+	--button-icon-size: 1.4em;
+	--button-padding: 0.75em 1.25em;
+	--calendar-disabled-bg: var(--dark-light-gray);
+	--calendar-hover-bg: var(--dark-light-blue);
+	--calendar-selected: var(--dark-blue);
+}

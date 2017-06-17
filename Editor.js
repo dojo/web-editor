@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/global", "@dojo/core/lang", "@dojo/core/queue", "@dojo/core/util", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/mixins/Themeable", "./project", "./styles/editor.m.css"], factory);
+        define(["require", "exports", "@dojo/core/global", "@dojo/core/lang", "@dojo/core/queue", "@dojo/core/util", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/util/DomWrapper", "./project", "./styles/editor.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -32,69 +32,67 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var d_1 = require("@dojo/widget-core/d");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
+    var DomWrapper_1 = require("@dojo/widget-core/util/DomWrapper");
     var project_1 = require("./project");
     var css = require("./styles/editor.m.css");
     var globalMonaco = global_1.default.monaco;
-    /* tslint:disable:variable-name */
     var EditorBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
-    /* tslint:enable:variable-name */
     var Editor = (function (_super) {
         __extends(Editor, _super);
         function Editor() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
+            var _this = _super.call(this) || this;
+            _this._onAfterRender = function () {
+                if (!_this._editor) {
+                    _this._editor = globalMonaco.editor.create(_this._root, _this.properties.options);
+                    _this._didChangeHandle = _this._editor.onDidChangeModelContent(util_1.debounce(_this._onDidChangeModelContent, 1000));
+                    var onEditorInit = _this.properties.onEditorInit;
+                    _this._setModel();
+                    onEditorInit && onEditorInit(_this._editor);
+                    _this.own(lang_1.createHandle(function () {
+                        if (_this._editor) {
+                            _this._editor.dispose();
+                            _this._didChangeHandle.dispose();
+                        }
+                    }));
+                }
+                _this._editor.layout();
+                _this._queuedLayout = false;
+                var onEditorLayout = _this.properties.onEditorLayout;
+                onEditorLayout && onEditorLayout();
+            };
             _this._onDidChangeModelContent = function () {
                 if (_this.properties.filename) {
                     project_1.default.setFileDirty(_this.properties.filename);
                 }
             };
             _this._queuedLayout = false;
+            var root = _this._root = document.createElement('div');
+            root.style.height = '100%';
+            root.style.width = '100%';
+            _this._EditorDom = DomWrapper_1.default(root);
             return _this;
         }
-        Editor.prototype._initEditor = function (element) {
-            var _this = this;
-            /* doing this async, during next macro task to help ensure the editor does a proper layout */
-            queue_1.queueTask(function () {
-                _this._editor = globalMonaco.editor.create(element, _this.properties.options);
-                _this._didChangeHandle = _this._editor.onDidChangeModelContent(util_1.debounce(_this._onDidChangeModelContent, 1000));
-                var onEditorInit = _this.properties.onEditorInit;
-                onEditorInit && onEditorInit(_this._editor);
-                _this.own(lang_1.createHandle(function () {
-                    _this._editor.dispose();
-                    _this._didChangeHandle.dispose();
-                }));
-            });
+        Editor.prototype._setModel = function () {
+            var filename = this.properties.filename;
+            if (this._editor && filename && project_1.default.includes(filename)) {
+                this._editor.setModel(project_1.default.getFileModel(filename));
+            }
         };
         Editor.prototype.render = function () {
-            return d_1.v('div', {
-                afterCreate: this._initEditor,
-                afterUpdate: this.updateEditor,
-                classes: this.classes(css.base)
-            });
-        };
-        Editor.prototype.updateEditor = function (node) {
-            var _this = this;
-            if (!this._editor) {
-                return node;
-            }
-            if (this.properties.filename && project_1.default.includes(this.properties.filename)) {
-                this._editor.setModel(project_1.default.getFileModel(this.properties.filename));
-            }
+            /* TODO: Refactor when https://github.com/dojo/widget-core/pull/548 published */
             if (!this._queuedLayout) {
+                /* doing this async, during the next major task, to allow the widget to actually render */
                 this._queuedLayout = true;
-                queue_1.queueTask(function () {
-                    _this._editor.layout();
-                    _this._queuedLayout = false;
-                    var onEditorLayout = _this.properties.onEditorLayout;
-                    onEditorLayout && onEditorLayout();
-                });
+                queue_1.queueTask(this._onAfterRender);
             }
-            return node;
+            this._setModel();
+            /* TODO: Create single node when https://github.com/dojo/widget-core/issues/553 resolved */
+            return d_1.v('div', {
+                classes: this.classes(css.root)
+            }, [this.properties.filename ? d_1.w(this._EditorDom, { key: 'editor' }) : null]);
         };
         return Editor;
     }(EditorBase));
-    __decorate([
-        WidgetBase_1.afterRender()
-    ], Editor.prototype, "updateEditor", null);
     Editor = __decorate([
         Themeable_1.theme(css)
     ], Editor);

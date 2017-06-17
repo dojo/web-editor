@@ -4,20 +4,47 @@
 	<title>@dojo/web-editor</title>
 	<link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
 	<style>
+		html, body {
+			height: 100%;
+		}
+
 		body {
 			font-family: 'Roboto Slab', serif;
+			display: flex;
+			flex-direction: column;
+			align-items: stretch;
+			align-content: stretch;
 		}
 
 		/* flexbox seems a little challenged because while auto layout is on the editor, growing can be done
 		 * but shrinking seems to get stuck on the width of the editor */
 		.wrap {
+			flex: 1;
 			display: flex;
-			align-items: center;
+			align-items: stretch;
+			align-content: stretch;
+		}
+
+		.app {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: stretch;
+			align-content: stretch;
+		}
+
+		.monaco-editor.vs-dark.dojo2 {
+			background-color: #282c34;
 		}
 	</style>
 	<!-- manually include widget styles until converted fully to WebPack -->
 	<link href="../styles/editor.m.css" rel="stylesheet">
 	<link href="../styles/runner.m.css" rel="stylesheet">
+	<link href="../styles/scrollbar.m.css" rel="stylesheet">
+	<link href="../styles/treepane.m.css" rel="stylesheet">
+	<link href="../node_modules/@dojo/widgets/common/styles/widgets.css" rel="stylesheet">
+	<link href="../themes/dark/theme.css" rel="stylesheet">
+	<script src="../node_modules/maquette/dist/css-transitions.min.js"></script>
 </head>
 <body>
 	<h1>@dojo/web-editor</h1>
