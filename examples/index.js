@@ -71,10 +71,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var themes_1 = require("../support/themes");
     var theme_1 = require("../themes/dark/theme");
     /* path to the project directory */
-    var PROJECT_DIRECTORY = '../../../projects/';
+    var PROJECT_DIRECTORY = '../projects/';
     var monacoTheme;
     var icons;
-    var sourcePath = '../../extensions/vscode-material-icon-theme/out/src/material-icons.json';
+    var sourcePath = '../extensions/vscode-material-icon-theme/out/src/material-icons.json';
     function addFile(root, filename) {
         if (!root) {
             root = {
