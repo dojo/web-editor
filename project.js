@@ -132,6 +132,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 return 'unknown';
         }
     }
+    var JsxEmit = monaco.languages.typescript.JsxEmit;
+    function getJsxEmit(type) {
+        switch (type) {
+            case 'preserve':
+                return JsxEmit.Preserve;
+            case 'react':
+                return JsxEmit.React;
+            default:
+                return JsxEmit.None;
+        }
+    }
     var ScriptTarget = monaco.languages.typescript.ScriptTarget;
     function getScriptTarget(type) {
         switch (type) {
@@ -261,9 +272,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             var _a = this._project.tsconfig.compilerOptions, compilerOptions = _a === void 0 ? {} : _a;
             var options = {};
             /* copied from tsconfig.json */
-            var experimentalDecorators = compilerOptions.experimentalDecorators, lib = compilerOptions.lib, noImplicitAny = compilerOptions.noImplicitAny, noImplicitThis = compilerOptions.noImplicitThis, noImplicitReturns = compilerOptions.noImplicitReturns, noLib = compilerOptions.noLib, noUnusedLocals = compilerOptions.noUnusedLocals, noUnusedParameters = compilerOptions.noUnusedParameters, strictNullChecks = compilerOptions.strictNullChecks, target = compilerOptions.target, types = compilerOptions.types;
+            var experimentalDecorators = compilerOptions.experimentalDecorators, jsx = compilerOptions.jsx, jsxFactory = compilerOptions.jsxFactory, lib = compilerOptions.lib, noImplicitAny = compilerOptions.noImplicitAny, noImplicitThis = compilerOptions.noImplicitThis, noImplicitReturns = compilerOptions.noImplicitReturns, noLib = compilerOptions.noLib, noUnusedLocals = compilerOptions.noUnusedLocals, noUnusedParameters = compilerOptions.noUnusedParameters, strict = compilerOptions.strict, strictNullChecks = compilerOptions.strictNullChecks, target = compilerOptions.target, types = compilerOptions.types;
             lang_1.assign(options, {
                 experimentalDecorators: experimentalDecorators,
+                jsx: getJsxEmit(jsx),
+                jsxFactory: jsxFactory,
                 lib: lib,
                 noImplicitAny: noImplicitAny,
                 noImplicitThis: noImplicitThis,
@@ -271,6 +284,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 noLib: noLib,
                 noUnusedLocals: noUnusedLocals,
                 noUnusedParameters: noUnusedParameters,
+                strict: strict,
                 strictNullChecks: strictNullChecks,
                 target: getScriptTarget(target),
                 types: types
