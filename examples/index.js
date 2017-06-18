@@ -257,9 +257,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             var projectLoad = d_1.v('div', { key: 'projectLoad' }, [
                 d_1.v('label', { for: 'project' }, ['Project to load:']),
                 d_1.v('select', { type: 'text', name: 'project', id: 'project', onchange: this._onchangeProject, disabled: isProjectLoaded ? true : false }, [
-                    d_1.v('option', { value: 'dojo-test-app.project.json' }, ['Dojo2 Hello World']),
-                    d_1.v('option', { value: 'dojo2-todo-mvc.project.json', selected: true }, ['Dojo2 Todo MVC']),
-                    d_1.v('option', { value: 'dojo2-todo-mvc-kitchensink.project.json' }, ['Dojo2 Kitchensink Todo MVC'])
+                    d_1.v('option', { value: 'dojo-test-app.project.json' }, ['Dojo 2 Hello World']),
+                    d_1.v('option', { value: 'dojo2-todo-mvc.project.json', selected: true }, ['Dojo 2 Todo MVC']),
+                    d_1.v('option', { value: 'dojo2-todo-mvc-kitchensink.project.json' }, ['Dojo 2 Kitchensink Todo MVC'])
                 ]),
                 d_1.v('button', { type: 'button', name: 'load-project', id: 'load-project', onclick: this._onclickLoad, disabled: isProjectLoaded ? true : false }, ['Load'])
             ]);
