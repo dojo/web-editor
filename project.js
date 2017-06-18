@@ -346,9 +346,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         Project.prototype.emit = function () {
             return __awaiter(this, void 0, void 0, function () {
                 var _this = this;
-                var typescriptFileUris, worker, services, output, cssFiles, jsonFiles, otherFiles;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
+                var typescriptFileUris, _a, worker, services, output, cssFiles, jsonFiles, otherFiles;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
                         case 0:
                             if (!this._project) {
                                 throw new Error('Project not loaded.');
@@ -362,12 +362,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                                 var name = _a.name;
                                 return _this.getFileModel(name).uri;
                             });
+                            if (!!this._worker) return [3 /*break*/, 2];
+                            _a = this;
                             return [4 /*yield*/, monaco.languages.typescript.getTypeScriptWorker()];
                         case 1:
-                            worker = _a.sent();
-                            return [4 /*yield*/, worker.apply(void 0, typescriptFileUris)];
+                            _a._worker = _b.sent();
+                            _b.label = 2;
                         case 2:
-                            services = _a.sent();
+                            worker = this._worker;
+                            return [4 /*yield*/, worker.apply(void 0, typescriptFileUris)];
+                        case 3:
+                            services = _b.sent();
                             return [4 /*yield*/, Promise.all(typescriptFileUris.map(function (file) { return __awaiter(_this, void 0, void 0, function () {
                                     var filename, emitOutput;
                                     return __generator(this, function (_a) {
@@ -384,8 +389,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                                         }
                                     });
                                 }); }))];
-                        case 3:
-                            output = _a.sent();
+                        case 4:
+                            output = _b.sent();
                             return [4 /*yield*/, css_1.getEmit.apply(void 0, this._project.files /* add css modules */
                                     .filter(function (_a) {
                                     var type = _a.type;
@@ -399,8 +404,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                                     var model = _a.model, type = _a.type;
                                     return { name: model.uri.fsPath.replace(/^\/\.\//, ''), text: model.getValue(), type: type };
                                 }))];
-                        case 4:
-                            cssFiles = _a.sent();
+                        case 5:
+                            cssFiles = _b.sent();
                             jsonFiles = json_1.getEmit.apply(void 0, this._project.files /* add json files as a module */
                                 .filter(function (_a) {
                                 var type = _a.type;
