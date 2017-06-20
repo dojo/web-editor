@@ -49,7 +49,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/lang", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Projector", "@dojo/widget-core/WidgetBase", "../Editor", "../FileBar", "../IconCss", "../TreePane", "../styles/treepane.m.css", "../project", "../Runner", "../support/icons", "../support/themes", "../themes/dark/theme"], factory);
+        define(["require", "exports", "@dojo/core/lang", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Projector", "@dojo/widget-core/WidgetBase", "../Editor", "../FileBar", "../IconCss", "../TreePane", "../styles/treepane.m.css", "../project", "../routing", "../Runner", "../support/icons", "../support/gists", "../support/themes", "../themes/dark/theme"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -66,8 +66,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var TreePane_1 = require("../TreePane");
     var css = require("../styles/treepane.m.css");
     var project_1 = require("../project");
+    var routing_1 = require("../routing");
     var Runner_1 = require("../Runner");
     var icons_1 = require("../support/icons");
+    var gists_1 = require("../support/gists");
     var themes_1 = require("../support/themes");
     var theme_1 = require("../themes/dark/theme");
     /* path to the project directory */
@@ -131,13 +133,60 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var App = (function (_super) {
         __extends(App, _super);
         function App() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
+            var _this = _super.call(this) || this;
             _this._activeFileIndex = 0;
             _this._compiling = false;
             _this._editorFilename = '';
             _this._expanded = ['/', '/src'];
+            _this._gists = [];
+            _this._loadingGists = false;
+            _this._projectName = 'Dojo 2 Todo MVC';
             _this._projectValue = 'dojo2-todo-mvc.project.json';
+            _this._onRouteGist = function (request) { return __awaiter(_this, void 0, void 0, function () {
+                var isProjectLoaded, _a, err_1;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            console.log('_onRouteGist');
+                            isProjectLoaded = project_1.default.isLoaded();
+                            if (!isProjectLoaded) return [3 /*break*/, 1];
+                            console.error('Project already loaded, cannot navigate to gist');
+                            return [3 /*break*/, 8];
+                        case 1:
+                            _a = this;
+                            return [4 /*yield*/, gists_1.getById(request.params.id)];
+                        case 2:
+                            _a._gist = _b.sent();
+                            if (!this._gist) return [3 /*break*/, 7];
+                            _b.label = 3;
+                        case 3:
+                            _b.trys.push([3, 5, , 6]);
+                            return [4 /*yield*/, project_1.default.load(this._gist.projectJson)];
+                        case 4:
+                            _b.sent();
+                            console.log('Project loaded');
+                            this.invalidate();
+                            return [3 /*break*/, 6];
+                        case 5:
+                            err_1 = _b.sent();
+                            console.error(err_1);
+                            return [3 /*break*/, 6];
+                        case 6: return [3 /*break*/, 8];
+                        case 7:
+                            console.error("Could not find gist with ID \"" + request.params.id + "\" ");
+                            _b.label = 8;
+                        case 8: return [2 /*return*/];
+                    }
+                });
+            }); };
+            _this._onRouteRoot = function (request) {
+                console.log('navigate root');
+            };
             _this._openFiles = [];
+            _this.own(routing_1.startGistRouter({
+                onGist: _this._onRouteGist,
+                onRoot: _this._onRouteRoot
+            }));
             return _this;
         }
         App.prototype._getTreeItems = function () {
@@ -162,6 +211,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 };
             });
         };
+        App.prototype._onchangeGists = function (e) {
+            var select = e.target;
+            this._selectedGist = array_1.find(this._gists, function (_a) {
+                var projectJson = _a.projectJson;
+                return projectJson === select.value;
+            });
+        };
+        App.prototype._onchangeGithubUsername = function (e) {
+            var select = e.target;
+            this._githubUsername = select.value;
+        };
         /**
          * Handle when the project name changes in the dropdown
          * @param e The DOM `onchange` event
@@ -170,6 +230,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             e.preventDefault();
             var select = e.target;
             this._projectValue = select.value;
+            this._projectName = select.options[select.selectedIndex].text || '?';
         };
         /**
          * Handle when the on project load button is clicked
@@ -179,13 +240,65 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             var _this = this;
             e.preventDefault();
             console.log("Loading project \"" + this._projectValue + "\"...");
-            project_1.default.load(PROJECT_DIRECTORY + this._projectValue)
-                .then(function () {
-                console.log('Project loaded');
-                _this.invalidate();
-            }, function (err) {
-                console.error(err);
-            });
+            (function () { return __awaiter(_this, void 0, void 0, function () {
+                var err_2;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            _a.trys.push([0, 2, , 3]);
+                            return [4 /*yield*/, project_1.default.load(PROJECT_DIRECTORY + this._projectValue)];
+                        case 1:
+                            _a.sent();
+                            console.log('Project loaded');
+                            this.invalidate();
+                            return [3 /*break*/, 3];
+                        case 2:
+                            err_2 = _a.sent();
+                            console.error(err_2);
+                            return [3 /*break*/, 3];
+                        case 3: return [2 /*return*/];
+                    }
+                });
+            }); })();
+        };
+        App.prototype._onclickLoadGist = function (e) {
+            e.preventDefault();
+            routing_1.setPath(this._selectedGist.id);
+        };
+        App.prototype._onclickLoadGists = function (e) {
+            var _this = this;
+            e.preventDefault();
+            if (!this._githubUsername) {
+                return;
+            }
+            console.log("Loading gists for: \"" + this._githubUsername + "\"...");
+            this._loadingGists = true;
+            this.invalidate();
+            (function () { return __awaiter(_this, void 0, void 0, function () {
+                var gists, err_3;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            _a.trys.push([0, 2, , 3]);
+                            return [4 /*yield*/, gists_1.getByUsername(this._githubUsername)];
+                        case 1:
+                            gists = _a.sent();
+                            this._gists = (gists || []).slice();
+                            if (this._gists.length) {
+                                this._selectedGist = this._gists[0];
+                            }
+                            console.log('Loaded.');
+                            this._loadingGists = false;
+                            this.invalidate();
+                            return [3 /*break*/, 3];
+                        case 2:
+                            err_3 = _a.sent();
+                            console.error(err_3);
+                            return [3 /*break*/, 3];
+                        case 3: return [2 /*return*/];
+                    }
+                });
+            }); })();
         };
         /**
          * Handle when the on project run button is clicked
@@ -253,77 +366,98 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         App.prototype.render = function () {
             var isProjectLoaded = project_1.default.isLoaded();
+            var programName = isProjectLoaded ? d_1.v('h3', {}, [this._projectName || '']) : null;
+            var gistLoad = !isProjectLoaded ? d_1.v('div', { key: 'gistLoad' }, [
+                d_1.v('label', { for: 'username' }, ['GitHub username: ']),
+                d_1.v('input', { name: 'username', type: 'text', placeholder: 'GitHub username', onchange: this._onchangeGithubUsername }),
+                d_1.v('button', { type: 'button', name: 'load-gists', id: 'load-gists', onclick: this._onclickLoadGists, disabled: this._loadingGists ? true : false }, ['Get Gists'])
+            ]) : null;
+            var gists = this._gists.length && !isProjectLoaded ? d_1.v('div', {}, [
+                d_1.v('label', { for: 'gists' }, ['Gist to load: ']),
+                d_1.v('select', { type: 'text', name: 'gists', id: 'gists', onchange: this._onchangeGists }, this._gists.map(function (_a) {
+                    var description = _a.description, projectJson = _a.projectJson;
+                    return d_1.v('option', { value: projectJson }, [description]);
+                })),
+                d_1.v('button', { type: 'button', name: 'load-gist', id: 'load-gist', onclick: this._onclickLoadGist }, ['Load'])
+            ]) : null;
             /* A UI to select a project and provide a button to load it */
-            var projectLoad = d_1.v('div', { key: 'projectLoad' }, [
-                d_1.v('label', { for: 'project' }, ['Project to load:']),
-                d_1.v('select', { type: 'text', name: 'project', id: 'project', onchange: this._onchangeProject, disabled: isProjectLoaded ? true : false }, [
+            var projectLoad = !isProjectLoaded ? d_1.v('div', { key: 'projectLoad' }, [
+                d_1.v('label', { for: 'project' }, ['Project to load: ']),
+                d_1.v('select', { type: 'text', name: 'project', id: 'project', onchange: this._onchangeProject }, [
                     d_1.v('option', { value: 'dojo-test-app.project.json' }, ['Dojo 2 Hello World']),
                     d_1.v('option', { value: 'dojo2-todo-mvc.project.json', selected: true }, ['Dojo 2 Todo MVC']),
                     d_1.v('option', { value: 'dojo2-todo-mvc-tsx.project.json' }, ['Dojo 2 Todo MVC TSX']),
                     d_1.v('option', { value: 'dojo2-todo-mvc-kitchensink.project.json' }, ['Dojo 2 Kitchensink Todo MVC'])
                 ]),
-                d_1.v('button', { type: 'button', name: 'load-project', id: 'load-project', onclick: this._onclickLoad, disabled: isProjectLoaded ? true : false }, ['Load'])
-            ]);
-            var projectRun = null;
-            /* If the project is loaded, then we will render a UI which allows selection of the file to edit and a button to run the project */
-            if (isProjectLoaded) {
-                projectRun = d_1.v('div', { key: 'projectRun' }, [
-                    d_1.v('button', { type: 'button', name: 'run', id: 'run', onclick: this._onclickRun, disabled: this._compiling ? true : false }, ['Run'])
-                ]);
-            }
+                d_1.v('button', { type: 'button', name: 'load-project', id: 'load-project', onclick: this._onclickLoad }, ['Load'])
+            ]) : null;
+            /* A UI to run the loaded project */
+            var projectRun = isProjectLoaded ? d_1.v('div', { key: 'projectRun' }, [
+                d_1.v('button', { type: 'button', name: 'run', id: 'run', onclick: this._onclickRun, disabled: this._compiling ? true : false }, ['Run'])
+            ]) : null;
             var runnerProperties = lang_1.assign({}, this._program, { key: 'runner', onRun: this._onRun, theme: theme_1.default });
             return d_1.v('div', {
                 classes: {
                     'app': true
                 }
             }, [
-                d_1.w(IconCss_1.default, {
-                    baseClass: css.labelFixed,
-                    icons: icons,
-                    key: 'iconcss',
-                    sourcePath: sourcePath
-                }),
-                projectLoad,
-                projectRun,
+                d_1.v('h1', {}, ['@dojo/web-editor']),
+                programName,
                 d_1.v('div', {
                     classes: {
-                        wrap: true
-                    },
-                    key: 'wrap'
+                        'app': true
+                    }
                 }, [
+                    d_1.w(IconCss_1.default, {
+                        baseClass: css.labelFixed,
+                        icons: icons,
+                        key: 'iconcss',
+                        sourcePath: sourcePath
+                    }),
+                    gistLoad,
+                    gists,
+                    projectLoad,
+                    projectRun,
                     d_1.v('div', {
-                        styles: { flex: '1' }
-                    }, [d_1.w(TreePane_1.default, {
-                            expanded: this._expanded.slice(),
-                            icons: icons,
-                            key: 'treepane',
-                            selected: this._selected,
-                            sourcePath: sourcePath,
-                            root: isProjectLoaded ? this._getTreeItems() : undefined,
-                            onItemOpen: this._onItemOpen,
-                            onItemSelect: this._onItemSelect,
-                            onItemToggle: this._onItemToggle,
-                            theme: theme_1.default
-                        })]),
-                    d_1.v('div', {
-                        styles: { flex: '1', margin: '0 0.5em' }
+                        classes: {
+                            wrap: true
+                        },
+                        key: 'wrap'
                     }, [
-                        this._openFiles.length ? d_1.w(FileBar_1.default, {
-                            activeIndex: this._getActiveFile(),
-                            files: this._getFileItems(),
-                            key: 'filebar',
-                            theme: theme_1.default,
-                            onRequestTabClose: this._onRequestTabClose,
-                            onRequestTabChange: this._onRequestTabChange
-                        }) : null,
-                        d_1.w(Editor_1.default, {
-                            filename: this._editorFilename,
-                            key: 'editor',
-                            options: { theme: monacoTheme },
-                            theme: theme_1.default
-                        })
-                    ]),
-                    d_1.w(Runner_1.default, runnerProperties)
+                        d_1.v('div', {
+                            styles: { flex: '1' }
+                        }, [d_1.w(TreePane_1.default, {
+                                expanded: this._expanded.slice(),
+                                icons: icons,
+                                key: 'treepane',
+                                selected: this._selected,
+                                sourcePath: sourcePath,
+                                root: isProjectLoaded ? this._getTreeItems() : undefined,
+                                onItemOpen: this._onItemOpen,
+                                onItemSelect: this._onItemSelect,
+                                onItemToggle: this._onItemToggle,
+                                theme: theme_1.default
+                            })]),
+                        d_1.v('div', {
+                            styles: { flex: '1', margin: '0 0.5em' }
+                        }, [
+                            this._openFiles.length ? d_1.w(FileBar_1.default, {
+                                activeIndex: this._getActiveFile(),
+                                files: this._getFileItems(),
+                                key: 'filebar',
+                                theme: theme_1.default,
+                                onRequestTabClose: this._onRequestTabClose,
+                                onRequestTabChange: this._onRequestTabChange
+                            }) : null,
+                            d_1.w(Editor_1.default, {
+                                filename: this._editorFilename,
+                                key: 'editor',
+                                options: { theme: monacoTheme },
+                                theme: theme_1.default
+                            })
+                        ]),
+                        d_1.w(Runner_1.default, runnerProperties)
+                    ])
                 ])
             ]);
         };

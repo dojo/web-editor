@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/dojo/web-editor#readme",
   "devDependencies": {
-    "@dojo/cli-export-project": ">=2.0.0-alpha.1",
+    "@dojo/cli-export-project": ">=2.0.0-alpha.2",
     "@dojo/i18n": "next",
     "@dojo/interfaces": "next",
     "@dojo/test-extras": "^2.0.0-alpha.4",
