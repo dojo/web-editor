@@ -239,7 +239,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             });
         });
     }
-    var RunnerBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
+    var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
     /**
      * A widget which will render its properties into a _runnable_ application within an `iframe`
      */
@@ -254,9 +254,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             };
             _this._updating = false;
             var iframe = _this._iframe = document.createElement('iframe');
-            iframe.setAttribute('src', DEFAULT_IFRAME_SRC);
-            /* TODO: Remove when https://github.com/dojo/widget-core/issues/553 resolved */
-            iframe.classList.add(css.iframe);
             _this._IframeDom = DomWrapper_1.default(iframe);
             _this.own(lang_1.createHandle(function () {
                 if (iframe.contentWindow) {
@@ -286,12 +283,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             return d_1.v('div', {
                 classes: this.classes(css.root)
             }, [d_1.w(this._IframeDom, {
+                    classes: this.classes(css.iframe),
                     key: 'runner',
                     src: this.properties.src || DEFAULT_IFRAME_SRC
                 })]);
         };
         return Runner;
-    }(RunnerBase));
+    }(ThemeableBase));
     __decorate([
         WidgetBase_1.afterRender()
     ], Runner.prototype, "updateSource", null);

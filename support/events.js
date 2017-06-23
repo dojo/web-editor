@@ -10,7 +10,7 @@
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function getAbsolutePosition(evt, horizontal) {
-        return evt.type === 'touchstart' ?
+        return evt.type.match(/^touch/) ?
             horizontal ? evt.changedTouches[0].screenX : evt.changedTouches[0].screenY :
             horizontal ? evt.pageX : evt.pageY;
     }

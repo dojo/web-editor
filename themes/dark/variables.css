@@ -11,7 +11,8 @@
 	--dark-red: #ED5153;
 	--dark-green: #01D48E;
 	--dark-gray: #BBB;
-	--dark-black: #282c34;
+	--dark-black: #16181C;
+	--dark-med-black: #292d35;
 	--dark-light-black: #3F4552;
 
 	--dark-error-color: var(--dark-red);

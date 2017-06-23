@@ -59,7 +59,7 @@
     "@dojo/core": "next",
     "@dojo/has": "next",
     "@dojo/loader": "next",
-    "@dojo/routing": "next",
+    "@dojo/routing": "v2.0.0-beta2.1",
     "@dojo/shim": "next",
     "@dojo/widget-core": "next",
     "@dojo/widgets": "2.0.0-alpha.24",

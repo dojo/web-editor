@@ -86,34 +86,42 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }());
     exports.EditorService = EditorService;
     var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
+    /**
+     * A Widget which will render a wrapped `monaco-editor`
+     */
     var Editor = (function (_super) {
         __extends(Editor, _super);
         function Editor() {
             var _this = _super.call(this) || this;
-            _this._onAfterRender = function () { return __awaiter(_this, void 0, void 0, function () {
-                var _a, _onDidChangeModelContent, _root, _b, onEditorInit, options, editorService, editor_1, didChangeHandle_1, onEditorLayout;
-                return __generator(this, function (_c) {
+            _this._doLayout = function () { return __awaiter(_this, void 0, void 0, function () {
+                var onEditorLayout;
+                return __generator(this, function (_a) {
+                    this._queuedLayout = false;
                     if (!this._editor) {
-                        _a = this, _onDidChangeModelContent = _a._onDidChangeModelContent, _root = _a._root, _b = _a.properties, onEditorInit = _b.onEditorInit, options = _b.options;
-                        editorService = this._editorService = new EditorService();
-                        editor_1 = this._editor = globalMonaco.editor.create(_root, options, { editorService: editorService });
-                        didChangeHandle_1 = this._didChangeHandle = editor_1.onDidChangeModelContent(util_1.debounce(_onDidChangeModelContent, 1000));
-                        this._setModel();
-                        onEditorInit && onEditorInit(editor_1);
-                        this.own(lang_1.createHandle(function () {
-                            if (editor_1) {
-                                editor_1.dispose();
-                                didChangeHandle_1.dispose();
-                            }
-                        }));
+                        return [2 /*return*/];
                     }
                     this._editor.layout();
-                    this._queuedLayout = false;
                     onEditorLayout = this.properties.onEditorLayout;
                     onEditorLayout && onEditorLayout();
                     return [2 /*return*/];
                 });
             }); };
+            _this._onAttached = function () {
+                if (!_this._editor) {
+                    var _a = _this, _onDidChangeModelContent = _a._onDidChangeModelContent, _root = _a._root, _b = _a.properties, onEditorInit = _b.onEditorInit, options = _b.options;
+                    var editorService = _this._editorService = new EditorService();
+                    var editor_1 = _this._editor = globalMonaco.editor.create(_root, options, { editorService: editorService });
+                    var didChangeHandle_1 = _this._didChangeHandle = editor_1.onDidChangeModelContent(util_1.debounce(_onDidChangeModelContent, 1000));
+                    _this._setModel();
+                    onEditorInit && onEditorInit(editor_1);
+                    _this.own(lang_1.createHandle(function () {
+                        if (editor_1) {
+                            editor_1.dispose();
+                            didChangeHandle_1.dispose();
+                        }
+                    }));
+                }
+            };
             _this._onDidChangeModelContent = function () {
                 if (_this.properties.filename) {
                     project_1.default.setFileDirty(_this.properties.filename);
@@ -121,9 +129,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             };
             _this._queuedLayout = false;
             var root = _this._root = document.createElement('div');
-            root.style.height = '100%';
-            root.style.width = '100%';
-            _this._EditorDom = DomWrapper_1.default(root);
+            _this._EditorDom = DomWrapper_1.default(root, { onAttached: _this._onAttached });
             return _this;
         }
         Editor.prototype._setModel = function () {
@@ -133,17 +139,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             }
         };
         Editor.prototype.render = function () {
-            /* TODO: Refactor when https://github.com/dojo/widget-core/pull/548 published */
             if (!this._queuedLayout) {
                 /* doing this async, during the next major task, to allow the widget to actually render */
                 this._queuedLayout = true;
-                queue_1.queueTask(this._onAfterRender);
+                queue_1.queueTask(this._doLayout);
             }
             this._setModel();
-            /* TODO: Create single node when https://github.com/dojo/widget-core/issues/553 resolved */
-            return d_1.v('div', {
-                classes: this.classes(css.root)
-            }, [this.properties.filename ? d_1.w(this._EditorDom, { key: 'editor' }) : null]);
+            return this.properties.filename ?
+                /* DomWrapper ignores `onAttached` here, but is needed to make testing possible */
+                d_1.w(this._EditorDom, { key: 'editor', classes: this.classes(css.root), onAttached: this._onAttached }) :
+                d_1.v('div', { classes: this.classes(css.root), key: 'editor' });
         };
         return Editor;
     }(ThemeableBase));

@@ -39,6 +39,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             _this._id = uuid_1.default();
             return _this;
         }
+        // private _callTabFocus = false;
         FileBar.prototype._onDownArrowPress = function () {
             var alignButtons = this.properties.alignButtons;
             if (alignButtons === 1 /* left */ || alignButtons === 2 /* right */) {
@@ -63,6 +64,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             return files.map(function (file, i) {
                 var closeable = file.closeable, disabled = file.disabled, key = file.key, _a = file.label, label = _a === void 0 ? null : _a;
                 return d_1.w(TabButton_1.default, {
+                    // TODO: uncomment when TabButton published with https://github.com/dojo/widgets/pull/241
+                    // callFocus: this._callTabFocus && i === this.properties.activeIndex,
                     active: i === _this.properties.activeIndex,
                     closeable: closeable,
                     controls: _this._id + "-tab-" + i,
@@ -73,6 +76,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     onClick: _this.selectIndex,
                     onCloseClick: _this.closeIndex,
                     onEndPress: _this.selectLastIndex,
+                    // onFocusCalled: () => this._callTabFocus = false,
                     onHomePress: _this.selectFirstIndex,
                     onDownArrowPress: _this._onDownArrowPress,
                     onLeftArrowPress: _this._onLeftArrowPress,

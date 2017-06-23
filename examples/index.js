@@ -147,7 +147,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
-                            console.log('_onRouteGist');
                             isProjectLoaded = project_1.default.isLoaded();
                             if (!isProjectLoaded) return [3 /*break*/, 1];
                             console.error('Project already loaded, cannot navigate to gist');
@@ -179,9 +178,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     }
                 });
             }); };
-            _this._onRouteRoot = function (request) {
-                console.log('navigate root');
-            };
+            _this._onRouteRoot = function (request) { };
             _this._openFiles = [];
             _this.own(routing_1.startGistRouter({
                 onGist: _this._onRouteGist,

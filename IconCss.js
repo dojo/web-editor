@@ -22,6 +22,12 @@ var __extends = (this && this.__extends) || (function () {
     var d_1 = require("@dojo/widget-core/d");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var icons_1 = require("./support/icons");
+    /**
+     * A function that converts an `IconJson` structure into CSS text
+     * @param sourcePath The base URL where the icons are located
+     * @param baseClass The base class name which an icon is based off of
+     * @param icons An object structure that defines icon classes
+     */
     function getStylesFromJson(sourcePath, baseClass, icons) {
         var resolver = new icons_1.IconResolver(sourcePath, icons);
         var styles = '';

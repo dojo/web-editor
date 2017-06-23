@@ -196,6 +196,18 @@ startGistRouter({
 });
 ```
 
+### FileBar
+
+Displays an array of tabs which is designed to represent open files.
+
+### IconCss
+
+This widget injects a `<style>` element which contains the CSS which is dynamically generated based on an object structure which defines different icon types.
+
+### TreePane
+
+This widget provides a collapsible view of a file system like structure.
+
 ### external/postcss-bundle
 
 In order to properly transpile CSS that is part of a project, the web-editor needs to utilise postcss with additional plugins for this
@@ -230,6 +242,11 @@ the AMD `require()`.  It should look something like this:
     </script>
 </body>
 ```
+
+### Extensions
+
+The `/extensions` path contains any extensions which have been adapted from `vscode` for use in the web editor.  Currently it contains
+an icon theme.
 
 ### Supporting Modules
 
@@ -313,9 +330,9 @@ For example, you might have something like this in your web-editor page:
 
 ## Installation
 
-The package is typically instlaled using `npm`.  The distrubition though comes with a version of `monaco-editor` that uses the current
+The package is typically installed using `npm`.  The distribution though comes with a version of `monaco-editor` that uses the current
 version of TypeScript.  Therefore it is often better to use that included version than the version that is currently available, as it
-appears the general avaialable version lags behind in updating.
+appears the general available version lags behind in updating.
 
 ## Licensing Information
 
