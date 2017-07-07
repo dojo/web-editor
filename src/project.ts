@@ -185,9 +185,9 @@ export class Project extends Evented {
 
 		diagnostics.forEach((diagnostic) => {
 			const message = flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-			if (diagnostic.file) {
+			if (diagnostic.file && diagnostic.start) {
 				const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-				console.warn(`Error ${diagnostic.file.name} (${line + 1},${character + 1}): ${message}`);
+				console.warn(`Error ${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
 			}
 			else {
 				console.warn(`Error: ${message}`);

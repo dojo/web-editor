@@ -42,7 +42,7 @@ function getMonacoEditor(properties: Partial<EditorProperties> = {}): Promise<mo
 
 		widget.setProperties(assign(properties, { onEditorInit }));
 		widget.getRender();
-	});
+	}) as Promise<any>;
 }
 
 registerSuite({
@@ -131,7 +131,7 @@ registerSuite({
 			options: {
 				theme: 'vs-code-pretty'
 			}
-		});
+		} as any); // theme is now missing from editor?!
 		assert.deepEqual(monacoEditorCreateOptions, { theme: 'vs-code-pretty' }, 'should pass options properly');
 	},
 

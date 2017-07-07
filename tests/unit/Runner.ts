@@ -58,7 +58,7 @@ function getRunnerDoc(program?: Partial<Program>): Promise<Document> {
 				onRun
 			});
 			widget.getRender();
-		});
+		}) as Promise<Document>;
 }
 
 registerSuite({
