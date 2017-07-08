@@ -1,4 +1,5 @@
 import { ProjectFile } from '@dojo/cli-export-project/interfaces/project.json';
+import Promise from '@dojo/shim/Promise';
 import WeakMap from '@dojo/shim/WeakMap';
 import { EmitFile } from '../../src/interfaces';
 
