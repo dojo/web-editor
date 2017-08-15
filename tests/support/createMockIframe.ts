@@ -22,16 +22,16 @@ export function callContentWindowListener(iframe: HTMLIFrameElement, type: strin
 }
 
 export function getDocumentStrings(iframe: HTMLIFrameElement): string[] {
-	return [ ...iframeData.get(iframe).documentStrings ];
+	return [ ...iframeData.get(iframe)!.documentStrings ];
 }
 
 export default function createMockIframe(): HTMLIFrameElement {
 	const iframe = {
 		addEventListener(type: string, listener: EventListenerOrEventListenerObject, useCapture?: boolean | undefined): void {
-			if (!iframeData.get(iframe).eventListeners[type]) {
-				iframeData.get(iframe).eventListeners[type] = [];
+			if (!iframeData.get(iframe)!.eventListeners[type]) {
+				iframeData.get(iframe)!.eventListeners[type] = [];
 			}
-			iframeData.get(iframe).eventListeners[type].push(listener);
+			iframeData.get(iframe)!.eventListeners[type].push(listener);
 		},
 
 		classList: {
@@ -40,14 +40,14 @@ export default function createMockIframe(): HTMLIFrameElement {
 
 		contentWindow: {
 			addEventListener(type: string, listener: EventListenerOrEventListenerObject, useCapture?: boolean | undefined): void {
-				if (!iframeData.get(iframe).contentWindowEventListeners[type]) {
-					iframeData.get(iframe).contentWindowEventListeners[type] = [];
+				if (!iframeData.get(iframe)!.contentWindowEventListeners[type]) {
+					iframeData.get(iframe)!.contentWindowEventListeners[type] = [];
 				}
-				iframeData.get(iframe).contentWindowEventListeners[type].push(listener);
+				iframeData.get(iframe)!.contentWindowEventListeners[type].push(listener);
 			},
 
 			dispatchEvent(evt: Event): boolean {
-				const listeners = iframeData.get(iframe).contentWindowEventListeners[evt.type];
+				const listeners = iframeData.get(iframe)!.contentWindowEventListeners[evt.type];
 				if (listeners) {
 					return listeners.some((listener) => {
 						(<any> listener).call(iframe.contentWindow, evt);
@@ -59,11 +59,11 @@ export default function createMockIframe(): HTMLIFrameElement {
 
 			document: {
 				close(): void {
-					iframeData.get(iframe).documentOpen = false;
+					iframeData.get(iframe)!.documentOpen = false;
 				},
 
 				write(...content: string[]): void {
-					const data = iframeData.get(iframe);
+					const data = iframeData.get(iframe)!;
 					if (!data.documentOpen) {
 						data.documentStrings = [];
 						data.documentOpen = true;
@@ -79,16 +79,16 @@ export default function createMockIframe(): HTMLIFrameElement {
 			},
 
 			removeEventListener(type: string, listener?: EventListener | EventListenerObject | undefined, options?: boolean | EventListenerOptions | undefined): void {
-				const listeners = iframeData.get(iframe).contentWindowEventListeners[type];
+				const listeners = iframeData.get(iframe)!.contentWindowEventListeners[type];
 				if (listeners) {
-					iframeData.get(iframe).contentWindowEventListeners[type] = listeners
+					iframeData.get(iframe)!.contentWindowEventListeners[type] = listeners
 						.filter((item) => item !== listener);
 				}
 			}
 		},
 
 		dispatchEvent(evt: Event): boolean {
-			const listeners = iframeData.get(iframe).eventListeners[evt.type];
+			const listeners = iframeData.get(iframe)!.eventListeners[evt.type];
 			if (listeners) {
 				return listeners.some((listener) => {
 					(<any> listener).call(iframe.contentWindow, evt);
@@ -99,9 +99,9 @@ export default function createMockIframe(): HTMLIFrameElement {
 		},
 
 		removeEventListener(type: string, listener?: EventListener | EventListenerObject | undefined, options?: boolean | EventListenerOptions | undefined): void {
-			const listeners = iframeData.get(iframe).eventListeners[type];
+			const listeners = iframeData.get(iframe)!.eventListeners[type];
 				if (listeners) {
-					iframeData.get(iframe).eventListeners[type] = listeners
+					iframeData.get(iframe)!.eventListeners[type] = listeners
 						.filter((item) => item !== listener);
 				}
 		},
