@@ -1,11 +1,9 @@
-import { assign } from '@dojo/core/lang';
 import { v, w } from '@dojo/widget-core/d';
 import { DNode } from '@dojo/widget-core/interfaces';
 import Projector from '@dojo/widget-core/mixins/Projector';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
-import Editor from '../Editor';
 import project, { Program } from '../project';
-import Runner, { RunnerProperties } from '../Runner';
+import Workbench from '../Workbench';
 
 /* path to the project directory */
 const PROJECT_DIRECTORY = '../../../projects/';
@@ -122,20 +120,10 @@ class App extends WidgetBase {
 			]);
 		}
 
-		const runnerProperties: RunnerProperties = assign({}, this._program, { key: 'runner', onRun: this._onRun });
-
 		return v('div', [
 			projectLoad,
 			fileSelect,
-			v('div', {
-				classes: {
-					wrap: true
-				},
-				key: 'wrap'
-			}, [
-				w(Editor, { filename: this._editorFilename, key: 'editor' }),
-				w(Runner, runnerProperties)
-			])
+			w(Workbench, { filename: this._editorFilename, program: this._program, onRun: this._onRun })
 		]);
 	}
 }
