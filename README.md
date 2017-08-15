@@ -64,6 +64,18 @@ import project from '@dojo/web-editor/project';
 })();
 ```
 
+### Workbench
+
+This is a widget which wraps the other widgets to provide a _workbench_ for editing files and running projects.
+
+The `Workbench` has a few key properties:
+
+* `filename` - This is the name of the file in the project which should be being displayed in the `Editor`.
+* `program` - This is an emitted `Program` which is passed to the `Runner`.
+* `onRun` - A method that gets called when the `Runner` finishes running the supplied program.  This can be used to detrmine when to update the UI to reflect that program has been run.
+
+`Workbench` is a themeable widget, with the only themeable class being `workbench.base`.
+
 ### Editor
 
 This is a widget which wraps `monaco-editor`, allowing the editor to seemlessly integrate with the project.  It will automatically
