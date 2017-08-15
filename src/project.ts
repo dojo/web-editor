@@ -211,7 +211,7 @@ export class Project extends Evented {
 		if (!this._fileMap.has(file)) {
 			this._fileMap.set(file, {});
 		}
-		return this._fileMap.get(file);
+		return this._fileMap.get(file)!;
 	}
 
 	/**

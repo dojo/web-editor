@@ -8,7 +8,7 @@ export const definitionMap = new WeakMap<ProjectFile, ProjectFile>();
 export default {
 	getDefinitions(...files: ProjectFile[]): Promise<ProjectFile[]> {
 		const definitions = files.map((file) => definitionMap.get(file));
-		return Promise.resolve(definitions);
+		return Promise.resolve(definitions as any);
 	},
 	getEmit(...files: ProjectFile[]): Promise<EmitFile[]> {
 		return Promise.resolve(files);
