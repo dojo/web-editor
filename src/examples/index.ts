@@ -4,9 +4,13 @@ import Projector from '@dojo/widget-core/mixins/Projector';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import project, { Program } from '../project';
 import Workbench from '../Workbench';
+import { IconJson, load as loadIcons } from '../support/icons';
 
 /* path to the project directory */
 const PROJECT_DIRECTORY = '../../../projects/';
+
+let icons: IconJson;
+const iconsSourcePath = '../../extensions/vscode-material-icon-theme/out/src/material-icons.json';
 
 /**
  * An example application widget that incorporates both the Editor and Runner widgets into a simplistic UI
@@ -123,7 +127,13 @@ class App extends WidgetBase {
 		return v('div', [
 			projectLoad,
 			fileSelect,
-			w(Workbench, { filename: this._editorFilename, program: this._program, onRun: this._onRun })
+			w(Workbench, {
+				filename: this._editorFilename,
+				icons,
+				iconsSourcePath,
+				program: this._program,
+				onRun: this._onRun
+			})
 		]);
 	}
 }
@@ -131,5 +141,8 @@ class App extends WidgetBase {
 /* Mixin a projector to the App and create an instance */
 const projector = new (Projector(App))();
 
-/* Start the projector and append it to the document.body */
-projector.append();
+(async function () {
+	icons = await loadIcons(iconsSourcePath);
+	/* Start the projector and append it to the document.body */
+	projector.append();
+})();

@@ -45,7 +45,7 @@ registerSuite({
 		});
 
 		const render = widget.getRender() as WNode<UnitUnderTest>;
-		assert.lengthOf(render.children, 2, 'Should have two children');
+		assert.lengthOf(render.children, 3, 'Should have three children');
 		assert.deepEqual((render.properties as any).classes, { [css.base]: true }, 'Has correct classes');
 	}
 });

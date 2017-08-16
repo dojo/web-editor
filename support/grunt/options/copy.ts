@@ -5,7 +5,7 @@ export = function(grunt: IGrunt) {
 		dev: {
 			expand: true,
 			cwd: '.',
-			src: [ '{src,tests}/**/*.{html,css,json,txt}' ],
+			src: [ '{src,tests}/**/*.{html,css,json,txt}', 'extensions/**/*' ],
 			dest: '<%= devDirectory %>'
 		},
 
@@ -18,7 +18,7 @@ export = function(grunt: IGrunt) {
 			}, {
 				expand: true,
 				cwd: '.',
-				src: [ 'projects/**/*.json', 'package.json', 'README.md', 'node_modules/monaco-editor/**/*' ],
+				src: [ 'projects/**/*.json', 'package.json', 'README.md', 'node_modules/monaco-editor/**/*', 'extensions/**/*' ],
 				dest: '<%= distDirectory %>'
 			} ],
 			options: {
