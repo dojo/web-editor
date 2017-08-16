@@ -112,7 +112,7 @@ registerSuite({
 		 * expected render */
 		const render = widget.getRender() as HNode;
 		assert.strictEqual(render.tag, 'div', 'should be a "div" tag');
-		assert.deepEqual(render.properties.classes, widget.classes(css.base)(), 'should have proper classes');
+		assert.deepEqual(render.properties.classes, widget.classes(css.root)(), 'should have proper classes');
 		assert.lengthOf(render.children, 1, 'should have only one child');
 		assert.isFunction((render.children[0] as WNode).widgetConstructor, 'should be a function');
 		assert.strictEqual((render.children[0] as WNode).properties.key, 'editor', 'should have editor key set');

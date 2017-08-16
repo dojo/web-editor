@@ -1,8 +1,6 @@
-.base {
+.root {
 	flex: 1;
-	margin: 1em 0.5em;
 	height: 100%;
-	border: 1px solid grey;
 }
 
 .iframe {

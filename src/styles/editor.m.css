@@ -1,7 +1,7 @@
 /**
  * A base class for the editor
  */
-.base {
+.root {
 	flex: 1;
 	height: 100%;
 }

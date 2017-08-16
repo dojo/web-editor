@@ -309,7 +309,7 @@ export default class Runner extends RunnerBase<RunnerProperties> {
 
 	public render() {
 		return v('div', {
-			classes: this.classes(css.base)
+			classes: this.classes(css.root)
 		}, [ w(this._IframeDom, {
 			key: 'runner',
 			src: this.properties.src || DEFAULT_IFRAME_SRC

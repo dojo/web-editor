@@ -1,0 +1,36 @@
+import * as registerSuite from 'intern!object';
+import * as assert from 'intern/chai!assert';
+import harness from '@dojo/test-extras/harness';
+import { v } from '@dojo/widget-core/d';
+import { HNode } from '@dojo/widget-core/interfaces';
+import IconCss, { IconCssProperties } from '../../src/IconCss';
+import icons from '../support/iconJson';
+
+registerSuite({
+	name: 'IconCss',
+
+	'rendering'() {
+		const widget = harness(IconCss);
+
+		widget.expectRender(v('style', {
+			media: 'screen',
+			type: 'text/css'
+		}, [ null ]));
+
+		widget.destroy();
+	},
+
+	'with icons'() {
+		const widget = harness<IconCssProperties, typeof IconCss>(IconCss);
+
+		widget.setProperties({
+			baseClass: 'foo',
+			icons,
+			sourcePath: 'https://example.com/path/to/icons'
+		});
+
+		const render = widget.getRender() as HNode;
+
+		assert.include(render.children[0] as string, '.foo._file_json::before');
+	}
+});
