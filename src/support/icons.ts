@@ -1,3 +1,6 @@
+'!has("url-api")';
+import './URL';
+
 import global from '@dojo/core/global';
 import request from '@dojo/core/request';
 

@@ -9,4 +9,5 @@ import './postcss';
 import './postcssCssnext';
 import './postcssModules';
 import './sourceMap';
+import './URL';
 import './providers/all';
