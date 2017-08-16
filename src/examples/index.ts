@@ -4,6 +4,7 @@ import Projector from '@dojo/widget-core/mixins/Projector';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import project, { Program } from '../project';
 import Workbench from '../Workbench';
+import { load as loadTheme } from '../support/editorThemes';
 import { IconJson, load as loadIcons } from '../support/icons';
 import darkTheme from '../themes/dark/theme';
 
@@ -146,6 +147,7 @@ class App extends WidgetBase {
 const projector = new (Projector(App))();
 
 (async function () {
+	await loadTheme('../../data/editor-dark.json');
 	icons = await loadIcons(iconsSourcePath);
 	/* Start the projector and append it to the document.body */
 	projector.append();

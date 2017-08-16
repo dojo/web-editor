@@ -38,7 +38,14 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 			classes: this.classes(css.root)
 		}, [
 			w(IconCss, { baseClass: css.icons, icons, key: 'icons', sourcePath }),
-			w(Editor, { filename, key: 'editor', theme }),
+			w(Editor, {
+				filename,
+				key: 'editor',
+				options: {
+					minimap: { enabled: false }
+				},
+				theme
+			}),
 			w(Runner, runnerProperties)
 		]);
 	}
