@@ -7,6 +7,6 @@ registerSuite({
 	name: 'support/URL',
 
 	'exists'() {
-		assert(global.URL);
+		assert(global.window.URL);
 	}
 });
