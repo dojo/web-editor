@@ -1,0 +1,7 @@
+@import './variables.css';
+
+.root {
+	background: var(--dark-black);
+	flex: 1;
+	height: 100%;
+}

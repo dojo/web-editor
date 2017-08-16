@@ -1,6 +1,5 @@
-.base {
+.root {
 	display: flex;
-	align-items: center;
 }
 
 .icons {

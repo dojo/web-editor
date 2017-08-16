@@ -1,0 +1,24 @@
+@import 'https://fonts.googleapis.com/css?family=Roboto+Slab';
+
+html, body {
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+body {
+	align-items: stretch;
+	align-content: stretch;
+	display: flex;
+	flex-direction: column;
+	font-family: 'Roboto Slab', serif;
+}
+
+.root {
+	align-items: stretch;
+	align-content: stretch;
+	flex: 1;
+	display: flex;
+}

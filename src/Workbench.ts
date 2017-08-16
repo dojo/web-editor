@@ -25,17 +25,20 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 	render() {
 		const {
 			filename,
-			program,
 			icons,
 			iconsSourcePath: sourcePath,
-			onRun } = this.properties;
-		const runnerProperties: RunnerProperties = assign({}, program, { key: 'runner', onRun });
+			program,
+			theme,
+			onRun
+		} = this.properties;
+
+		const runnerProperties: RunnerProperties = assign({}, program, { key: 'runner', theme, onRun });
 
 		return v('div', {
-			classes: this.classes(css.base)
+			classes: this.classes(css.root)
 		}, [
 			w(IconCss, { baseClass: css.icons, icons, key: 'icons', sourcePath }),
-			w(Editor, { filename, key: 'editor' }),
+			w(Editor, { filename, key: 'editor', theme }),
 			w(Runner, runnerProperties)
 		]);
 	}

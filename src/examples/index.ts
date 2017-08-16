@@ -5,6 +5,7 @@ import WidgetBase from '@dojo/widget-core/WidgetBase';
 import project, { Program } from '../project';
 import Workbench from '../Workbench';
 import { IconJson, load as loadIcons } from '../support/icons';
+import darkTheme from '../themes/dark/theme';
 
 /* path to the project directory */
 const PROJECT_DIRECTORY = '../../../projects/';
@@ -124,7 +125,9 @@ class App extends WidgetBase {
 			]);
 		}
 
-		return v('div', [
+		return v('div', {
+			classes: { app: true }
+		}, [
 			projectLoad,
 			fileSelect,
 			w(Workbench, {
@@ -132,6 +135,7 @@ class App extends WidgetBase {
 				icons,
 				iconsSourcePath,
 				program: this._program,
+				theme: darkTheme,
 				onRun: this._onRun
 			})
 		]);
