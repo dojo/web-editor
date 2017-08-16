@@ -6,7 +6,7 @@ import has, { add as hasAdd } from '@dojo/has/has';
 
 hasAdd('url-api', () => {
 	try {
-		const u = new URL('b', 'http://a');
+		const u = new global.window.URL('b', 'http://a');
 		u.pathname = 'c%20d';
 		return u.href === 'http://a/c%20d';
 	}
@@ -665,6 +665,6 @@ if (!has('url-api')) {
 			};
 		}
 
-		global.URL = jURL;
+		global.window.URL = jURL;
 	})();
 }
