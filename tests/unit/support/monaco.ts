@@ -1,11 +1,12 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { load } from '../../../src/support/editorThemes';
+import { loadTheme, loadMonaco } from '../../../src/support/monaco';
 
 registerSuite({
 	name: 'support/icons',
 
 	'basic'() {
-		assert.isFunction(load);
+		assert.isFunction(loadTheme);
+		assert.isFunction(loadMonaco);
 	}
 });

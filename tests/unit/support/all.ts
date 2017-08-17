@@ -1,7 +1,7 @@
 import './base64';
 import './css';
 import './DOMParser';
-import './editorThemes';
+import './monaco';
 import './gists';
 import './icons';
 import './json';
