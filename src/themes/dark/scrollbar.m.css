@@ -1,0 +1,35 @@
+.root {
+	position: absolute;
+}
+
+.slider {
+	position: absolute;
+	left: 0px;
+	width: 10px;
+	background: rgba(78, 86, 102, 0.5);
+}
+
+.horizontal {
+	bottom: 0px;
+	height: 10px;
+	left: 0px;
+	width: 100%;
+}
+
+.vertical {
+	height: 100%;
+	right: 0px;
+	top: 0px;
+	width: 10px;
+}
+
+.invisible {
+	opacity: 0;
+	transition: opacity .8s linear;
+}
+
+.visible {
+	background: transparent;
+	opacity: 1;
+	transition: opacity .1s linear;
+}

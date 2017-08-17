@@ -8,6 +8,7 @@ import './json';
 import './postcss';
 import './postcssCssnext';
 import './postcssModules';
+import './ScrollBar';
 import './sourceMap';
 import './URL';
 import './providers/all';

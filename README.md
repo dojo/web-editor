@@ -71,10 +71,14 @@ This is a widget which wraps the other widgets to provide a _workbench_ for edit
 The `Workbench` has a few key properties:
 
 * `filename` - This is the name of the file in the project which should be being displayed in the `Editor`.
+* `files` - This is an array of file names that should be displayed in the file tree for user selection.
+* `icons` - An object structure used to provide a set of icons to be used when displaying a file in the tree.
+* `iconsSourcePath` - The path to the file icons to be used.
 * `program` - This is an emitted `Program` which is passed to the `Runner`.
-* `onRun` - A method that gets called when the `Runner` finishes running the supplied program.  This can be used to detrmine when to update the UI to reflect that program has been run.
+* `onFileOpen` - A method that gets called when a file is requested to be opened from the file tree.  If appropriate, to change the file being edited, update the `filename` property with the supplied ID.
+* `onRun` - A method that gets called when the `Runner` finishes running the supplied program.  This can be used to determine when to update the UI to reflect that program has been run.
 
-`Workbench` is a themeable widget, with the only themeable class being `workbench.base`.
+`Workbench` is a themeable widget, with `workbench.root` and `workbench.filepane` being themeable.
 
 ### Editor
 
@@ -87,7 +91,7 @@ The `Editor` has two key properties:
 * `filename` - This is the name of the file in the project which the editor should be displaying.  Changing this property will cause the widget to change the file that is currently being displayed.
 * `options` - Passed to the `monaco-editor` when it is created.  Needs to conform to the `monaco.editor.IEditorOptions` interface.
 
-`Editor` is a themeable widget, with the only themeable class being `editor.base`.
+`Editor` is a themeable widget, with the only themeable class being `editor.root`.
 
 #### Usage
 
@@ -136,7 +140,7 @@ The `Runner` has several key properties which control its behaviour:
 * `onRun` - A method that is called when the `Runner` is finished standing up the program.  It does not reflect the actual state
   of the program.
 
-`Runner` is a themeable widget, with the only themeable class being `runner.base`.
+`Runner` is a themeable widget, with the only themeable class being `runner.root`.
 
 #### Usage
 

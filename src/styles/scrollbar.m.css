@@ -1,0 +1,32 @@
+.root {
+	position: absolute;
+}
+
+.slider {
+	position: absolute;
+	left: 0px;
+	width: 10px;
+	border: 1px solid black;
+}
+
+.horizontal {
+	bottom: 0px;
+	height: 10px;
+	left: 0px;
+	width: 100%;
+}
+
+.vertical {
+	height: 100%;
+	right: 0px;
+	top: 0px;
+	width: 10px;
+}
+
+.invisible {
+	opacity: 0;
+}
+
+.visible {
+	opacity: 1;
+}

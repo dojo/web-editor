@@ -1,0 +1,89 @@
+@import './variables.css';
+
+.root {
+	background-color: var(--dark-black);
+	color: var(--dark-light-gray);
+	font-size: 13px;
+	height: 100%;
+	line-height: 1.4em;
+	overflow: hidden;
+	position: relative;
+	user-select: none;
+	width: 100%;
+}
+
+.scroll {
+	height: 100%;
+	position: absolute;
+	width: 100%;
+}
+
+.label {
+	flex: 1;
+	flex-wrap: nowrap;
+	height: 22px;
+	line-height: 22px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.label::before {
+	background-size: 16px;
+	background-position: 0;
+	background-repeat: no-repeat;
+	height: 22px;
+	padding-right: 6px;
+	-webkit-font-smoothing: antialiased;
+	width: 16px;
+	display: inline-block;
+	vertical-align: top;
+}
+
+.labelName {
+	overflow: hidden;
+	text-decoration: none;
+	text-overflow: ellipsis;
+	white-space: pre;
+}
+
+.content {
+	position: relative;
+	height: 100%;
+	display: flex;
+}
+
+.hasChildren .content::before {
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23E8E8E8' d='M6 4v8l4-4-4-4zm1 2.414L8.586 8 7 9.586V6.414z'/%3E%3C/svg%3E");
+}
+
+.hasChildren.expanded .content::before {
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23E8E8E8' d='M11 10H5.344L11 4.414V10z'/%3E%3C/svg%3E");
+}
+
+.content::before {
+	background-position: 50% 50%;
+	background-size: 16px;
+	background-repeat: no-repeat;
+	content: ' ';
+	display: inline-block;
+	height: 22px;
+	padding-right: 6px;
+	vertical-align: top;
+	width: 16px;
+}
+
+.row {
+	box-sizing: border-box;
+	cursor: pointer;
+	overflow: hidden;
+	touch-action: none;
+	width: 100%;
+}
+
+.row.selected {
+	background-color: var(--dark-light-black);
+}
+
+.row:hover:not(.selected) {
+	background-color: var(--dark-med-black);
+}

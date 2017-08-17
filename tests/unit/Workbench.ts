@@ -44,8 +44,10 @@ registerSuite({
 			onRun
 		});
 
+		widget.classes(css.filetree)();
+
 		const render = widget.getRender() as WNode<UnitUnderTest>;
-		assert.lengthOf(render.children, 3, 'Should have three children');
+		assert.lengthOf(render.children, 4, 'Should have four children');
 		assert.deepEqual((render.properties as any).classes, widget.classes(css.root)(), 'Has correct classes');
 	}
 });
