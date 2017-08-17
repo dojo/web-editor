@@ -10,8 +10,6 @@ import DomWrapper from '@dojo/widget-core/util/DomWrapper';
 import project from './project';
 import * as css from './styles/editor.m.css';
 
-const globalMonaco: typeof monaco = global.monaco;
-
 /**
  * @type EditorProperties
  *
@@ -34,12 +32,12 @@ const EditorBase = ThemeableMixin(WidgetBase);
 
 @theme(css)
 export default class Editor extends EditorBase<EditorProperties> {
-	private _editor: monaco.editor.IStandaloneCodeEditor | undefined;
+	private _editor: monaco.editor.IStandaloneCodeEditor;
 	private _EditorDom: Constructor<WidgetBase<VirtualDomProperties & WidgetProperties>>;
 	private _didChangeHandle: monaco.IDisposable;
 	private _onAfterRender = () => {
 		if (!this._editor) {
-			this._editor = globalMonaco.editor.create(this._root, this.properties.options);
+			this._editor = global.monaco.editor.create(this._root, this.properties.options);
 			this._didChangeHandle = this._editor.onDidChangeModelContent(debounce(this._onDidChangeModelContent, 1000));
 			const { onEditorInit } = this.properties;
 			this._setModel();
@@ -91,6 +89,8 @@ export default class Editor extends EditorBase<EditorProperties> {
 		/* TODO: Create single node when https://github.com/dojo/widget-core/issues/553 resolved */
 		return v('div', {
 			classes: this.classes(css.root)
-		}, [ w(this._EditorDom, { key: 'editor' }) ]);
+		}, [
+			w(this._EditorDom, { key: 'editor' })
+		]);
 	}
 }
