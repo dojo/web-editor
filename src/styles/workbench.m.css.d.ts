@@ -1,2 +1,2 @@
 export const root: string;
-export const icons: string;
+export const filetree: string;

@@ -1,0 +1,55 @@
+.root {
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+	user-select: none;
+	width: 100%;
+}
+
+.scroll {
+	height: 100%;
+	position: absolute;
+	width: 100%;
+}
+
+.label {
+	flex: 1;
+	flex-wrap: nowrap;
+	overflow: hidden;
+	text-overflow: hidden;
+}
+
+.labelFixed {
+	display: inherit;
+}
+
+.labelName {
+	overflow: hidden;
+	text-overflow: hidden;
+}
+
+.content {
+	position: relative;
+	height: 100%;
+	display: flex;
+}
+
+.hasChildren .content::before {
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23E8E8E8' d='M6 4v8l4-4-4-4zm1 2.414L8.586 8 7 9.586V6.414z'/%3E%3C/svg%3E");
+}
+
+.hasChildren.expanded .content::before {
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23E8E8E8' d='M11 10H5.344L11 4.414V10z'/%3E%3C/svg%3E");
+}
+
+.row {
+	box-sizing: border-box;
+	cursor: pointer;
+	overflow: hidden;
+	touch-action: none;
+	width: 100%;
+}
+
+.row.selected {
+	font-weight: bold;
+}

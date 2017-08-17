@@ -24,28 +24,6 @@ class App extends WidgetBase {
 	private _projectValue = 'dojo2-todo-mvc.project.json';
 
 	/**
-	 * Returns a set of virtual DOM nodes that are the options for the file select
-	 */
-	private _getFileOptions(): DNode[] {
-		return project.getFileNames()
-			.sort((a, b) => a < b ? -1 : 1)
-			.map((filename) => {
-				return v('option', { value: filename }, [ filename ]);
-			});
-	}
-
-	/**
-	 * Handle when the file changes in the dropdown
-	 * @param e The DOM `onchange` event
-	 */
-	private _onchangeFile(e: Event) {
-		e.preventDefault();
-		const select: HTMLSelectElement = e.target as any;
-		this._editorFilename = select.value;
-		this.invalidate();
-	}
-
-	/**
 	 * Handle when the project name changes in the dropdown
 	 * @param e The DOM `onchange` event
 	 */
@@ -89,6 +67,12 @@ class App extends WidgetBase {
 			});
 	}
 
+	private _onFileOpen(filename: string) {
+		if (project.isLoaded() && project.includes(filename)) {
+			this._editorFilename = filename;
+		}
+	}
+
 	/**
 	 * Handles when the Runner widget finishes running the project
 	 */
@@ -117,10 +101,6 @@ class App extends WidgetBase {
 		if (isProjectLoaded) {
 			fileSelect = v('div', { key: 'fileSelect' }, [
 				v('div', [
-					v('label', { for: 'select-file' }, [ 'File to display:' ]),
-					v('select', { name: 'select-file', id: 'select-file', onchange: this._onchangeFile }, this._getFileOptions())
-				]),
-				v('div', [
 					v('button', { type: 'button', name: 'run', id: 'run', onclick: this._onclickRun, disabled: this._compiling ? true : false }, [ 'Run' ])
 				])
 			]);
@@ -133,10 +113,13 @@ class App extends WidgetBase {
 			fileSelect,
 			w(Workbench, {
 				filename: this._editorFilename,
+				files: isProjectLoaded ? project.getFileNames() : undefined,
 				icons,
 				iconsSourcePath,
 				program: this._program,
 				theme: darkTheme,
+
+				onFileOpen: this._onFileOpen,
 				onRun: this._onRun
 			})
 		]);
