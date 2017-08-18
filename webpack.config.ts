@@ -47,7 +47,7 @@ const cssModuleLoader = ExtractTextPlugin.extract({
 	]
 });
 
-module.exports = (env: string, args: string[]) => {
+const webpackConfig = (env: string, args: string[]) => {
 	return {
 		entry: {
 			main: [
@@ -189,3 +189,5 @@ module.exports = (env: string, args: string[]) => {
 		devtool: 'cheap-module-eval-source-map'
 	};
 };
+
+export default webpackConfig;
