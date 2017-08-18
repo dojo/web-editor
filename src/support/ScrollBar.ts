@@ -1,8 +1,10 @@
 import { v } from '@dojo/widget-core/d';
+import Dimensions from '@dojo/widget-core/meta/Dimensions';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import { theme, ThemeableMixin, ThemeableProperties } from '@dojo/widget-core/mixins/Themeable';
+import Drag from './meta/Drag';
+import Matches from './meta/Matches';
 import * as css from '../styles/scrollbar.m.css';
-import { getAbsolutePosition } from './events';
 
 /**
  * Properties that can be set `ScrollBar`
@@ -51,38 +53,71 @@ const DEFAULT_KEY = 'scrollbar';
 const ThemeableBase = ThemeableMixin(WidgetBase);
 
 /**
+ * Convert a relative number to an absolute number
+ * @param relative The relative value to convert to an absolute value
+ * @param relativeSize The relative size to compare with the abosolute size
+ * @param absoluteSize The absolute size to compare with the relative size
+ */
+function fromRelative(relative: number, relativeSize: number, absoluteSize: number): number {
+	return absoluteSize * (relativeSize ? relative / relativeSize : 0);
+}
+
+/**
+ * Convert an absolute number to a relative number
+ * @param absolute The absolute value to convert to a relative value
+ * @param relativeSize The realtive size to compare with the absolute size
+ * @param absoluteSize The absolute size to compare with the relative size
+ */
+function toRelative(absolute: number, relativeSize: number, absoluteSize: number): number {
+	return absoluteSize ? (absolute / absoluteSize) * relativeSize : 0;
+}
+
+/**
  * A class that provides a visualization of scrolling as well as emits events when the user interacts with
  * the scroll bar.  The properties of the scroll widget are relative, thereby not needing to translate from
  * the real DOM size of the scroll bar or scroll area it represents.
  */
 @theme(css)
 export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
-	private _domSize = 0;
-	private _dragging = false;
-	private _dragPosition: number;
 	private _visible = false;
 
-	private _getSize(): number {
-		return this.properties.size || this._domSize;
+	/**
+	 * Returns the height or width of the scroll bar, depending on if it is horizontal or not
+	 */
+	private _getDomSize(): number {
+		const { horizontal, key = DEFAULT_KEY } = this.properties;
+		const { height, width } = this.meta(Dimensions).get(key).size;
+		return horizontal ? width : height;
 	}
 
-	private _fromRelative = (relative: number): number => {
-		const size = this._getSize();
-		return this._domSize * (size ? relative / size : 0);
-	}
-
-	private _toRelative = (absolute: number): number => {
-		const size = this._getSize();
-		return this._domSize ? (absolute / this._domSize) * size : 0;
-	}
-
-	private _onDomUpdate(element: HTMLElement, key: string) {
-		const { horizontal = false, key: widgetKey = DEFAULT_KEY } = this.properties;
-		if (key === widgetKey) {
-			this._domSize = horizontal ? element.clientWidth : element.clientHeight;
+	/**
+	 * Determine if the scroll bar node is being clicked and if so, call the scroll listener with the relative position
+	 * that is attempted to be navigated to.
+	 * @param evt The mouse event
+	 */
+	private _onclick(evt: MouseEvent) {
+		if (this.meta(Matches).get(this.properties.key || DEFAULT_KEY, evt)) {
+			evt.preventDefault();
+			const domSize = this._getDomSize();
+			const {
+				horizontal,
+				position,
+				size = domSize,
+				sliderMin = 10,
+				sliderSize,
+				onScroll
+			} = this.properties;
+			const absoluteDelta = (horizontal ? evt.offsetX : evt.offsetY) -
+				(fromRelative(position, size, domSize) +
+				((sliderSize ? fromRelative(sliderSize, size, domSize) : sliderMin) / 2));
+			onScroll && onScroll(toRelative(absoluteDelta, size, domSize));
 		}
 	}
 
+	/**
+	 * Set the visible state to true if the mouse is hovering over the scroll bar
+	 * @param evt The mouse event
+	 */
 	private _onmouseenter(evt: MouseEvent) {
 		evt.preventDefault();
 		if (!this._visible) {
@@ -91,6 +126,10 @@ export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
 		}
 	}
 
+	/**
+	 * Set the visible state to false if the mouse has moved away from the scroll bar
+	 * @param evt The mouse event
+	 */
 	private _onmouseleave(evt: MouseEvent) {
 		evt.preventDefault();
 		if (this._visible) {
@@ -99,56 +138,30 @@ export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
 		}
 	}
 
-	private _onSliderDragStart = (evt: MouseEvent & TouchEvent) => {
-		evt.preventDefault();
-		const { horizontal } = this.properties;
-		this._dragging = true;
-		this._dragPosition = getAbsolutePosition(evt, horizontal);
-	}
-
-	private _onSliderDrag = (evt: MouseEvent & TouchEvent) => {
-		const {
-			_dragging,
-			_dragPosition,
-			properties: {
-				horizontal,
-				onScroll
-			}
-		} = this;
-		if (_dragging) {
-			evt.preventDefault();
-			const delta = this._toRelative(getAbsolutePosition(evt, horizontal) - _dragPosition);
-			onScroll && onScroll(delta);
-			this._dragPosition = getAbsolutePosition(evt, horizontal);
-		}
-	}
-
-	private _onSliderDragStop = (evt: MouseEvent & TouchEvent) => {
-		evt.preventDefault();
-		this._dragging = false;
-	}
-
-	public onElementCreated(element: HTMLElement, key: string) {
-		this._onDomUpdate(element, key);
-	}
-
-	public onElementUpdated(element: HTMLElement, key: string) {
-		this._onDomUpdate(element, key);
-	}
-
 	render() {
+		const domSize = this._getDomSize();
 		const {
 			horizontal = false,
 			key = DEFAULT_KEY,
 			position,
 			size = 0,
 			sliderMin = 10,
-			sliderSize = 0,
-			visible: propsVisible
+			sliderSize = domSize,
+			visible: propsVisible,
+			onScroll
 		} = this.properties;
-		const renderPosition = String(this._fromRelative(position)) + 'px';
-		const relativeSliderSize = this._fromRelative(sliderSize);
-		const renderSliderSize = String(relativeSliderSize > sliderMin ? relativeSliderSize : sliderMin) + 'px';
+
+		let dragging = false;
+		if (onScroll) {
+			const dragResult = this.meta(Drag).get('slider');
+			const delta = horizontal ? dragResult.delta.x : dragResult.delta.y;
+			dragging = dragResult.isDragging;
+			delta && onScroll(toRelative(delta, size, domSize));
+		}
+
+		const renderPosition = String(fromRelative(position, size, domSize)) + 'px';
+		const absoluteSliderSize = fromRelative(sliderSize, size, domSize);
+		const renderSliderSize = String(absoluteSliderSize > sliderMin ? absoluteSliderSize : sliderMin) + 'px';
 		const visible = sliderSize >= size ? false : propsVisible !== undefined ? propsVisible : this._visible;
 		const styles = horizontal ? {
 			left: renderPosition,
@@ -159,23 +172,21 @@ export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
 		};
 
 		return v('div', {
-			classes: this.classes(css.root, css.vertical, visible ? css.visible : css.invisible),
+			classes: this.classes(
+				css.root,
+				horizontal ? css.horizontal : css.vertical,
+				visible || dragging ? css.visible : css.invisible
+			),
 			key,
 
+			onclick: this._onclick,
 			onmouseenter: this._onmouseenter,
 			onmouseleave: this._onmouseleave
 		}, [
 			v('div', {
 				classes: this.classes(css.slider),
 				key: 'slider',
-				styles,
-
-				onmousedown: this._onSliderDragStart,
-				onmousemove: this._onSliderDrag,
-				onmouseup: this._onSliderDragStop,
-				ontouchstart: this._onSliderDragStart,
-				ontouchmove: this._onSliderDrag,
-				ontouchend: this._onSliderDragStop
+				styles
 			})
 		]);
 	}
