@@ -56,8 +56,7 @@ module.exports = (env: string, args: string[]) => {
 			],
 			'support/providers/amdRequire': './src/support/providers/amdRequire.ts',
 			'support/worker-proxy': './src/support/worker-proxy.ts',
-			'examples/index': './src/examples/index.ts',
-			postcss: './support/webpack/postcss.ts'
+			'examples/index': './src/examples/index.ts'
 		},
 		output: {
 			libraryTarget: 'umd',
@@ -67,18 +66,6 @@ module.exports = (env: string, args: string[]) => {
 		context: basePath,
 		module: {
 			rules: [
-				{
-					test: require.resolve('postcss-cssnext'),
-					use: [ { loader: 'expose-loader', options: 'cssnext' } ]
-				},
-				{
-					test: require.resolve('postcss'),
-					use: [ { loader: 'expose-loader', options: 'postcss' } ]
-				},
-				{
-					test: require.resolve('postcss-modules'),
-					use: [ { loader: 'expose-loader', options: 'postcssModules' } ]
-				},
 				{
 					test: /\.tsx?$/,
 					enforce: 'pre',

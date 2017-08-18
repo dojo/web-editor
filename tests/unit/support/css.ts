@@ -46,15 +46,9 @@ registerSuite({
 			};
 		});
 
-		register('src/support/postcss', {
-			default: postcssSpy
-		});
-		register('src/support/postcssCssnext', {
-			default: cssnextStub
-		});
-		register('src/support/postcssModules', {
-			default: postcssModulesSpy
-		});
+		register('postcss', postcssSpy);
+		register('postcss-cssnext', cssnextStub);
+		register('postcss-modules', postcssModulesSpy);
 
 		mockHandle = enable();
 
