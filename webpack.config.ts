@@ -3,17 +3,16 @@ import { existsSync } from 'fs';
 import { resolve, join, sep, isAbsolute } from 'path';
 
 // loaders
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer-sunburst');
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const postcssImport = require('postcss-import');
 const postcssCssNext = require('postcss-cssnext');
 
 // plugins
 import CoreLoadPlugin from '@dojo/cli-build-webpack/plugins/CoreLoadPlugin';
-// const AutoRequireWebpackPlugin = require('auto-require-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-// const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
-const { IgnorePlugin, NormalModuleReplacementPlugin, ContextReplacementPlugin } = webpack;
+const { IgnorePlugin, NormalModuleReplacementPlugin, ContextReplacementPlugin, optimize: { UglifyJsPlugin } } = webpack;
 
 function isRelative(id: string): boolean {
 	const first = id.charAt(0);
@@ -47,7 +46,7 @@ const cssModuleLoader = ExtractTextPlugin.extract({
 	]
 });
 
-const webpackConfig = (env: string, args: string[]) => {
+const webpackConfig = (env: any = {}, args: any) => {
 	return {
 		entry: {
 			main: [
@@ -138,7 +137,6 @@ const webpackConfig = (env: string, args: string[]) => {
 			]
 		},
 		plugins: [
-			// new AutoRequireWebpackPlugin('examples/index'),
 			new NormalModuleReplacementPlugin(/\.m\.css$/, (result: any) => {
 				if (isAbsolute(result.request)) {
 					return;
@@ -151,11 +149,30 @@ const webpackConfig = (env: string, args: string[]) => {
 					result.request = result.request.replace(/\.m\.css$/, '.m.css.js');
 				}
 			}),
-			// new HtmlWebpackPlugin({
-			// 	inject: true,
-			// 	chunks: [ 'examples/index', 'postcss' ],
-			// 	template: 'src/examples/index.html'
-			// }),
+			...(() => {
+				let distPlugins: any[] = [];
+
+				if (env.dist) {
+					console.log('\n\n\nDIST\n\n\n');
+					distPlugins = [
+						new UglifyJsPlugin({
+							sourceMap: true,
+							compress: { warnings: false },
+							exclude: /tests[/]/
+						}),
+						new OptimizeCssAssetsPlugin({
+							cssProcessorOptions: { map: { inline: false } }
+						}),
+						new BundleAnalyzerPlugin({
+							analyzerMode: 'static',
+							openAnalyzer: false,
+							reportType: 'sunburst'
+						})
+					];
+				}
+
+				return distPlugins;
+			})(),
 			new IgnorePlugin(/request\/providers\/node/),
 			new ContextReplacementPlugin(/dojo-app[\\\/]lib/, { test: () => false }),
 			new ContextReplacementPlugin(/.*/, { test: () => false }),
@@ -165,10 +182,6 @@ const webpackConfig = (env: string, args: string[]) => {
 			new CopyWebpackPlugin([
 				{ from: resolve(__dirname, 'node_modules/monaco-editor/min/vs'), to: 'vs' }
 			])
-			// new HtmlWebpackIncludeAssetsPlugin({
-			// 	assets: ['vs/loader.js', 'configureLoader.js'],
-			// 	append: false
-			// })
 		],
 		node: {
 			dgram: 'empty',

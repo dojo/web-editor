@@ -8,6 +8,6 @@ export = function(grunt: IGrunt) {
 			progress: true
 		},
 		dev: webpackConfig,
-		dist: webpackConfig
+		dist: webpackConfig.bind(null, { dist: true })
 	};
 };
