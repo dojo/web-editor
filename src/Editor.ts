@@ -9,6 +9,7 @@ import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mi
 import DomWrapper from '@dojo/widget-core/util/DomWrapper';
 import project from './project';
 import * as css from './styles/editor.m.css';
+import loadMonaco from './support/monaco';
 
 /**
  * @type EditorProperties
@@ -35,7 +36,8 @@ export default class Editor extends EditorBase<EditorProperties> {
 	private _editor: monaco.editor.IStandaloneCodeEditor;
 	private _EditorDom: Constructor<WidgetBase<VirtualDomProperties & WidgetProperties>>;
 	private _didChangeHandle: monaco.IDisposable;
-	private _onAfterRender = () => {
+	private _onAfterRender = async () => {
+		await loadMonaco();
 		if (!this._editor) {
 			this._editor = global.monaco.editor.create(this._root, this.properties.options);
 			this._didChangeHandle = this._editor.onDidChangeModelContent(debounce(this._onDidChangeModelContent, 1000));

@@ -26,6 +26,7 @@ let onDidChangeModelContentDisposeStub: SinonStub;
 let disposeStub: SinonStub;
 let layoutStub: SinonStub;
 let setFileDirtyStub: SinonStub;
+let monacoStub: SinonStub;
 
 let projectFileMap: { [filename: string]: boolean; };
 
@@ -56,6 +57,11 @@ registerSuite({
 		disposeStub = sandbox.stub();
 		layoutStub = sandbox.stub();
 		setFileDirtyStub = sandbox.stub();
+		monacoStub = sandbox.stub().returns(Promise.resolve());
+
+		register('src/support/monaco', {
+			default: monacoStub
+		});
 
 		register('src/project', {
 			default: {
