@@ -46,5 +46,5 @@ export function initConfig(grunt: IGrunt, otherOptions: any) {
 
 	grunt.registerTask('dist', [ 'clean:dist', 'tcm', 'tslint', 'ts:dist', 'copy:dist', 'patch', 'postcss:dist', 'auto_install:dist' ]);
 
-	grunt.registerTask('default', [ 'dev' ]);
+	grunt.registerTask('default', [ 'webpack:dev' ]);
 }
