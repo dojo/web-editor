@@ -163,12 +163,9 @@ export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
 		const absoluteSliderSize = fromRelative(sliderSize, size, domSize);
 		const renderSliderSize = String(absoluteSliderSize > sliderMin ? absoluteSliderSize : sliderMin) + 'px';
 		const visible = sliderSize >= size ? false : propsVisible !== undefined ? propsVisible : this._visible;
-		const styles = horizontal ? {
-			left: renderPosition,
-			width: renderSliderSize
-		} : {
-			top: renderPosition,
-			height: renderSliderSize
+		const styles = {
+			[ horizontal ? 'left' : 'top' ]: renderPosition,
+			[ horizontal ? 'width' : 'height' ]: renderSliderSize
 		};
 
 		return v('div', {
