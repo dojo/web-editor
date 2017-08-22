@@ -8,5 +8,13 @@ registerSuite({
 	'basic'() {
 		assert.isFunction(loadTheme);
 		assert.isFunction(loadMonaco);
+	},
+
+	'loadMonaco returns a Promise'() {
+		assert.instanceOf(loadMonaco(), Promise);
+	},
+
+	'loadTheme returns a Promise'() {
+		assert.instanceOf(loadTheme('foo'), Promise);
 	}
 });

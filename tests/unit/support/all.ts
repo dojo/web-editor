@@ -5,6 +5,7 @@ import './monaco';
 import './gists';
 import './icons';
 import './json';
+import './MonacoScript';
 import './ScrollBar';
 import './sourceMap';
 import './URL';
