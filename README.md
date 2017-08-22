@@ -212,41 +212,6 @@ startGistRouter({
 });
 ```
 
-### external/postcss-bundle
-
-In order to properly transpile CSS that is part of a project, the web-editor needs to utilise postcss with additional plugins for this
-purpose.  Because postcss is distributed as a NodeJS package, it is necessary to make this available in the browser with appropriate
-fills of NodeJS functionality.  This is accomplished by creating a WebPack bundle of the modules and exporting the key modules as
-globals.
-
-This bundle needs to be loaded prior to loading the AMD loader, otherwise there will be conflicts between the WebPack `require()` and
-the AMD `require()`.  It should look something like this:
-
-```html
-<!DOCTYPE html>
-<html><title>Example</title></html>
-<body>
-    <script src="node_modules/@dojo/web-editor/external/postcss-bundle.js"></script>
-    <script src="node_modules/@dojo/web-editor/node_modules/monaco-editor/min/vs/loader.js"></script>
-    <script>
-        window.MonacoEnvironment = {
-            getWorkerUrl: function () {
-                return '../worker-proxy.js';
-            }
-        };
-
-        require.config({
-            paths: {
-                'vs': 'node_modules/@dojo/web-editor/node_modules/monaco-editor/min/vs',
-                '@dojo': 'node_modules/@dojo'
-            }
-        });
-
-        require([ './example' ], function () {});
-    </script>
-</body>
-```
-
 ### Supporting Modules
 
 There are several modules which are used to support the functionality of the web editor.

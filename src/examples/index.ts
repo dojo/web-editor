@@ -4,12 +4,12 @@ import Projector from '@dojo/widget-core/mixins/Projector';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import project, { Program } from '../project';
 import Workbench from '../Workbench';
-import { load as loadTheme } from '../support/editorThemes';
+import { loadTheme } from '../support/monaco';
 import { IconJson, load as loadIcons } from '../support/icons';
 import darkTheme from '../themes/dark/theme';
 
 /* path to the project directory */
-const PROJECT_DIRECTORY = '../../../projects/';
+const PROJECT_DIRECTORY = '../../projects/';
 
 let icons: IconJson;
 const iconsSourcePath = '../../extensions/vscode-material-icon-theme/out/src/material-icons.json';
