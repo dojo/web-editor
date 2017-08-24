@@ -28,7 +28,8 @@ export interface IconCssProperties extends WidgetProperties {
  */
 function getStylesFromJson(sourcePath: string, baseClass: string, icons: IconJson): string {
 
-	const resolver = new IconResolver(sourcePath, icons);
+	const resolver = new IconResolver();
+	resolver.setProperties({ icons, sourcePath });
 	let styles = '';
 
 	function before(selector: string): string {

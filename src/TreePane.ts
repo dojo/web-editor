@@ -1,14 +1,13 @@
 import { includes } from '@dojo/shim/array';
-import Map from '@dojo/shim/Map';
 import { v, w } from '@dojo/widget-core/d';
 import { DNode, WNode } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
+import Dimensions from '@dojo/widget-core/meta/Dimensions';
 import { theme, ThemeableMixin, ThemeableProperties } from '@dojo/widget-core/mixins/Themeable';
 import { Keys } from '@dojo/widgets/common/util';
 import * as css from './styles/treepane.m.css';
-import { IconJson, IconResolver } from './support/icons';
-import { getAbsolutePosition } from './support/events';
 import ScrollBar from './support/ScrollBar';
+import Drag from './support/meta/Drag';
 
 /**
  * The interface for items that can be rendered in the `TreePane`.
@@ -49,9 +48,13 @@ export interface TreePaneProperties extends ThemeableProperties {
 	expanded?: string[];
 
 	/**
-	 * An object that provides information about icons to use with an item
+	 * A method for returning the class to an item when rendering, the method should return a `string` with the class name that
+	 * should be used for the item or `undefined` if there is no icon
+	 * @param item The tree pane item that is referenced
+	 * @param expanded If the tree pane item has the `children` attribute, expanded will be `true` if the item is in an
+	 *                 expanded state or `false` if not expanded.  Otherwise the value is `undefined`.
 	 */
-	icons?: IconJson;
+	getItemClass?(item: TreePaneItem, expanded: boolean | undefined): string | undefined;
 
 	/**
 	 * The label for the widget from an accessability perspective
@@ -69,11 +72,6 @@ export interface TreePaneProperties extends ThemeableProperties {
 	showRoot?: boolean;
 
 	/**
-	 * The path to the root of the icon
-	 */
-	sourcePath?: string;
-
-	/**
 	 * The root item of the tree
 	 */
 	root?: TreePaneItem;
@@ -82,7 +80,7 @@ export interface TreePaneProperties extends ThemeableProperties {
 	 * Called when an item is opened (double clicked or enter pressed)
 	 * @param id The ID of the item that is attempting to be opened
 	 */
-	onItemOpen?(id?: string): void;
+	onItemOpen?(id: string): void;
 
 	/**
 	 * Called when an item is being selected (clicked or navigated to via the keyboard)
@@ -91,7 +89,7 @@ export interface TreePaneProperties extends ThemeableProperties {
 	 * to update the visual state of the widget
 	 * @param id The ID of the item that is attempting to be selected
 	 */
-	onItemSelect?(id?: string): void;
+	onItemSelect?(id: string): void;
 
 	/**
 	 * Called on a parent item when the item's expanded state is being toggled.
@@ -100,7 +98,7 @@ export interface TreePaneProperties extends ThemeableProperties {
 	 * update the visual state of the widget
 	 * @param id The ID of the item that is attempting to have its expanded state toggled
 	 */
-	onItemToggle?(id?: string): void;
+	onItemToggle?(id: string): void;
 }
 
 const ROW_HEIGHT = 22;
@@ -184,7 +182,12 @@ export class Row extends ThemeableBase<RowProperties> {
 				title
 			}
 		} = this;
-		const classes = [ css.row, selected && css.selected || null, hasChildren && css.hasChildren || null, expanded && css.expanded || null ];
+		const classes = [
+			css.row,
+			selected && css.selected || null,
+			hasChildren && css.hasChildren || null,
+			expanded && css.expanded || null
+		];
 		return v('div', {
 			'aria-level': String(level),
 			'aria-selected': selected,
@@ -194,6 +197,7 @@ export class Row extends ThemeableBase<RowProperties> {
 			styles: {
 				'padding-left': String(level * ROW_LEVEL_LEFT_PADDING) + 'px'
 			},
+
 			onclick: _onclick,
 			ondblclick: _ondblclick
 		}, [
@@ -233,94 +237,44 @@ interface TreePaneNavigationState {
  */
 @theme(css)
 export default class TreePane extends ThemeableBase<TreePaneProperties> {
-	private _dragging = false;
-	private _dragPosition: number;
-	private _focusNode: HTMLElement;
-	private _items = new Map<string, TreePaneItem>();
 	private _navigation: TreePaneNavigationState;
-	private _resolver: IconResolver;
-	private _visibleRowCount: number;
 	private _scrollPosition = 0;
 	private _scrollVisible = false;
 	private _size: number;
 	private _sliderSize: number;
-	private _wantsFocus = false;
 
 	/**
-	 * _Flattens_ the tree of items into a map.
+	 * Search the tree of items to find one item, in a BFS fashion
+	 * @param id The tree pane item ID to match
 	 */
-	private _cacheItems() {
-		function cacheItem(cache: Map<string, TreePaneItem>, item: TreePaneItem) {
-			cache.set(item.id, item);
-			if (item.children) {
-				item.children.forEach(child => cacheItem(cache, child));
+	private _findItem(id: string): TreePaneItem | undefined {
+		if (!this.properties.root) {
+			return;
+		}
+
+		function find(id: string, item: TreePaneItem): TreePaneItem | undefined {
+			if (item.id === id) {
+				return item;
+			}
+			const children = item.children;
+			if (children) {
+				for (let i = 0; i < children.length; i++) {
+					const search = find(id, children[i]);
+					if (search) {
+						return search;
+					}
+				}
 			}
 		}
 
-		if (this.properties.root) {
-			this._items.clear();
-			cacheItem(this._items, this.properties.root);
-		}
+		return find(id, this.properties.root);
 	}
 
 	/**
-	 * Ensures that if the widget is blurred it will no longer grab focus
+	 * Determine how many rows are currently visible
 	 */
-	private _onblur() {
-		this._wantsFocus = false;
-	}
-
-	/**
-	 * Hooks functions that grab references and information about the DOM that the widget needs to operate
-	 * properly.
-	 *
-	 * This will eventually be replaced by the Dojo `meta` services.
-	 * @param element The HTMLElement that is being updated
-	 * @param key The key of the item to be updated
-	 */
-	private _onDomUpdate(element: HTMLElement, key: string) {
-		if (key === 'rows') {
-			this._visibleRowCount = element.clientHeight / ROW_HEIGHT;
-			if (!this._focusNode) {
-				this._focusNode = element;
-			}
-		}
-	}
-
-	/**
-	 * Deal with starting to drag the scrollable area
-	 * @param evt The TouchEvent or MouseEvent
-	 */
-	private _onDragStart(evt: TouchEvent & MouseEvent) {
-		evt.preventDefault();
-		this._dragging = true;
-		this._dragPosition = getAbsolutePosition(evt);
-	}
-
-	/**
-	 * Deal with tracking the movement of the scrollable area
-	 * @param evt The TouchEvent or Mouse Event
-	 */
-	private _onDragMove(evt: TouchEvent & MouseEvent) {
-		const {
-			_dragging,
-			_dragPosition
-		} = this;
-		if (_dragging) {
-			evt.preventDefault();
-			const delta = getAbsolutePosition(evt) - _dragPosition;
-			this._onPositionUpdate(delta / ROW_HEIGHT);
-			this._dragPosition = getAbsolutePosition(evt);
-		}
-	}
-
-	/**
-	 * Deal with when the drag movement ends
-	 * @param evt The TouchEvent or MouseEvent
-	 */
-	private _onDragEnd(evt: TouchEvent & MouseEvent) {
-		evt.preventDefault();
-		this._dragging = false;
+	private _getVisibleRowCount(): number {
+		return this.meta(Dimensions).get('rows').size.height / ROW_HEIGHT;
 	}
 
 	/**
@@ -365,7 +319,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 			break;
 		case Keys.Right: /* Open a folder */
 			if (selected) {
-				const item = this._items.get(selected);
+				const item = this._findItem(selected);
 				if (item && item.children && !includes(expanded, selected) && onItemToggle) {
 					evt.preventDefault();
 					onItemToggle(selected);
@@ -408,13 +362,15 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 	 * @returns `true` if the position was updated, otherwise `false`, which allows other methods to allow the tiggering
 	 *          event to bubble.
 	 */
-	private _onPositionUpdate(delta: number): boolean {
+	private _onPositionUpdate(delta: number, invalidateOnChange = true): boolean {
 		const { _scrollPosition, _size, _sliderSize } = this;
 		const updatedPosition = _scrollPosition + delta;
 		const maxPosition = _size - _sliderSize + 1;
 		this._scrollPosition = updatedPosition > 0 ? updatedPosition > maxPosition ? maxPosition : updatedPosition : 0;
 		if (_scrollPosition !== this._scrollPosition) {
-			this.invalidate();
+			if (invalidateOnChange) {
+				this.invalidate();
+			}
 			return true;
 		}
 		return false;
@@ -427,14 +383,13 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 	 */
 	private _onRowClick(key: string) {
 		this.properties.selected !== key && this.properties.onItemSelect && this.properties.onItemSelect(key);
-		const item = this._items.get(key);
+		const item = this._findItem(key);
 		if (!item) {
 			throw new Error(`Uncached TreePane row ID: "${key}"`);
 		}
 		if (item.children && this.properties.onItemToggle) {
 			this.properties.onItemToggle(key);
 		}
-		this._wantsFocus = true;
 	}
 
 	/**
@@ -472,10 +427,9 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 	private _renderChild(item: TreePaneItem, level: number): WNode<Row> {
 		const { children, id: key, label, title } = item;
 		const navigation = this._navigation;
-		const { expanded: propsExpanded = [], selected, theme } = this.properties;
+		const { expanded: propsExpanded = [], getItemClass, selected, theme } = this.properties;
 		const expanded = includes(propsExpanded, key);
 		const hasChildren = Boolean(children);
-		const resolverLabel = typeof label === 'string' ? label : '';
 		if (!navigation.selected) {
 			if (selected === key) {
 				navigation.selected = key;
@@ -490,7 +444,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 		}
 
 		return w(Row, {
-			class: hasChildren ? this._resolver.folder(resolverLabel, expanded) : this._resolver.file(resolverLabel),
+			class: getItemClass && getItemClass(item, expanded),
 			expanded,
 			hasChildren,
 			key,
@@ -509,7 +463,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 	 * Flatten the `root` of the tree and determine which rows need to be rendered, return an array
 	 * of `(WNode<Row> | null)[]`.
 	 */
-	private _renderChildren(): (WNode<Row> | null)[] {
+	private _renderChildren(visibleRowCount: number): (WNode<Row> | null)[] {
 		this._navigation = {
 			next: '',
 			previous: '',
@@ -521,7 +475,6 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 		const {
 			_navigation,
 			_scrollPosition,
-			_visibleRowCount,
 			properties: {
 				expanded = [],
 				root,
@@ -530,7 +483,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 		} = this;
 		const children: (WNode<Row> | null)[] = [];
 		const start = _navigation.start = _scrollPosition ? _scrollPosition - 1 : 0;
-		const end = _navigation.end = start + _visibleRowCount + 2;
+		const end = _navigation.end = start + visibleRowCount + 2;
 		let rowCount = 0;
 
 		const addChildren = (items: TreePaneItem[], level: number) => {
@@ -550,56 +503,27 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 		return children;
 	}
 
-	/**
-	 * Handler that invokes `_onDomUpdate`
-	 * @param element The element being created
-	 * @param key The key of the element being created
-	 */
-	public onElementCreated(element: HTMLElement, key: string) {
-		this._onDomUpdate(element, key);
-	}
-
-	/**
-	 * Handler that invokes `_onDomUpdate`
-	 * @param element The element beign created
-	 * @param key The key of the element being created
-	 */
-	public onElementUpdated(element: HTMLElement, key: string) {
-		this._onDomUpdate(element, key);
-	}
-
 	public render() {
 		const {
-			_focusNode,
 			_onScrollbarScroll,
-			_resolver,
 			_scrollPosition,
 			_scrollVisible,
 			properties: {
-				icons,
 				key,
 				label,
-				sourcePath,
 				theme
-			},
-			_visibleRowCount,
-			_wantsFocus
+			}
 		} = this;
 
-		/* if we have a cached focus, let's set the focus */
-		if (_focusNode && _wantsFocus) {
-			this._wantsFocus = false;
-			if (_focusNode !== document.activeElement) {
-				_focusNode.focus();
-			}
+		const delta = this.meta(Drag).get('rows').delta.y;
+		if (delta) {
+			this._onPositionUpdate((delta - (delta * 2)) / ROW_HEIGHT, false);
 		}
-		if (!_resolver && icons && sourcePath) {
-			this._resolver = new IconResolver(sourcePath, icons);
-		}
-		this._cacheItems();
+
 		const top =  0 - (_scrollPosition % ROW_HEIGHT);
-		const rows = this._renderChildren();
-		const sliderSize = this._sliderSize = _visibleRowCount > rows.length ? rows.length : _visibleRowCount;
+		const visibleRowCount = this._getVisibleRowCount();
+		const rows = this._renderChildren(visibleRowCount);
+		const sliderSize = this._sliderSize = visibleRowCount > rows.length ? rows.length : visibleRowCount;
 		const size = this._size = rows.length;
 
 		return v('div', {
@@ -620,14 +544,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 				},
 				tabIndex: 0,
 
-				onblur: this._onblur,
 				onkeydown: this._onkeydown,
-				onmousedown: this._onDragStart,
-				onmousemove: this._onDragMove,
-				onmouseup: this._onDragEnd,
-				ontouchstart: this._onDragStart,
-				ontouchmove: this._onDragMove,
-				ontouchend: this._onDragEnd,
 				onwheel: this._onwheel
 			}, rows),
 			w(ScrollBar, {

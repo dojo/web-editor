@@ -8,7 +8,7 @@ import IconCss from './IconCss';
 import { Program } from './project';
 import Runner, { RunnerProperties } from './Runner';
 import TreePane, { TreePaneItem } from './TreePane';
-import { IconJson } from './support/icons';
+import { IconJson, IconResolver } from './support/icons';
 import * as treepaneCss from './styles/treepane.m.css';
 import * as css from './styles/workbench.m.css';
 
@@ -55,7 +55,14 @@ export interface WorkbenchProperties extends ThemeableProperties {
 @theme(css)
 export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 	private _expanded = [ '/', '/src' ];
+	private _iconResolver = new IconResolver();
 	private _selected: string;
+
+	private _getItemClass = (item: TreePaneItem, expanded?: boolean) => {
+		if (typeof item.label === 'string') {
+			return item.children && item.children.length ? this._iconResolver.folder(item.label, expanded) : this._iconResolver.file(item.label);
+		}
+	}
 
 	private _getTreeRoot(): TreePaneItem | undefined {
 		/**
@@ -141,6 +148,7 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 	render() {
 		const {
 			_expanded,
+			_getItemClass: getItemClass,
 			_selected: selected,
 			properties: {
 				filename,
@@ -151,6 +159,10 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 				onRun
 			}
 		} = this;
+
+		if (icons && sourcePath) {
+			this._iconResolver.setProperties({ icons, sourcePath });
+		}
 
 		const runnerProperties: RunnerProperties = assign({}, program, { key: 'runner', theme, onRun });
 
@@ -168,11 +180,10 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 			}, [
 				w(TreePane, {
 					expanded: [ ..._expanded ],
-					icons,
+					getItemClass,
 					key: 'treepane',
 					root: this._getTreeRoot(),
 					selected,
-					sourcePath,
 					theme,
 
 					onItemOpen: this._onItemOpen,

@@ -35,21 +35,25 @@ export interface IconJson {
 	};
 }
 
-export class IconResolver {
-	private _config: IconJson;
-	private _sourcePath: string;
+export interface IconResolverProperties {
+	icons: IconJson;
+	sourcePath: string;
+}
 
-	constructor(sourcePath: string, config: IconJson) {
-		this._config = config;
-		this._sourcePath = (new globalURL(sourcePath, window.location.toString()).toString());
-	}
+export class IconResolver {
+	private _config: IconJson | undefined;
+	private _sourcePath: string | undefined;
+	private _cachedSourcePath: string | undefined;
 
 	/**
 	 * Get the class name for an icon based on the folder name and if it is expanded or not
 	 * @param name The name of the folder
 	 * @param expanded If the expanded version of the icon should be used.  Defaults to `false`.
 	 */
-	folder(name: string, expanded: boolean = false): string {
+	public folder(name: string, expanded: boolean = false): string {
+		if (!this._config) {
+			return '';
+		}
 		if (!expanded && name in this._config.folderNames) {
 			return this._config.folderNames[name];
 		}
@@ -64,7 +68,10 @@ export class IconResolver {
 	 * @param name The name of the file
 	 * @param language An optional language which would override the extension.
 	 */
-	file(name: string, language: string = ''): string {
+	public file(name: string, language: string = ''): string {
+		if (!this._config) {
+			return '';
+		}
 		if (name in this._config.fileNames) {
 			return this._config.fileNames[name];
 		}
@@ -88,11 +95,26 @@ export class IconResolver {
 	 * @param iconName The icon name to return a URL for
 	 */
 	public iconUrl(iconName: string): string {
+		if (!this._config) {
+			return '';
+		}
 		const iconPath = this._config.iconDefinitions[iconName] && this._config.iconDefinitions[iconName].iconPath;
 		if (!iconPath) {
 			throw new TypeError(`Icon named "${iconName}" not found.`);
 		}
 		return new globalURL(iconPath, this._sourcePath).toString();
+	}
+
+	/**
+	 * Set the properties on the icon resolver
+	 * @param param0 Properties to set on the instance
+	 */
+	public setProperties({ icons, sourcePath }: IconResolverProperties) {
+		this._config = icons;
+		if (this._cachedSourcePath !== sourcePath) {
+			this._cachedSourcePath = sourcePath;
+			this._sourcePath = (new globalURL(sourcePath, window.location.toString()).toString());
+		}
 	}
 }
 

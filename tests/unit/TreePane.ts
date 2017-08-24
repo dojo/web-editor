@@ -29,20 +29,13 @@ registerSuite({
 				},
 				tabIndex: 0,
 
-				onblur: widget.listener,
 				onkeydown: widget.listener,
-				onmousedown: widget.listener,
-				onmousemove: widget.listener,
-				onmouseup: widget.listener,
-				ontouchstart: widget.listener,
-				ontouchmove: widget.listener,
-				ontouchend: widget.listener,
 				onwheel: widget.listener
 			}, []),
 			w(ScrollBar, {
 				position: 0,
 				size: 0,
-				sliderSize: undefined,
+				sliderSize: 0,
 				visible: false,
 				theme: undefined,
 
