@@ -148,12 +148,12 @@ export interface RowProperties extends ThemeableProperties {
 	/**
 	 * Called when the row is clicked
 	 */
-	onClick?(key?: string): void;
+	onClick?(key?: string | number): void;
 
 	/**
 	 * Called when the row is double clicked
 	 */
-	onDblClick?(key?: string): void;
+	onDblClick?(key?: string | number): void;
 }
 
 /**

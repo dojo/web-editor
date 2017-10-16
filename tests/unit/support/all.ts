@@ -11,5 +11,4 @@ import './postcssModules';
 import './ScrollBar';
 import './sourceMap';
 import './URL';
-import './meta/all';
 import './providers/all';
