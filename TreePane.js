@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/Map", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/mixins/Themeable", "./support/ScrollBar", "./styles/treepane.m.css", "./support/events", "./support/icons"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/Map", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/mixins/Themeable", "./styles/treepane.m.css", "./support/icons", "./support/events", "./support/ScrollBar"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -30,10 +30,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var d_1 = require("@dojo/widget-core/d");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
-    var ScrollBar_1 = require("./support/ScrollBar");
     var css = require("./styles/treepane.m.css");
-    var events_1 = require("./support/events");
     var icons_1 = require("./support/icons");
+    var events_1 = require("./support/events");
+    var ScrollBar_1 = require("./support/ScrollBar");
     var ROW_HEIGHT = 22;
     var ROW_LEVEL_LEFT_PADDING = 12;
     var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
@@ -80,11 +80,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 ])
             ]);
         };
+        Row = __decorate([
+            Themeable_1.theme(css)
+        ], Row);
         return Row;
     }(ThemeableBase));
-    Row = __decorate([
-        Themeable_1.theme(css)
-    ], Row);
     exports.Row = Row;
     /**
      * A widget class which takes a tree of items with a root specified as the `root` property and renders them into
@@ -181,9 +181,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
          * @param evt The keyboard event
          */
         TreePane.prototype._onkeydown = function (evt) {
-            var _a = this, _b = _a.properties, expanded = _b.expanded, onItemOpen = _b.onItemOpen, onItemSelect = _b.onItemSelect, onItemToggle = _b.onItemToggle, _c = _a._navigation, next = _c.next, previous = _c.previous, selected = _c.selected, start = _c.start, end = _c.end, selectedPosition = _c.selectedPosition;
+            var _a = this, _b = _a.properties, _c = _b.expanded, expanded = _c === void 0 ? [] : _c, onItemOpen = _b.onItemOpen, onItemSelect = _b.onItemSelect, onItemToggle = _b.onItemToggle, _d = _a._navigation, next = _d.next, previous = _d.previous, selected = _d.selected, start = _d.start, end = _d.end, selectedPosition = _d.selectedPosition;
             switch (evt.which) {
-                case 40 /* Down */:
+                case 40 /* Down */:/* Select Next Row */ 
                     if (next && onItemSelect) {
                         evt.preventDefault();
                         onItemSelect(next);
@@ -193,7 +193,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                         }
                     }
                     break;
-                case 38 /* Up */:
+                case 38 /* Up */:/* Select Previous Row */ 
                     if (previous && onItemSelect) {
                         evt.preventDefault();
                         onItemSelect(previous);
@@ -202,13 +202,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                         }
                     }
                     break;
-                case 37 /* Left */:
+                case 37 /* Left */:/* Close a folder */ 
                     if (selected && array_1.includes(expanded, selected) && onItemToggle) {
                         evt.preventDefault();
                         onItemToggle(selected);
                     }
                     break;
-                case 39 /* Right */:
+                case 39 /* Right */:/* Open a folder */ 
                     if (selected) {
                         var item = this._items.get(selected);
                         if (item && item.children && !array_1.includes(expanded, selected) && onItemToggle) {
@@ -217,7 +217,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                         }
                     }
                     break;
-                case 13 /* Enter */:
+                case 13 /* Enter */:/* Open a folder or open an item */ 
                     if (selected && onItemOpen) {
                         evt.preventDefault();
                         onItemOpen(selected);
@@ -302,7 +302,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         TreePane.prototype._renderChild = function (item, level) {
             var children = item.children, key = item.id, label = item.label, title = item.title;
             var navigation = this._navigation;
-            var _a = this.properties, propsExpanded = _a.expanded, selected = _a.selected, theme = _a.theme;
+            var _a = this.properties, _b = _a.expanded, propsExpanded = _b === void 0 ? [] : _b, selected = _a.selected, theme = _a.theme;
             var expanded = array_1.includes(propsExpanded, key);
             var hasChildren = Boolean(children);
             var resolverLabel = typeof label === 'string' ? label : '';
@@ -346,7 +346,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 start: 0,
                 end: 0
             };
-            var _a = this, _navigation = _a._navigation, _scrollPosition = _a._scrollPosition, _visibleRowCount = _a._visibleRowCount, _b = _a.properties, expanded = _b.expanded, root = _b.root, showRoot = _b.showRoot;
+            var _a = this, _navigation = _a._navigation, _scrollPosition = _a._scrollPosition, _visibleRowCount = _a._visibleRowCount, _b = _a.properties, _c = _b.expanded, expanded = _c === void 0 ? [] : _c, root = _b.root, showRoot = _b.showRoot;
             var children = [];
             var start = _navigation.start = _scrollPosition ? _scrollPosition - 1 : 0;
             var end = _navigation.end = start + _visibleRowCount + 2;
@@ -434,11 +434,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 })
             ]);
         };
+        TreePane = __decorate([
+            Themeable_1.theme(css)
+        ], TreePane);
         return TreePane;
     }(ThemeableBase));
-    TreePane = __decorate([
-        Themeable_1.theme(css)
-    ], TreePane);
     exports.default = TreePane;
 });
 //# sourceMappingURL=TreePane.js.map

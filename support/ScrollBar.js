@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/mixins/Themeable", "../styles/scrollbar.m.css", "../support/events"], factory);
+        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/mixins/Themeable", "../styles/scrollbar.m.css", "./events"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -29,7 +29,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
     var css = require("../styles/scrollbar.m.css");
-    var events_1 = require("../support/events");
+    var events_1 = require("./events");
     var DEFAULT_KEY = 'scrollbar';
     var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
     /**
@@ -134,11 +134,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 })
             ]);
         };
+        ScrollBar = __decorate([
+            Themeable_1.theme(css)
+        ], ScrollBar);
         return ScrollBar;
     }(ThemeableBase));
-    ScrollBar = __decorate([
-        Themeable_1.theme(css)
-    ], ScrollBar);
     exports.default = ScrollBar;
 });
 //# sourceMappingURL=ScrollBar.js.map

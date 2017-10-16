@@ -64,6 +64,22 @@ import project from '@dojo/web-editor/project';
 })();
 ```
 
+### Workbench
+
+This is a widget which wraps the other widgets to provide a _workbench_ for editing files and running projects.
+
+The `Workbench` has a few key properties:
+
+* `filename` - This is the name of the file in the project which should be being displayed in the `Editor`.
+* `files` - This is an array of file names that should be displayed in the file tree for user selection.
+* `icons` - An object structure used to provide a set of icons to be used when displaying a file in the tree.
+* `iconsSourcePath` - The path to the file icons to be used.
+* `program` - This is an emitted `Program` which is passed to the `Runner`.
+* `onFileOpen` - A method that gets called when a file is requested to be opened from the file tree.  If appropriate, to change the file being edited, update the `filename` property with the supplied ID.
+* `onRun` - A method that gets called when the `Runner` finishes running the supplied program.  This can be used to determine when to update the UI to reflect that program has been run.
+
+`Workbench` is a themeable widget, with `workbench.root` and `workbench.filepane` being themeable.
+
 ### Editor
 
 This is a widget which wraps `monaco-editor`, allowing the editor to seemlessly integrate with the project.  It will automatically
@@ -75,7 +91,7 @@ The `Editor` has two key properties:
 * `filename` - This is the name of the file in the project which the editor should be displaying.  Changing this property will cause the widget to change the file that is currently being displayed.
 * `options` - Passed to the `monaco-editor` when it is created.  Needs to conform to the `monaco.editor.IEditorOptions` interface.
 
-`Editor` is a themeable widget, with the only themeable class being `editor.base`.
+`Editor` is a themeable widget, with the only themeable class being `editor.root`.
 
 #### Usage
 
@@ -124,7 +140,7 @@ The `Runner` has several key properties which control its behaviour:
 * `onRun` - A method that is called when the `Runner` is finished standing up the program.  It does not reflect the actual state
   of the program.
 
-`Runner` is a themeable widget, with the only themeable class being `runner.base`.
+`Runner` is a themeable widget, with the only themeable class being `runner.root`.
 
 #### Usage
 
@@ -196,18 +212,6 @@ startGistRouter({
 });
 ```
 
-### FileBar
-
-Displays an array of tabs which is designed to represent open files.
-
-### IconCss
-
-This widget injects a `<style>` element which contains the CSS which is dynamically generated based on an object structure which defines different icon types.
-
-### TreePane
-
-This widget provides a collapsible view of a file system like structure.
-
 ### external/postcss-bundle
 
 In order to properly transpile CSS that is part of a project, the web-editor needs to utilise postcss with additional plugins for this
@@ -242,11 +246,6 @@ the AMD `require()`.  It should look something like this:
     </script>
 </body>
 ```
-
-### Extensions
-
-The `/extensions` path contains any extensions which have been adapted from `vscode` for use in the web editor.  Currently it contains
-an icon theme.
 
 ### Supporting Modules
 
@@ -330,20 +329,17 @@ For example, you might have something like this in your web-editor page:
 
 ## Installation
 
-The package is typically installed using `npm`.  The distribution though comes with a version of `monaco-editor` that uses the current
+The package is typically instlaled using `npm`.  The distrubition though comes with a version of `monaco-editor` that uses the current
 version of TypeScript.  Therefore it is often better to use that included version than the version that is currently available, as it
-appears the general available version lags behind in updating.
+appears the general avaialable version lags behind in updating.
 
 ## Licensing Information
 
 This package also includes the following libraries and their dependencies:
 
-* [`monaco-editor`](https://github.com/Microsoft/monaco-editor) - © 2016 Microsoft Corporation. [MIT][MIT] license.
-* [`postcss`](https://github.com/postcss/postcss) - © 2013 Andrey Sitnik. [MIT][MIT] license.
-* [`postcss-cssnext`](https://github.com/MoOx/postcss-cssnext) - © 2014 Maxime Thirouin. [MIT][MIT] license.
-* [`postcss-modules`](https://github.com/css-modules/postcss-modules) - © 2015 - 2016 Alexander Madyankin. [MIT][MIT] license.
-* [`vscode-material-icon-theme`](https://github.com/PKief/vscode-material-icon-theme) - © 2015 Philipp Kief. [MIT][MIT] license.
+* [`monaco-editor`](https://github.com/Microsoft/monaco-editor) - © 2016 Microsoft Corporation. [MIT](http://opensource.org/licenses/MIT) license.
+* [`postcss`](https://github.com/postcss/postcss) - © 2013 Andrey Sitnik. [MIT](http://opensource.org/licenses/MIT) license.
+* [`postcss-cssnext`](https://github.com/MoOx/postcss-cssnext) - © 2014 Maxime Thirouin. [MIT](http://opensource.org/licenses/MIT) license.
+* [`postcss-modules`](https://github.com/css-modules/postcss-modules) - © 2015 - 2016 Alexander Madyankin. [MIT](http://opensource.org/licenses/MIT) license.
 
 © 2017 [JS Foundation](https://js.foundation/). [New BSD](http://opensource.org/licenses/BSD-3-Clause) license.
-
-[MIT]: http://opensource.org/licenses/MIT

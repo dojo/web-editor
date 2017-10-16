@@ -59,6 +59,11 @@ var __extends = (this && this.__extends) || (function () {
         AMDRequireResponse.prototype.text = function () {
             return Task_1.default.resolve(typeof this._response === 'string' ? this._response : this._response && this._response.toString());
         };
+        AMDRequireResponse.prototype.upload = function () {
+            return new Observable_1.default(function (observer) {
+                observer.error(new Error('Upload not supported'));
+            });
+        };
         return AMDRequireResponse;
     }(Response_1.default));
     exports.AMDRequireResponse = AMDRequireResponse;

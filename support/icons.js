@@ -39,11 +39,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/global", "@dojo/core/request"], factory);
+        define(["require", "exports", "./URL", "@dojo/core/global", "@dojo/core/request"], factory);
     }
 })(function (require, exports) {
     "use strict";
+    '!has("url-api")';
     Object.defineProperty(exports, "__esModule", { value: true });
+    require("./URL");
     var global_1 = require("@dojo/core/global");
     var request_1 = require("@dojo/core/request");
     var globalURL = global_1.default.window.URL;

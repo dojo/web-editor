@@ -132,17 +132,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 return 'unknown';
         }
     }
-    var JsxEmit = monaco.languages.typescript.JsxEmit;
-    function getJsxEmit(type) {
-        switch (type) {
-            case 'preserve':
-                return JsxEmit.Preserve;
-            case 'react':
-                return JsxEmit.React;
-            default:
-                return JsxEmit.None;
-        }
-    }
     var ScriptTarget = monaco.languages.typescript.ScriptTarget;
     function getScriptTarget(type) {
         switch (type) {
@@ -197,9 +186,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                             diagnostics = _b.apply(_a, _c.concat([_d.sent()]));
                             diagnostics.forEach(function (diagnostic) {
                                 var message = flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-                                if (diagnostic.file) {
+                                if (diagnostic.file && diagnostic.start) {
                                     var _a = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start), line = _a.line, character = _a.character;
-                                    console.warn("Error " + diagnostic.file.name + " (" + (line + 1) + "," + (character + 1) + "): " + message);
+                                    console.warn("Error " + diagnostic.file.fileName + " (" + (line + 1) + "," + (character + 1) + "): " + message);
                                 }
                                 else {
                                     console.warn("Error: " + message);
@@ -272,11 +261,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             var _a = this._project.tsconfig.compilerOptions, compilerOptions = _a === void 0 ? {} : _a;
             var options = {};
             /* copied from tsconfig.json */
-            var experimentalDecorators = compilerOptions.experimentalDecorators, jsx = compilerOptions.jsx, jsxFactory = compilerOptions.jsxFactory, lib = compilerOptions.lib, noImplicitAny = compilerOptions.noImplicitAny, noImplicitThis = compilerOptions.noImplicitThis, noImplicitReturns = compilerOptions.noImplicitReturns, noLib = compilerOptions.noLib, noUnusedLocals = compilerOptions.noUnusedLocals, noUnusedParameters = compilerOptions.noUnusedParameters, strict = compilerOptions.strict, strictNullChecks = compilerOptions.strictNullChecks, target = compilerOptions.target, types = compilerOptions.types;
+            var experimentalDecorators = compilerOptions.experimentalDecorators, lib = compilerOptions.lib, noImplicitAny = compilerOptions.noImplicitAny, noImplicitThis = compilerOptions.noImplicitThis, noImplicitReturns = compilerOptions.noImplicitReturns, noLib = compilerOptions.noLib, noUnusedLocals = compilerOptions.noUnusedLocals, noUnusedParameters = compilerOptions.noUnusedParameters, strictNullChecks = compilerOptions.strictNullChecks, target = compilerOptions.target, types = compilerOptions.types;
             lang_1.assign(options, {
                 experimentalDecorators: experimentalDecorators,
-                jsx: getJsxEmit(jsx),
-                jsxFactory: jsxFactory,
                 lib: lib,
                 noImplicitAny: noImplicitAny,
                 noImplicitThis: noImplicitThis,
@@ -284,7 +271,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 noLib: noLib,
                 noUnusedLocals: noUnusedLocals,
                 noUnusedParameters: noUnusedParameters,
-                strict: strict,
                 strictNullChecks: strictNullChecks,
                 target: getScriptTarget(target),
                 types: types
@@ -360,9 +346,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         Project.prototype.emit = function () {
             return __awaiter(this, void 0, void 0, function () {
                 var _this = this;
-                var typescriptFileUris, _a, worker, services, output, cssFiles, jsonFiles, otherFiles;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
+                var typescriptFileUris, worker, services, output, cssFiles, jsonFiles, otherFiles;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
                         case 0:
                             if (!this._project) {
                                 throw new Error('Project not loaded.');
@@ -376,17 +362,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                                 var name = _a.name;
                                 return _this.getFileModel(name).uri;
                             });
-                            if (!!this._worker) return [3 /*break*/, 2];
-                            _a = this;
                             return [4 /*yield*/, monaco.languages.typescript.getTypeScriptWorker()];
                         case 1:
-                            _a._worker = _b.sent();
-                            _b.label = 2;
-                        case 2:
-                            worker = this._worker;
+                            worker = _a.sent();
                             return [4 /*yield*/, worker.apply(void 0, typescriptFileUris)];
-                        case 3:
-                            services = _b.sent();
+                        case 2:
+                            services = _a.sent();
                             return [4 /*yield*/, Promise.all(typescriptFileUris.map(function (file) { return __awaiter(_this, void 0, void 0, function () {
                                     var filename, emitOutput;
                                     return __generator(this, function (_a) {
@@ -403,8 +384,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                                         }
                                     });
                                 }); }))];
-                        case 4:
-                            output = _b.sent();
+                        case 3:
+                            output = _a.sent();
                             return [4 /*yield*/, css_1.getEmit.apply(void 0, this._project.files /* add css modules */
                                     .filter(function (_a) {
                                     var type = _a.type;
@@ -418,8 +399,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                                     var model = _a.model, type = _a.type;
                                     return { name: model.uri.fsPath.replace(/^\/\.\//, ''), text: model.getValue(), type: type };
                                 }))];
-                        case 5:
-                            cssFiles = _b.sent();
+                        case 4:
+                            cssFiles = _a.sent();
                             jsonFiles = json_1.getEmit.apply(void 0, this._project.files /* add json files as a module */
                                 .filter(function (_a) {
                                 var type = _a.type;

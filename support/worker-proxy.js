@@ -1,3 +1,4 @@
+"use strict";
 /*
  * This module bootstraps the monaco-editor into a web worker, so that processing happens
  * in the background
