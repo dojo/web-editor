@@ -1,9 +1,9 @@
 import { v } from '@dojo/widget-core/d';
 import Dimensions from '@dojo/widget-core/meta/Dimensions';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
+import Drag from '@dojo/widget-core/meta/Drag';
+import Matches from '@dojo/widget-core/meta/Matches';
 import { theme, ThemeableMixin, ThemeableProperties } from '@dojo/widget-core/mixins/Themeable';
-import Drag from './meta/Drag';
-import Matches from './meta/Matches';
 import * as css from '../styles/scrollbar.m.css';
 
 /**
@@ -86,7 +86,8 @@ export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
 	 */
 	private _getDomSize(): number {
 		const { horizontal, key = DEFAULT_KEY } = this.properties;
-		const { height, width } = this.meta(Dimensions).get(key).size;
+		// TODO: Remove string coersion when dojo/widget-core#721 is published
+		const { height, width } = this.meta(Dimensions).get(`${key}`).size;
 		return horizontal ? width : height;
 	}
 
@@ -96,7 +97,8 @@ export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
 	 * @param evt The mouse event
 	 */
 	private _onclick(evt: MouseEvent) {
-		if (this.meta(Matches).get(this.properties.key || DEFAULT_KEY, evt)) {
+		// TODO: Remove string coersion when dojo/widget-core#721 is published
+		if (this.meta(Matches).get(`${this.properties.key}` || DEFAULT_KEY, evt)) {
 			evt.preventDefault();
 			const domSize = this._getDomSize();
 			const {
