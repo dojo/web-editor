@@ -1,7 +1,8 @@
 import { createHandle } from '@dojo/core/lang';
 import { v, w } from '@dojo/widget-core/d';
 import { Constructor, DNode, VirtualDomProperties, WidgetProperties } from '@dojo/widget-core/interfaces';
-import WidgetBase, { afterRender } from '@dojo/widget-core/WidgetBase';
+import WidgetBase from '@dojo/widget-core/WidgetBase';
+import afterRender from '@dojo/widget-core/decorators/afterRender';
 import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
 import DomWrapper from '@dojo/widget-core/util/DomWrapper';
 import { Program } from './project';

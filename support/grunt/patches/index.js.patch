@@ -1,13 +1,13 @@
 diff --git a/examples/index.js b/examples/index.js
-index 907b324..b028b2e 100644
+index 02f4aef..a38b2b6 100644
 --- a/examples/index.js
 +++ b/examples/index.js
-@@ -27,7 +27,7 @@ var __extends = (this && this.__extends) || (function () {
-     var project_1 = require("../project");
-     var Runner_1 = require("../Runner");
+@@ -63,7 +63,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
+     var icons_1 = require("../support/icons");
+     var theme_1 = require("../themes/dark/theme");
      /* path to the project directory */
 -    var PROJECT_DIRECTORY = '../../../projects/';
 +    var PROJECT_DIRECTORY = '../projects/';
+     var icons;
+     var iconsSourcePath = '../../extensions/vscode-material-icon-theme/out/src/material-icons.json';
      /**
-      * An example application widget that incorporates both the Editor and Runner widgets into a simplistic UI
-      */
