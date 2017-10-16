@@ -3,11 +3,11 @@ import { v, w } from '@dojo/widget-core/d';
 import { DNode, WNode } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import Dimensions from '@dojo/widget-core/meta/Dimensions';
+import Drag from '@dojo/widget-core/meta/Drag';
 import { theme, ThemeableMixin, ThemeableProperties } from '@dojo/widget-core/mixins/Themeable';
 import { Keys } from '@dojo/widgets/common/util';
 import * as css from './styles/treepane.m.css';
 import ScrollBar from './support/ScrollBar';
-import Drag from './support/meta/Drag';
 
 /**
  * The interface for items that can be rendered in the `TreePane`.

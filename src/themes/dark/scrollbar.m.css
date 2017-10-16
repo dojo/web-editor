@@ -1,3 +1,6 @@
+
+.root, .root * { box-sizing: border-box; }
+
 .root {
 	position: absolute;
 }
@@ -6,6 +9,10 @@
 	position: absolute;
 	left: 0px;
 	width: 10px;
+	background: rgba(78, 86, 102, 0.5);
+}
+
+.slider.dragging {
 	background: rgba(78, 86, 102, 0.5);
 }
 

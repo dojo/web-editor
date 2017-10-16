@@ -1,12 +1,16 @@
+.root, .root * { box-sizing: border-box; }
+
 .root {
 	position: absolute;
 }
 
 .slider {
 	position: absolute;
-	left: 0px;
-	width: 10px;
 	border: 1px solid black;
+}
+
+.slider.dragging {
+	border: 1px solid grey;
 }
 
 .horizontal {
@@ -16,10 +20,20 @@
 	width: 100%;
 }
 
+.horizontal .slider {
+	top: 0px;
+	height: 10px;
+}
+
 .vertical {
 	height: 100%;
 	right: 0px;
 	top: 0px;
+	width: 10px;
+}
+
+.vertical .slider {
+	left: 0px;
 	width: 10px;
 }
 
@@ -28,5 +42,6 @@
 }
 
 .visible {
+	background: transparent;
 	opacity: 1;
 }
