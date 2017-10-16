@@ -1,8 +1,8 @@
 import { v } from '@dojo/widget-core/d';
 import Dimensions from '@dojo/widget-core/meta/Dimensions';
-import WidgetBase from '@dojo/widget-core/WidgetBase';
 import Drag from '@dojo/widget-core/meta/Drag';
 import Matches from '@dojo/widget-core/meta/Matches';
+import WidgetBase from '@dojo/widget-core/WidgetBase';
 import { theme, ThemeableMixin, ThemeableProperties } from '@dojo/widget-core/mixins/Themeable';
 import * as css from '../styles/scrollbar.m.css';
 
