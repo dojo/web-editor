@@ -21,7 +21,7 @@ class App extends WidgetBase {
 	private _compiling = false;
 	private _editorFilename = '';
 	private _program: Program | undefined;
-	private _projectValue = 'dojo2-todo-mvc.project.json';
+	private _projectValue = '005-initial.project.json';
 
 	/**
 	 * Handle when the project name changes in the dropdown
@@ -88,8 +88,9 @@ class App extends WidgetBase {
 		const projectLoad = v('div', { key: 'projectLoad' }, [
 			v('label', { for: 'project' }, [ 'Project to load:' ]),
 			v('select', { type: 'text', name: 'project', id: 'project', onchange: this._onchangeProject, disabled: isProjectLoaded ? true : false }, [
+				v('option', { value: '005-initial.project.json', selected: true }, [ 'Form widgets tutorial - initial' ]),
 				v('option', { value: 'dojo-test-app.project.json' }, [ 'Dojo2 Hello World' ]),
-				v('option', { value: 'dojo2-todo-mvc.project.json', selected: true }, [ 'Dojo2 Todo MVC' ]),
+				v('option', { value: 'dojo2-todo-mvc.project.json' }, [ 'Dojo2 Todo MVC' ]),
 				v('option', { value: 'dojo2-todo-mvc-tsx.project.json' }, [ 'Dojo 2 JSX Todo MVC' ]),
 				v('option', { value: 'dojo2-todo-mvc-kitchensink.project.json' }, [ 'Dojo2 Kitchensink Todo MVC' ])
 			]),
