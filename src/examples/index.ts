@@ -9,10 +9,11 @@ import { IconJson, load as loadIcons } from '../support/icons';
 import darkTheme from '../themes/dark/theme';
 
 /* path to the project directory */
-const PROJECT_DIRECTORY = '../../../projects/';
+const PROJECTS_PATH = '../../../projects/';
+const EDITOR_THEME = '../../data/editor-dark.json';
+const iconsSourcePath = '../../extensions/vscode-material-icon-theme/out/src/material-icons.json';
 
 let icons: IconJson;
-const iconsSourcePath = '../../extensions/vscode-material-icon-theme/out/src/material-icons.json';
 
 /**
  * An example application widget that incorporates both the Editor and Runner widgets into a simplistic UI
@@ -40,7 +41,7 @@ class App extends WidgetBase {
 	private _onclickLoad(e: MouseEvent) {
 		e.preventDefault();
 		console.log(`Loading project "${this._projectValue}"...`);
-		project.load(PROJECT_DIRECTORY + this._projectValue)
+		project.load(PROJECTS_PATH + this._projectValue)
 			.then(() => {
 				console.log('Project loaded');
 				this.invalidate();
@@ -131,7 +132,7 @@ class App extends WidgetBase {
 const projector = new (Projector(App))();
 
 (async function () {
-	await loadTheme('../../data/editor-dark.json');
+	await loadTheme(EDITOR_THEME);
 	icons = await loadIcons(iconsSourcePath);
 	/* Start the projector and append it to the document.body */
 	projector.append();
