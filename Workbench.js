@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/object", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "./Editor", "./IconCss", "./Runner", "./TreePane", "./styles/treepane.m.css", "./styles/workbench.m.css"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/object", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "./Editor", "./IconCss", "./Runner", "./TreePane", "./support/icons", "./styles/treepane.m.css", "./styles/workbench.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -34,6 +34,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var IconCss_1 = require("./IconCss");
     var Runner_1 = require("./Runner");
     var TreePane_1 = require("./TreePane");
+    var icons_1 = require("./support/icons");
     var treepaneCss = require("./styles/treepane.m.css");
     var css = require("./styles/workbench.m.css");
     var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
@@ -42,6 +43,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         function Workbench() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this._expanded = ['/', '/src'];
+            _this._iconResolver = new icons_1.IconResolver();
+            _this._getItemClass = function (item, expanded) {
+                if (typeof item.label === 'string') {
+                    return item.children && item.children.length ? _this._iconResolver.folder(item.label, expanded) : _this._iconResolver.file(item.label);
+                }
+            };
             return _this;
         }
         Workbench.prototype._getTreeRoot = function () {
@@ -124,7 +131,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             this.invalidate();
         };
         Workbench.prototype.render = function () {
-            var _a = this, _expanded = _a._expanded, selected = _a._selected, _b = _a.properties, filename = _b.filename, icons = _b.icons, sourcePath = _b.iconsSourcePath, program = _b.program, theme = _b.theme, onRun = _b.onRun;
+            var _a = this, _expanded = _a._expanded, getItemClass = _a._getItemClass, selected = _a._selected, _b = _a.properties, filename = _b.filename, icons = _b.icons, sourcePath = _b.iconsSourcePath, program = _b.program, theme = _b.theme, onRun = _b.onRun;
+            if (icons && sourcePath) {
+                this._iconResolver.setProperties({ icons: icons, sourcePath: sourcePath });
+            }
             var runnerProperties = object_1.assign({}, program, { key: 'runner', theme: theme, onRun: onRun });
             return d_1.v('div', {
                 classes: this.classes(css.root)
@@ -140,11 +150,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 }, [
                     d_1.w(TreePane_1.default, {
                         expanded: _expanded.slice(),
-                        icons: icons,
+                        getItemClass: getItemClass,
                         key: 'treepane',
                         root: this._getTreeRoot(),
                         selected: selected,
-                        sourcePath: sourcePath,
                         theme: theme,
                         onItemOpen: this._onItemOpen,
                         onItemSelect: this._onItemSelect,

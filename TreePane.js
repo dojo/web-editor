@@ -20,19 +20,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/Map", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/mixins/Themeable", "./styles/treepane.m.css", "./support/icons", "./support/events", "./support/ScrollBar"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/meta/Drag", "@dojo/widget-core/mixins/Themeable", "./styles/treepane.m.css", "./support/ScrollBar"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var array_1 = require("@dojo/shim/array");
-    var Map_1 = require("@dojo/shim/Map");
     var d_1 = require("@dojo/widget-core/d");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
+    var Dimensions_1 = require("@dojo/widget-core/meta/Dimensions");
+    var Drag_1 = require("@dojo/widget-core/meta/Drag");
     var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
     var css = require("./styles/treepane.m.css");
-    var icons_1 = require("./support/icons");
-    var events_1 = require("./support/events");
     var ScrollBar_1 = require("./support/ScrollBar");
     var ROW_HEIGHT = 22;
     var ROW_LEVEL_LEFT_PADDING = 12;
@@ -53,7 +52,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         };
         Row.prototype.render = function () {
             var _a = this, _onclick = _a._onclick, _ondblclick = _a._ondblclick, _b = _a.properties, rowClass = _b.class, expanded = _b.expanded, hasChildren = _b.hasChildren, label = _b.label, level = _b.level, selected = _b.selected, title = _b.title;
-            var classes = [css.row, selected && css.selected || null, hasChildren && css.hasChildren || null, expanded && css.expanded || null];
+            var classes = [
+                css.row,
+                selected && css.selected || null,
+                hasChildren && css.hasChildren || null,
+                expanded && css.expanded || null
+            ];
             return d_1.v('div', {
                 'aria-level': String(level),
                 'aria-selected': selected,
@@ -95,11 +99,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         __extends(TreePane, _super);
         function TreePane() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this._dragging = false;
-            _this._items = new Map_1.default();
             _this._scrollPosition = 0;
             _this._scrollVisible = false;
-            _this._wantsFocus = false;
             /**
              * Handler for the ScrollBar's higher order `onScroll` event.  This calls the `_onPosistionUpdate`.
              * @param delta The number of rows, positive or negative that have been scrolled
@@ -110,71 +111,34 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             return _this;
         }
         /**
-         * _Flattens_ the tree of items into a map.
+         * Search the tree of items to find one item, in a BFS fashion
+         * @param id The tree pane item ID to match
          */
-        TreePane.prototype._cacheItems = function () {
-            function cacheItem(cache, item) {
-                cache.set(item.id, item);
-                if (item.children) {
-                    item.children.forEach(function (child) { return cacheItem(cache, child); });
+        TreePane.prototype._findItem = function (id) {
+            if (!this.properties.root) {
+                return;
+            }
+            function find(id, item) {
+                if (item.id === id) {
+                    return item;
+                }
+                var children = item.children;
+                if (children) {
+                    for (var i = 0; i < children.length; i++) {
+                        var search = find(id, children[i]);
+                        if (search) {
+                            return search;
+                        }
+                    }
                 }
             }
-            if (this.properties.root) {
-                this._items.clear();
-                cacheItem(this._items, this.properties.root);
-            }
+            return find(id, this.properties.root);
         };
         /**
-         * Ensures that if the widget is blurred it will no longer grab focus
+         * Determine how many rows are currently visible
          */
-        TreePane.prototype._onblur = function () {
-            this._wantsFocus = false;
-        };
-        /**
-         * Hooks functions that grab references and information about the DOM that the widget needs to operate
-         * properly.
-         *
-         * This will eventually be replaced by the Dojo `meta` services.
-         * @param element The HTMLElement that is being updated
-         * @param key The key of the item to be updated
-         */
-        TreePane.prototype._onDomUpdate = function (element, key) {
-            if (key === 'rows') {
-                this._visibleRowCount = element.clientHeight / ROW_HEIGHT;
-                if (!this._focusNode) {
-                    this._focusNode = element;
-                }
-            }
-        };
-        /**
-         * Deal with starting to drag the scrollable area
-         * @param evt The TouchEvent or MouseEvent
-         */
-        TreePane.prototype._onDragStart = function (evt) {
-            evt.preventDefault();
-            this._dragging = true;
-            this._dragPosition = events_1.getAbsolutePosition(evt);
-        };
-        /**
-         * Deal with tracking the movement of the scrollable area
-         * @param evt The TouchEvent or Mouse Event
-         */
-        TreePane.prototype._onDragMove = function (evt) {
-            var _a = this, _dragging = _a._dragging, _dragPosition = _a._dragPosition;
-            if (_dragging) {
-                evt.preventDefault();
-                var delta = events_1.getAbsolutePosition(evt) - _dragPosition;
-                this._onPositionUpdate(delta / ROW_HEIGHT);
-                this._dragPosition = events_1.getAbsolutePosition(evt);
-            }
-        };
-        /**
-         * Deal with when the drag movement ends
-         * @param evt The TouchEvent or MouseEvent
-         */
-        TreePane.prototype._onDragEnd = function (evt) {
-            evt.preventDefault();
-            this._dragging = false;
+        TreePane.prototype._getVisibleRowCount = function () {
+            return this.meta(Dimensions_1.default).get('rows').size.height / ROW_HEIGHT;
         };
         /**
          * Deal with keyboard navigation in the scroll area
@@ -210,7 +174,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     break;
                 case 39 /* Right */:/* Open a folder */ 
                     if (selected) {
-                        var item = this._items.get(selected);
+                        var item = this._findItem(selected);
                         if (item && item.children && !array_1.includes(expanded, selected) && onItemToggle) {
                             evt.preventDefault();
                             onItemToggle(selected);
@@ -250,13 +214,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
          * @returns `true` if the position was updated, otherwise `false`, which allows other methods to allow the tiggering
          *          event to bubble.
          */
-        TreePane.prototype._onPositionUpdate = function (delta) {
+        TreePane.prototype._onPositionUpdate = function (delta, invalidateOnChange) {
+            if (invalidateOnChange === void 0) { invalidateOnChange = true; }
             var _a = this, _scrollPosition = _a._scrollPosition, _size = _a._size, _sliderSize = _a._sliderSize;
             var updatedPosition = _scrollPosition + delta;
             var maxPosition = _size - _sliderSize + 1;
             this._scrollPosition = updatedPosition > 0 ? updatedPosition > maxPosition ? maxPosition : updatedPosition : 0;
             if (_scrollPosition !== this._scrollPosition) {
-                this.invalidate();
+                if (invalidateOnChange) {
+                    this.invalidate();
+                }
                 return true;
             }
             return false;
@@ -268,14 +235,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
          */
         TreePane.prototype._onRowClick = function (key) {
             this.properties.selected !== key && this.properties.onItemSelect && this.properties.onItemSelect(key);
-            var item = this._items.get(key);
+            var item = this._findItem(key);
             if (!item) {
                 throw new Error("Uncached TreePane row ID: \"" + key + "\"");
             }
             if (item.children && this.properties.onItemToggle) {
                 this.properties.onItemToggle(key);
             }
-            this._wantsFocus = true;
         };
         /**
          * Handler for the row's higher order `onDblClick` event.  This fires the `onItemOpen` event.
@@ -302,10 +268,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         TreePane.prototype._renderChild = function (item, level) {
             var children = item.children, key = item.id, label = item.label, title = item.title;
             var navigation = this._navigation;
-            var _a = this.properties, _b = _a.expanded, propsExpanded = _b === void 0 ? [] : _b, selected = _a.selected, theme = _a.theme;
+            var _a = this.properties, _b = _a.expanded, propsExpanded = _b === void 0 ? [] : _b, getItemClass = _a.getItemClass, selected = _a.selected, theme = _a.theme;
             var expanded = array_1.includes(propsExpanded, key);
             var hasChildren = Boolean(children);
-            var resolverLabel = typeof label === 'string' ? label : '';
             if (!navigation.selected) {
                 if (selected === key) {
                     navigation.selected = key;
@@ -319,7 +284,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 navigation.next = key;
             }
             return d_1.w(Row, {
-                class: hasChildren ? this._resolver.folder(resolverLabel, expanded) : this._resolver.file(resolverLabel),
+                class: getItemClass && getItemClass(item, expanded),
                 expanded: expanded,
                 hasChildren: hasChildren,
                 key: key,
@@ -336,7 +301,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
          * Flatten the `root` of the tree and determine which rows need to be rendered, return an array
          * of `(WNode<Row> | null)[]`.
          */
-        TreePane.prototype._renderChildren = function () {
+        TreePane.prototype._renderChildren = function (visibleRowCount) {
             var _this = this;
             this._navigation = {
                 next: '',
@@ -346,10 +311,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 start: 0,
                 end: 0
             };
-            var _a = this, _navigation = _a._navigation, _scrollPosition = _a._scrollPosition, _visibleRowCount = _a._visibleRowCount, _b = _a.properties, _c = _b.expanded, expanded = _c === void 0 ? [] : _c, root = _b.root, showRoot = _b.showRoot;
+            var _a = this, _navigation = _a._navigation, _scrollPosition = _a._scrollPosition, _b = _a.properties, _c = _b.expanded, expanded = _c === void 0 ? [] : _c, root = _b.root, showRoot = _b.showRoot;
             var children = [];
             var start = _navigation.start = _scrollPosition ? _scrollPosition - 1 : 0;
-            var end = _navigation.end = start + _visibleRowCount + 2;
+            var end = _navigation.end = start + visibleRowCount + 2;
             var rowCount = 0;
             var addChildren = function (items, level) {
                 items.forEach(function (item) {
@@ -365,38 +330,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             }
             return children;
         };
-        /**
-         * Handler that invokes `_onDomUpdate`
-         * @param element The element being created
-         * @param key The key of the element being created
-         */
-        TreePane.prototype.onElementCreated = function (element, key) {
-            this._onDomUpdate(element, key);
-        };
-        /**
-         * Handler that invokes `_onDomUpdate`
-         * @param element The element beign created
-         * @param key The key of the element being created
-         */
-        TreePane.prototype.onElementUpdated = function (element, key) {
-            this._onDomUpdate(element, key);
-        };
         TreePane.prototype.render = function () {
-            var _a = this, _focusNode = _a._focusNode, _onScrollbarScroll = _a._onScrollbarScroll, _resolver = _a._resolver, _scrollPosition = _a._scrollPosition, _scrollVisible = _a._scrollVisible, _b = _a.properties, icons = _b.icons, key = _b.key, label = _b.label, sourcePath = _b.sourcePath, theme = _b.theme, _visibleRowCount = _a._visibleRowCount, _wantsFocus = _a._wantsFocus;
-            /* if we have a cached focus, let's set the focus */
-            if (_focusNode && _wantsFocus) {
-                this._wantsFocus = false;
-                if (_focusNode !== document.activeElement) {
-                    _focusNode.focus();
-                }
+            var _a = this, _onScrollbarScroll = _a._onScrollbarScroll, _scrollPosition = _a._scrollPosition, _scrollVisible = _a._scrollVisible, _b = _a.properties, key = _b.key, label = _b.label, theme = _b.theme;
+            var delta = this.meta(Drag_1.default).get('rows').delta.y;
+            if (delta) {
+                this._onPositionUpdate((delta - (delta * 2)) / ROW_HEIGHT, false);
             }
-            if (!_resolver && icons && sourcePath) {
-                this._resolver = new icons_1.IconResolver(sourcePath, icons);
-            }
-            this._cacheItems();
             var top = 0 - (_scrollPosition % ROW_HEIGHT);
-            var rows = this._renderChildren();
-            var sliderSize = this._sliderSize = _visibleRowCount > rows.length ? rows.length : _visibleRowCount;
+            var visibleRowCount = this._getVisibleRowCount();
+            var rows = this._renderChildren(visibleRowCount);
+            var sliderSize = this._sliderSize = visibleRowCount > rows.length ? rows.length : visibleRowCount;
             var size = this._size = rows.length;
             return d_1.v('div', {
                 'aria-label': label,
@@ -414,14 +357,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                         top: String(top) + 'px'
                     },
                     tabIndex: 0,
-                    onblur: this._onblur,
                     onkeydown: this._onkeydown,
-                    onmousedown: this._onDragStart,
-                    onmousemove: this._onDragMove,
-                    onmouseup: this._onDragEnd,
-                    ontouchstart: this._onDragStart,
-                    ontouchmove: this._onDragMove,
-                    ontouchend: this._onDragEnd,
                     onwheel: this._onwheel
                 }, rows),
                 d_1.w(ScrollBar_1.default, {

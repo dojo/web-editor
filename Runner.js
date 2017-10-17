@@ -274,6 +274,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             if (this.properties.modules) {
                 this._updating = true;
                 var source = getSource(this.properties);
+                this._iframe.classList.add(css.running);
                 writeIframeDoc(this._iframe, source, this._onIframeError)
                     .then(function () {
                     _this._updating = false;
@@ -284,11 +285,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             return node;
         };
         Runner.prototype.render = function () {
+            var _a = this.properties.src, src = _a === void 0 ? DEFAULT_IFRAME_SRC : _a;
             return d_1.v('div', {
                 classes: this.classes(css.root)
             }, [d_1.w(this._IframeDom, {
                     key: 'runner',
-                    src: this.properties.src || DEFAULT_IFRAME_SRC
+                    src: src
                 })]);
         };
         __decorate([

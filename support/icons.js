@@ -50,9 +50,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var request_1 = require("@dojo/core/request");
     var globalURL = global_1.default.window.URL;
     var IconResolver = (function () {
-        function IconResolver(sourcePath, config) {
-            this._config = config;
-            this._sourcePath = (new globalURL(sourcePath, window.location.toString()).toString());
+        function IconResolver() {
         }
         /**
          * Get the class name for an icon based on the folder name and if it is expanded or not
@@ -61,6 +59,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
          */
         IconResolver.prototype.folder = function (name, expanded) {
             if (expanded === void 0) { expanded = false; }
+            if (!this._config) {
+                return '';
+            }
             if (!expanded && name in this._config.folderNames) {
                 return this._config.folderNames[name];
             }
@@ -76,6 +77,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
          */
         IconResolver.prototype.file = function (name, language) {
             if (language === void 0) { language = ''; }
+            if (!this._config) {
+                return '';
+            }
             if (name in this._config.fileNames) {
                 return this._config.fileNames[name];
             }
@@ -98,11 +102,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
          * @param iconName The icon name to return a URL for
          */
         IconResolver.prototype.iconUrl = function (iconName) {
+            if (!this._config) {
+                return '';
+            }
             var iconPath = this._config.iconDefinitions[iconName] && this._config.iconDefinitions[iconName].iconPath;
             if (!iconPath) {
                 throw new TypeError("Icon named \"" + iconName + "\" not found.");
             }
             return new globalURL(iconPath, this._sourcePath).toString();
+        };
+        /**
+         * Set the properties on the icon resolver
+         * @param param0 Properties to set on the instance
+         */
+        IconResolver.prototype.setProperties = function (_a) {
+            var icons = _a.icons, sourcePath = _a.sourcePath;
+            this._config = icons;
+            if (this._cachedSourcePath !== sourcePath) {
+                this._cachedSourcePath = sourcePath;
+                this._sourcePath = (new globalURL(sourcePath, window.location.toString()).toString());
+            }
         };
         return IconResolver;
     }());

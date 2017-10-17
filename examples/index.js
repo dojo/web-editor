@@ -63,7 +63,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var icons_1 = require("../support/icons");
     var theme_1 = require("../themes/dark/theme");
     /* path to the project directory */
-    var PROJECT_DIRECTORY = '../../../projects/';
+    var PROJECT_DIRECTORY = '../projects/';
     var icons;
     var iconsSourcePath = '../../extensions/vscode-material-icon-theme/out/src/material-icons.json';
     /**
@@ -75,7 +75,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this._compiling = false;
             _this._editorFilename = '';
-            _this._projectValue = 'dojo2-todo-mvc.project.json';
+            _this._projectValue = '005-initial.project.json';
             return _this;
         }
         /**
@@ -139,8 +139,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             var projectLoad = d_1.v('div', { key: 'projectLoad' }, [
                 d_1.v('label', { for: 'project' }, ['Project to load:']),
                 d_1.v('select', { type: 'text', name: 'project', id: 'project', onchange: this._onchangeProject, disabled: isProjectLoaded ? true : false }, [
+                    d_1.v('option', { value: '005-initial.project.json', selected: true }, ['Form widgets tutorial - initial']),
                     d_1.v('option', { value: 'dojo-test-app.project.json' }, ['Dojo2 Hello World']),
-                    d_1.v('option', { value: 'dojo2-todo-mvc.project.json', selected: true }, ['Dojo2 Todo MVC']),
+                    d_1.v('option', { value: 'dojo2-todo-mvc.project.json' }, ['Dojo2 Todo MVC']),
                     d_1.v('option', { value: 'dojo2-todo-mvc-tsx.project.json' }, ['Dojo 2 JSX Todo MVC']),
                     d_1.v('option', { value: 'dojo2-todo-mvc-kitchensink.project.json' }, ['Dojo2 Kitchensink Todo MVC'])
                 ]),

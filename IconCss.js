@@ -29,7 +29,8 @@ var __extends = (this && this.__extends) || (function () {
      * @param icons An object structure that defines icon classes
      */
     function getStylesFromJson(sourcePath, baseClass, icons) {
-        var resolver = new icons_1.IconResolver(sourcePath, icons);
+        var resolver = new icons_1.IconResolver();
+        resolver.setProperties({ icons: icons, sourcePath: sourcePath });
         var styles = '';
         function before(selector) {
             return selector + '::before';

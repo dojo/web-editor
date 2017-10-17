@@ -127,6 +127,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             case 11 /* PlainText */:
                 return 'plaintext';
             case 9 /* XML */:
+            case 12 /* SVG */:
                 return 'xml';
             default:
                 return 'unknown';
