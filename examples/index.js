@@ -63,9 +63,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var icons_1 = require("../support/icons");
     var theme_1 = require("../themes/dark/theme");
     /* path to the project directory */
-    var PROJECT_DIRECTORY = '../projects/';
+    var PROJECTS_PATH = '../projects/';
+    var EDITOR_THEME = '../data/editor-dark.json';
+    var iconsSourcePath = '../extensions/vscode-material-icon-theme/out/src/material-icons.json';
     var icons;
-    var iconsSourcePath = '../../extensions/vscode-material-icon-theme/out/src/material-icons.json';
     /**
      * An example application widget that incorporates both the Editor and Runner widgets into a simplistic UI
      */
@@ -95,7 +96,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             var _this = this;
             e.preventDefault();
             console.log("Loading project \"" + this._projectValue + "\"...");
-            project_1.default.load(PROJECT_DIRECTORY + this._projectValue)
+            project_1.default.load(PROJECTS_PATH + this._projectValue)
                 .then(function () {
                 console.log('Project loaded');
                 _this.invalidate();
@@ -181,7 +182,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, editorThemes_1.load('../../data/editor-dark.json')];
+                    case 0: return [4 /*yield*/, editorThemes_1.load(EDITOR_THEME)];
                     case 1:
                         _a.sent();
                         return [4 /*yield*/, icons_1.load(iconsSourcePath)];
