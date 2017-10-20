@@ -44,7 +44,7 @@ registerSuite({
 			onRun
 		});
 
-		widget.classes(css.filetree)();
+		widget.classes(css.left)();
 
 		const render = widget.getRender() as WNode<UnitUnderTest>;
 		assert.lengthOf(render.children, 4, 'Should have four children');

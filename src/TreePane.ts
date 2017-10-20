@@ -7,6 +7,7 @@ import Drag from '@dojo/widget-core/meta/Drag';
 import { theme, ThemeableMixin, ThemeableProperties } from '@dojo/widget-core/mixins/Themeable';
 import { Keys } from '@dojo/widgets/common/util';
 import * as css from './styles/treepane.m.css';
+import * as iconCss from './styles/icons.m.css';
 import ScrollBar from './support/ScrollBar';
 
 /**
@@ -205,7 +206,7 @@ export class Row extends ThemeableBase<RowProperties> {
 				classes: this.classes(css.content)
 			}, [
 				v('div', {
-					classes: this.classes(css.label).fixed(css.labelFixed, rowClass || null),
+					classes: this.classes(css.label).fixed(iconCss.label, rowClass || null),
 					title: title
 				}, [
 					v('a', {

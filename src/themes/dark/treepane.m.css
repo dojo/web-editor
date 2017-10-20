@@ -1,7 +1,7 @@
 @import './variables.css';
 
 .root {
-	background-color: var(--dark-black);
+	background-color: var(--dark-light-black);
 	color: var(--dark-light-gray);
 	font-size: 13px;
 	height: 100%;
@@ -14,6 +14,7 @@
 
 .scroll {
 	height: 100%;
+	outline: none;
 	position: absolute;
 	width: 100%;
 }
@@ -53,11 +54,11 @@
 }
 
 .hasChildren .content::before {
-	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23E8E8E8' d='M6 4v8l4-4-4-4zm1 2.414L8.586 8 7 9.586V6.414z'/%3E%3C/svg%3E");
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22%23596C79%22%20viewBox%3D%220%200%2044%2044%22%3E%3Cpath%20fill%3D%22%23596c79%22%20fill-rule%3D%22evenodd%22%20d%3D%22M24.91873%2021.999113L13.246687%2033.671145c-1.071895%201.071895-1.069158%202.810376.004125%203.88432%201.081425%201.081423%202.813004%201.076075%203.884308.004125l13.621355-13.621355c.53515-.53515.80245-1.236455.802298-1.93827.001376-.706955-.267436-1.406404-.802297-1.941265L17.135118%206.437345c-1.071895-1.071895-2.810377-1.069173-3.884307.004125-1.081436%201.081423-1.076087%202.813002-.004124%203.88432z%22%2F%3E%3C%2Fsvg%3E");
 }
 
 .hasChildren.expanded .content::before {
-	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23E8E8E8' d='M11 10H5.344L11 4.414V10z'/%3E%3C/svg%3E");
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22%23596C79%22%20viewBox%3D%220%200%2044%2044%22%3E%3Cpath%20fill%3D%22%23596c79%22%20fill-rule%3D%22evenodd%22%20d%3D%22M28.87524%2028.876154l-16.506755-.00001c-1.515888%200-2.743245%201.231227-2.743712%202.749546%200%201.529364%201.228193%202.749993%202.743703%202.749536H31.63198c.756817%200%201.441724-.306887%201.937874-.803252.500866-.49892.805372-1.183585.805372-1.939993V12.368477c0-1.515888-1.231217-2.743255-2.749536-2.743702-1.529374-.00001-2.750003%201.228183-2.749546%202.743712z%22%2F%3E%3C%2Fsvg%3E");
 }
 
 .content::before {
@@ -81,9 +82,9 @@
 }
 
 .row.selected {
-	background-color: var(--dark-light-black);
+	background-color: var(--dark-highlight-black);
 }
 
 .row:hover:not(.selected) {
-	background-color: var(--dark-med-black);
+	background-color: var(--dark-highlight-black);
 }

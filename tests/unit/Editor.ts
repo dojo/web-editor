@@ -159,16 +159,16 @@ registerSuite({
 
 	async 'does layout on re-renders'() {
 		let called = 0;
-		function onEditorLayout() {
+		function onLayout() {
 			called++;
 		}
 		await getMonacoEditor({
-			onEditorLayout
+			onLayout
 		});
 		const currentCallCount = called;
 		widget.setProperties({
 			filename: './src/foo.ts',
-			onEditorLayout
+			onLayout
 		});
 		widget.getRender();
 		return new Promise((resolve, reject) => {

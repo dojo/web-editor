@@ -1,7 +1,11 @@
-/**
- * A base class for the editor
- */
+/* Themeable classes */
+
 .root {
 	flex: 1;
+}
+
+/* Fixed classes */
+
+.rootFixed {
 	height: 100%;
 }

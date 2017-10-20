@@ -1,0 +1,45 @@
+@import './variables.css';
+
+.root {
+	background-color: var(--dark-light-black);
+	border-right: 1px solid var(--dark-med-black);
+	border-top: 1px solid var(--dark-med-black);
+	box-sizing: border-box;
+	color: var(--dark-light-gray);
+	font-size: 13px;
+	height: 36px;
+	line-height: 1.4em;
+	outline: none;
+	padding-left: 10px;
+	width: 120px;
+}
+
+.selected {
+	background-color: var(--dark-med-black);
+}
+
+.label {
+	margin-bottom: auto;
+	margin-top: auto;
+}
+
+.label::before {
+	background-size: 16px;
+	background-position: 0;
+	height: 16px;
+	padding-right: 6px;
+	vertical-align: top;
+	width: 16px;
+}
+
+.description {
+	font-size: .9em;
+	margin-left: 0.5em;
+	opacity: .7;
+}
+
+.closer {
+	margin-top: auto;
+	margin-bottom: auto;
+	width: 28px;
+}

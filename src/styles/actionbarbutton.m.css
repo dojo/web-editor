@@ -1,0 +1,27 @@
+/* Themeable classes */
+
+.root {
+	background: inherit;
+}
+
+.label {
+	height: 36px;
+	line-height: 36px;
+	min-width: 28px;
+	outline: none;
+}
+
+/* Fixed classes */
+
+.rootFixed {
+	cursor: pointer;
+	display: inline-block;
+	position: relative;
+}
+
+.labelFixed {
+	display: block;
+	background-size: 16px;
+	background-position: 50%;
+	background-repeat: no-repeat;
+}

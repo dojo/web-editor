@@ -1,6 +1,7 @@
 import { find, includes } from '@dojo/shim/array';
 import { assign } from '@dojo/shim/object';
 import { v, w } from '@dojo/widget-core/d';
+import { WNode } from '@dojo/widget-core/interfaces';
 import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import Editor from './Editor';
@@ -8,8 +9,9 @@ import IconCss from './IconCss';
 import { Program } from './project';
 import Runner, { RunnerProperties } from './Runner';
 import TreePane, { TreePaneItem } from './TreePane';
+import Toolbar, { Tab } from './Toolbar';
 import { IconJson, IconResolver } from './support/icons';
-import * as treepaneCss from './styles/treepane.m.css';
+import * as iconCss from './styles/icons.m.css';
 import * as css from './styles/workbench.m.css';
 
 const ThemeableBase = ThemeableMixin(WidgetBase);
@@ -35,10 +37,18 @@ export interface WorkbenchProperties extends ThemeableProperties {
 	 */
 	iconsSourcePath?: string;
 
+	openFiles?: string[];
+
+	runnable?: boolean;
+
 	/**
 	 * The current emitted program that the runner should be running, otherwise `undefined`
 	 */
 	program?: Program;
+
+	onDirty?(): void;
+
+	onFileClose?(filename: string): void;
 
 	/**
 	 * Called when a file is opened on the workbench
@@ -46,22 +56,53 @@ export interface WorkbenchProperties extends ThemeableProperties {
 	 */
 	onFileOpen?(filename: string): void;
 
+	onFileSelect?(filename: string): void;
+
 	/**
 	 * Called when the runner completes loading the program
 	 */
 	onRun?(): void;
+
+	onRunClick?(): void;
 }
 
 @theme(css)
 export default class Workbench extends ThemeableBase<WorkbenchProperties> {
-	private _expanded = [ '/', '/src' ];
+	private _expanded = [ './', './src' ];
+	private _fileTreeOpen = true;
 	private _iconResolver = new IconResolver();
-	private _selected: string;
+	private _layoutEditor = false;
+	private _runnerOpen = true;
+	private _selected = '';
 
 	private _getItemClass = (item: TreePaneItem, expanded?: boolean) => {
 		if (typeof item.label === 'string') {
 			return item.children && item.children.length ? this._iconResolver.folder(item.label, expanded) : this._iconResolver.file(item.label);
 		}
+	}
+
+	private _getTabs(): WNode<Tab>[] {
+		const { properties: { filename: openFilename, openFiles, theme } } = this;
+
+		if (!openFiles) {
+			return [];
+		}
+
+		return openFiles.map((filename, idx) => {
+			const parts = filename.split(/[\/\\]/);
+			// TODO: deal with adding a labelDescription when duplicate files are opened
+			return w(Tab, {
+				iconClass: this._iconResolver.file(filename),
+				key: `${idx}`,
+				label: parts[parts.length - 1],
+				selected: filename === openFilename,
+				title: filename,
+				theme,
+
+				onClose: this._onFileTabClose,
+				onSelect: this._onFileTabSelect
+			});
+		});
 	}
 
 	private _getTreeRoot(): TreePaneItem | undefined {
@@ -145,18 +186,59 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 		this.invalidate();
 	}
 
+	private _onFileTabClose = (key: string | number | undefined, label: string) => {
+		const { openFiles, onFileClose } = this.properties;
+		const idx = Number(key);
+		if (onFileClose && openFiles && openFiles[idx]) {
+			onFileClose(openFiles[idx]);
+		}
+	}
+
+	private _onFileTabSelect = (key: string | number | undefined, label: string) => {
+		const { openFiles, onFileSelect } = this.properties;
+		const idx = Number(key);
+		if (onFileSelect && openFiles && openFiles[idx]) {
+			onFileSelect(openFiles[idx]);
+		}
+	}
+
+	private _onRun() {
+		const { onRun } = this.properties;
+		if (!this._runnerOpen) {
+			this._onToggleRunner();
+		}
+		onRun && onRun();
+	}
+
+	private _onToggleFiles() {
+		this._fileTreeOpen = !this._fileTreeOpen;
+		this._layoutEditor = true;
+		this.invalidate();
+	}
+
+	private _onToggleRunner() {
+		this._runnerOpen = !this._runnerOpen;
+		this._layoutEditor = true;
+		this.invalidate();
+	}
+
 	render() {
 		const {
 			_expanded,
+			_fileTreeOpen: filesOpen,
 			_getItemClass: getItemClass,
+			_layoutEditor: layout,
+			_runnerOpen: runnerOpen,
 			_selected: selected,
 			properties: {
 				filename,
 				icons,
 				iconsSourcePath: sourcePath,
 				program,
+				runnable,
 				theme,
-				onRun
+				onDirty,
+				onRunClick
 			}
 		} = this;
 
@@ -164,19 +246,25 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 			this._iconResolver.setProperties({ icons, sourcePath });
 		}
 
-		const runnerProperties: RunnerProperties = assign({}, program, { key: 'runner', theme, onRun });
+		const runnerProperties: RunnerProperties = assign({}, program, { key: 'runner', theme, onRun: this._onRun });
+
+		// if we are laying out the editor on this render, we can reset the state
+		if (layout) {
+			this._layoutEditor = false;
+		}
 
 		return v('div', {
-			classes: this.classes(css.root)
+			classes: this.classes(css.root).fixed(css.rootFixed)
 		}, [
 			w(IconCss, {
-				baseClass: treepaneCss.labelFixed,
+				baseClass: iconCss.label,
 				icons,
 				key: 'icons',
 				sourcePath
 			}),
 			v('div', {
-				classes: this.classes(css.filetree)
+				classes: this.classes(css.left, filesOpen ? null : css.closed),
+				key: 'left'
 			}, [
 				w(TreePane, {
 					expanded: [ ..._expanded ],
@@ -191,15 +279,38 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 					onItemToggle: this._onItemToggle
 				})
 			]),
-			w(Editor, {
-				filename,
-				key: 'editor',
-				options: {
-					minimap: { enabled: false }
-				},
-				theme
-			}),
-			w(Runner, runnerProperties)
+			v('div', {
+				classes: this.classes(css.middle),
+				key: 'middle'
+			}, [
+				w(Toolbar, {
+					runnable,
+					runnerOpen,
+					filesOpen,
+					theme,
+					onRunClick,
+					onToggleFiles: this._onToggleFiles,
+					onToggleRunner: this._onToggleRunner
+				}, this._getTabs()),
+				w(Editor, {
+					filename,
+					key: 'editor',
+					layout,
+					options: {
+						folding: true,
+						minimap: { enabled: false },
+						renderWhitespace: 'boundary'
+					},
+					theme,
+					onDirty
+				})
+			]),
+			v('div', {
+				classes: this.classes(css.right, runnerOpen ? null : css.closed),
+				key: 'right'
+			}, [
+				w(Runner, runnerProperties)
+			])
 		]);
 	}
 }

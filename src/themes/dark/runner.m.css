@@ -1,8 +1,8 @@
 @import './variables.css';
 
 .root {
-	background: var(--dark-black);
-	flex: 1;
+	background: var(--dark-light-black);
+	flex: 2;
 	height: 100%;
 }
 

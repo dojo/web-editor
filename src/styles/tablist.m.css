@@ -1,0 +1,22 @@
+/* Themeable classes */
+
+.root {
+	background: inherit;
+}
+
+.tablist {
+	height: 36px;
+}
+
+/* Fixed classes */
+
+.rootFixed {
+	flex: 1;
+	position: relative;
+	overflow: hidden;
+}
+
+.tablistFixed {
+	display: flex;
+	overflow: hidden;
+}

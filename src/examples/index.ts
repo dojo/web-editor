@@ -1,5 +1,6 @@
+import { from } from '@dojo/shim/array';
+import Set from '@dojo/shim/Set';
 import { v, w } from '@dojo/widget-core/d';
-import { DNode } from '@dojo/widget-core/interfaces';
 import Projector from '@dojo/widget-core/mixins/Projector';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import project, { Program } from '../project';
@@ -21,7 +22,9 @@ let icons: IconJson;
 class App extends WidgetBase {
 	private _compiling = false;
 	private _editorFilename = '';
+	private _openFiles = new Set<string>();
 	private _program: Program | undefined;
+	private _projectDirty = true;
 	private _projectValue = '005-initial.project.json';
 
 	/**
@@ -50,36 +53,62 @@ class App extends WidgetBase {
 			});
 	}
 
-	/**
-	 * Handle when the on project run button is clicked
-	 * @param e The DOM `onclick` event
-	 */
-	private _onclickRun(e: MouseEvent) {
-		e.preventDefault();
-		console.log('Compiling project...');
-		this._compiling = true;
-		this.invalidate(); /* this will update the UI so "Run" is disabled */
-		project.getProgram()
-			.then((program) => {
-				this._program = program;
-				this.invalidate(); /* this will cause the properties to the runner to change, starting the run process */
-			}, (err) => {
-				console.error(err);
-			});
+	private _onFileClose(filename: string) {
+		const { _openFiles } = this;
+		_openFiles.delete(filename);
+		if (this._editorFilename === filename) {
+			if (!_openFiles.size) {
+				this._editorFilename = '';
+			}
+			else {
+				this._editorFilename = _openFiles.values().next().value;
+			}
+		}
+		this.invalidate();
 	}
 
 	private _onFileOpen(filename: string) {
 		if (project.isLoaded() && project.includes(filename)) {
 			this._editorFilename = filename;
+			this._openFiles.add(filename);
+			this.invalidate();
 		}
 	}
 
-	/**
-	 * Handles when the Runner widget finishes running the project
-	 */
+	private _onFileSelect(filename: string) {
+		this._editorFilename = filename;
+		this.invalidate();
+	}
+
+	private _onDirty() {
+		this._projectDirty = true;
+		this.invalidate();
+	}
+
 	private _onRun() {
 		this._compiling = false;
-		this.invalidate(); /* this will enable the "Run" button in the UI */
+		this.invalidate();
+	}
+
+	/**
+	 * Handle when the on project run button is clicked
+	 */
+	private async _onRunClick() {
+		if (this._compiling || !project.isLoaded() || !this._projectDirty) {
+			return;
+		}
+		console.log('Compiling project...');
+		this._compiling = true;
+		this.invalidate(); /* this will update the UI so "Run" is disabled */
+		try {
+			const program = await project.getProgram();
+			this._program = program;
+			this._projectDirty = false;
+			this.invalidate(); /* this will cause the properties to the runner to change, starting the run process */
+		}
+		catch (err) {
+			console.error(err);
+		}
 	}
 
 	render() {
@@ -98,31 +127,26 @@ class App extends WidgetBase {
 			v('button', { type: 'button', name: 'load-project', id: 'load-project', onclick: this._onclickLoad, disabled: isProjectLoaded ? true : false }, [ 'Load' ])
 		]);
 
-		let fileSelect: DNode = null;
-		/* If the project is loaded, then we will render a UI which allows selection of the file to edit and a button to run the project */
-		if (isProjectLoaded) {
-			fileSelect = v('div', { key: 'fileSelect' }, [
-				v('div', [
-					v('button', { type: 'button', name: 'run', id: 'run', onclick: this._onclickRun, disabled: this._compiling ? true : false }, [ 'Run' ])
-				])
-			]);
-		}
-
 		return v('div', {
 			classes: { app: true }
 		}, [
 			projectLoad,
-			fileSelect,
 			w(Workbench, {
 				filename: this._editorFilename,
 				files: isProjectLoaded ? project.getFileNames() : undefined,
 				icons,
 				iconsSourcePath,
+				openFiles: from(this._openFiles),
 				program: this._program,
+				runnable: !this._compiling && isProjectLoaded && this._projectDirty,
 				theme: darkTheme,
 
+				onFileClose: this._onFileClose,
 				onFileOpen: this._onFileOpen,
-				onRun: this._onRun
+				onFileSelect: this._onFileSelect,
+				onDirty: this._onDirty,
+				onRun: this._onRun,
+				onRunClick: this._onRunClick
 			})
 		]);
 	}
