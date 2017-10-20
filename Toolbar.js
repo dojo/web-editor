@@ -71,14 +71,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             var _a = this.properties, iconClass = _a.iconClass, title = _a.label;
             return d_1.v('li', {
                 classes: this.classes(actionbarbuttonCss.root).fixed(actionbarbuttonCss.rootFixed),
-                role: 'presentation'
+                role: 'presentation',
+                onclick: this._onClick
             }, [
                 d_1.v('a', {
                     classes: this.classes(actionbarbuttonCss.label).fixed(actionbarbuttonCss.labelFixed, iconClass || null),
                     role: 'button',
                     tabIndex: 0,
-                    title: title,
-                    onclick: this._onClick
+                    title: title
                 })
             ]);
         };
@@ -111,15 +111,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 classes: this.classes(tabCss.root, selected ? tabCss.selected : null).fixed(tabCss.rootFixed),
                 role: 'presentation',
                 tabIndex: 0,
-                title: title
+                title: title,
+                onclick: this._onclick
             }, [
                 d_1.v('div', {
                     classes: this.classes(tabCss.label).fixed(tabCss.labelFixed, iconCss.label, iconClass || null),
                     title: title
                 }, [
                     d_1.v('a', {
-                        classes: this.classes().fixed(tabCss.link),
-                        onclick: this._onclick
+                        classes: this.classes().fixed(tabCss.link)
                     }, [label]),
                     d_1.v('span', {
                         classes: this.classes(tabCss.description).fixed(tabCss.descriptionFixed)
@@ -179,6 +179,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 var onToggleFiles = _this.properties.onToggleFiles;
                 onToggleFiles && onToggleFiles();
             };
+            _this._onRunClick = function () {
+                var onRunClick = _this.properties.onRunClick;
+                onRunClick && onRunClick();
+            };
             _this._onRunnerClick = function () {
                 var onToggleRunner = _this.properties.onToggleRunner;
                 onToggleRunner && onToggleRunner();
@@ -186,7 +190,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             return _this;
         }
         Toolbar.prototype.render = function () {
-            var _a = this.properties, filesOpen = _a.filesOpen, runnerOpen = _a.runnerOpen, theme = _a.theme;
+            var _a = this.properties, filesOpen = _a.filesOpen, runnable = _a.runnable, runnerOpen = _a.runnerOpen, theme = _a.theme;
             return d_1.v('div', {
                 classes: this.classes(toolbarCss.root).fixed(toolbarCss.rootFixed),
                 key: 'root'
@@ -212,6 +216,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     theme: theme
                 }, [
                     d_1.w(ActionBarButton, {
+                        key: 'runProject',
+                        label: 'Run project',
+                        iconClass: runnable ? toolbarCss.runIconEnabled : toolbarCss.runIconDisabled,
+                        theme: theme,
+                        onClick: this._onRunClick
+                    }),
+                    d_1.w(ActionBarButton, {
+                        key: 'toggleRunner',
                         label: 'Toggle runner',
                         iconClass: runnerOpen ? toolbarCss.previewIconOpen : toolbarCss.previewIconClosed,
                         theme: theme,

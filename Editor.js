@@ -54,7 +54,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             var _this = _super.call(this) || this;
             _this._emptyModel = monaco.editor.createModel('');
             _this._onAttached = function () {
-                var _a = _this, _onDidChangeModelContent = _a._onDidChangeModelContent, _root = _a._root, _b = _a.properties, onEditorInit = _b.onEditorInit, onEditorLayout = _b.onEditorLayout, options = _b.options;
+                var _a = _this, _onDidChangeModelContent = _a._onDidChangeModelContent, _root = _a._root, _b = _a.properties, onInit = _b.onInit, onLayout = _b.onLayout, options = _b.options;
                 // _onAttached fires when the DOM is actually attached to the document, but the rest of the virtual DOM hasn't
                 // been layed out which causes issues for monaco-editor when figuring out its initial size, so we will schedule
                 // it to be run at the end of the turn, which will provide more reliable layout
@@ -62,20 +62,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     var editor = _this._editor = globalMonaco.editor.create(_root, options);
                     var didChangeHandle = _this._didChangeHandle = editor.onDidChangeModelContent(util_1.debounce(_onDidChangeModelContent, 1000));
                     _this._setModel();
-                    onEditorInit && onEditorInit(editor);
+                    onInit && onInit(editor);
                     _this.own(lang_1.createHandle(function () {
                         editor.dispose();
                         didChangeHandle.dispose();
                     }));
                     _this._originalSize = getSize(_root);
                     editor.layout();
-                    onEditorLayout && onEditorLayout();
+                    onLayout && onLayout();
                 });
             };
             _this._onDidChangeModelContent = function () {
-                var filename = _this.properties.filename;
+                var _a = _this.properties, filename = _a.filename, onDirty = _a.onDirty;
                 if (filename) {
                     project_1.default.setFileDirty(filename);
+                    onDirty && onDirty();
                 }
             };
             var root = _this._root = document.createElement('div');
@@ -83,7 +84,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             return _this;
         }
         Editor.prototype._layout = function () {
-            var _a = this, _editor = _a._editor, _originalSize = _a._originalSize, _root = _a._root, onEditorLayout = _a.properties.onEditorLayout;
+            var _a = this, _editor = _a._editor, _originalSize = _a._originalSize, _root = _a._root, onLayout = _a.properties.onLayout;
             if (!_editor) {
                 return;
             }
@@ -97,7 +98,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 var size = getSize(_root);
                 if (!isEqualSize(size, { height: _originalSize.height, width: MINIMUM_WIDTH })) {
                     _editor.layout(size);
-                    onEditorLayout && onEditorLayout();
+                    onLayout && onLayout();
                 }
             });
         };

@@ -79,6 +79,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             _this._compiling = false;
             _this._editorFilename = '';
             _this._openFiles = new Set_1.default();
+            _this._projectDirty = true;
             _this._projectValue = '005-initial.project.json';
             return _this;
         }
@@ -107,24 +108,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 console.error(err);
             });
         };
-        /**
-         * Handle when the on project run button is clicked
-         * @param e The DOM `onclick` event
-         */
-        App.prototype._onclickRun = function (e) {
-            var _this = this;
-            e.preventDefault();
-            console.log('Compiling project...');
-            this._compiling = true;
-            this.invalidate(); /* this will update the UI so "Run" is disabled */
-            project_1.default.getProgram()
-                .then(function (program) {
-                _this._program = program;
-                _this.invalidate(); /* this will cause the properties to the runner to change, starting the run process */
-            }, function (err) {
-                console.error(err);
-            });
-        };
         App.prototype._onFileClose = function (filename) {
             var _openFiles = this._openFiles;
             _openFiles.delete(filename);
@@ -149,12 +132,47 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this._editorFilename = filename;
             this.invalidate();
         };
-        /**
-         * Handles when the Runner widget finishes running the project
-         */
+        App.prototype._onDirty = function () {
+            this._projectDirty = true;
+            this.invalidate();
+        };
         App.prototype._onRun = function () {
             this._compiling = false;
-            this.invalidate(); /* this will enable the "Run" button in the UI */
+            this.invalidate();
+        };
+        /**
+         * Handle when the on project run button is clicked
+         */
+        App.prototype._onRunClick = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var program, err_1;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (this._compiling || !project_1.default.isLoaded() || !this._projectDirty) {
+                                return [2 /*return*/];
+                            }
+                            console.log('Compiling project...');
+                            this._compiling = true;
+                            this.invalidate(); /* this will update the UI so "Run" is disabled */
+                            _a.label = 1;
+                        case 1:
+                            _a.trys.push([1, 3, , 4]);
+                            return [4 /*yield*/, project_1.default.getProgram()];
+                        case 2:
+                            program = _a.sent();
+                            this._program = program;
+                            this._projectDirty = false;
+                            this.invalidate(); /* this will cause the properties to the runner to change, starting the run process */
+                            return [3 /*break*/, 4];
+                        case 3:
+                            err_1 = _a.sent();
+                            console.error(err_1);
+                            return [3 /*break*/, 4];
+                        case 4: return [2 /*return*/];
+                    }
+                });
+            });
         };
         App.prototype.render = function () {
             var isProjectLoaded = project_1.default.isLoaded();
@@ -170,20 +188,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 ]),
                 d_1.v('button', { type: 'button', name: 'load-project', id: 'load-project', onclick: this._onclickLoad, disabled: isProjectLoaded ? true : false }, ['Load'])
             ]);
-            var fileSelect = null;
-            /* If the project is loaded, then we will render a UI which allows selection of the file to edit and a button to run the project */
-            if (isProjectLoaded) {
-                fileSelect = d_1.v('div', { key: 'fileSelect' }, [
-                    d_1.v('div', [
-                        d_1.v('button', { type: 'button', name: 'run', id: 'run', onclick: this._onclickRun, disabled: this._compiling ? true : false }, ['Run'])
-                    ])
-                ]);
-            }
             return d_1.v('div', {
                 classes: { app: true }
             }, [
                 projectLoad,
-                fileSelect,
                 d_1.w(Workbench_1.default, {
                     filename: this._editorFilename,
                     files: isProjectLoaded ? project_1.default.getFileNames() : undefined,
@@ -191,11 +199,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     iconsSourcePath: iconsSourcePath,
                     openFiles: array_1.from(this._openFiles),
                     program: this._program,
+                    runnable: !this._compiling && isProjectLoaded && this._projectDirty,
                     theme: theme_1.default,
                     onFileClose: this._onFileClose,
                     onFileOpen: this._onFileOpen,
                     onFileSelect: this._onFileSelect,
-                    onRun: this._onRun
+                    onDirty: this._onDirty,
+                    onRun: this._onRun,
+                    onRunClick: this._onRunClick
                 })
             ]);
         };

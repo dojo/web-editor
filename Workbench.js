@@ -78,6 +78,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             }
             return openFiles.map(function (filename, idx) {
                 var parts = filename.split(/[\/\\]/);
+                // TODO: deal with adding a labelDescription when duplicate files are opened
                 return d_1.w(Toolbar_1.Tab, {
                     iconClass: _this._iconResolver.file(filename),
                     key: "" + idx,
@@ -169,6 +170,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             }
             this.invalidate();
         };
+        Workbench.prototype._onRun = function () {
+            var onRun = this.properties.onRun;
+            if (!this._runnerOpen) {
+                this._onToggleRunner();
+            }
+            onRun && onRun();
+        };
         Workbench.prototype._onToggleFiles = function () {
             this._fileTreeOpen = !this._fileTreeOpen;
             this._layoutEditor = true;
@@ -180,11 +188,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             this.invalidate();
         };
         Workbench.prototype.render = function () {
-            var _a = this, _expanded = _a._expanded, filesOpen = _a._fileTreeOpen, getItemClass = _a._getItemClass, layout = _a._layoutEditor, runnerOpen = _a._runnerOpen, selected = _a._selected, _b = _a.properties, filename = _b.filename, icons = _b.icons, sourcePath = _b.iconsSourcePath, program = _b.program, theme = _b.theme, onRun = _b.onRun;
+            var _a = this, _expanded = _a._expanded, filesOpen = _a._fileTreeOpen, getItemClass = _a._getItemClass, layout = _a._layoutEditor, runnerOpen = _a._runnerOpen, selected = _a._selected, _b = _a.properties, filename = _b.filename, icons = _b.icons, sourcePath = _b.iconsSourcePath, program = _b.program, runnable = _b.runnable, theme = _b.theme, onDirty = _b.onDirty, onRunClick = _b.onRunClick;
             if (icons && sourcePath) {
                 this._iconResolver.setProperties({ icons: icons, sourcePath: sourcePath });
             }
-            var runnerProperties = object_1.assign({}, program, { key: 'runner', theme: theme, onRun: onRun });
+            var runnerProperties = object_1.assign({}, program, { key: 'runner', theme: theme, onRun: this._onRun });
             // if we are laying out the editor on this render, we can reset the state
             if (layout) {
                 this._layoutEditor = false;
@@ -219,9 +227,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     key: 'middle'
                 }, [
                     d_1.w(Toolbar_1.default, {
+                        runnable: runnable,
                         runnerOpen: runnerOpen,
                         filesOpen: filesOpen,
                         theme: theme,
+                        onRunClick: onRunClick,
                         onToggleFiles: this._onToggleFiles,
                         onToggleRunner: this._onToggleRunner
                     }, this._getTabs()),
@@ -234,7 +244,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                             minimap: { enabled: false },
                             renderWhitespace: 'boundary'
                         },
-                        theme: theme
+                        theme: theme,
+                        onDirty: onDirty
                     })
                 ]),
                 d_1.v('div', {
