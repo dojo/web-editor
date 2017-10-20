@@ -49,11 +49,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Projector", "@dojo/widget-core/WidgetBase", "../project", "../Workbench", "../support/editorThemes", "../support/icons", "../themes/dark/theme"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/Set", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Projector", "@dojo/widget-core/WidgetBase", "../project", "../Workbench", "../support/editorThemes", "../support/icons", "../themes/dark/theme"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    var array_1 = require("@dojo/shim/array");
+    var Set_1 = require("@dojo/shim/Set");
     var d_1 = require("@dojo/widget-core/d");
     var Projector_1 = require("@dojo/widget-core/mixins/Projector");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
@@ -76,6 +78,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this._compiling = false;
             _this._editorFilename = '';
+            _this._openFiles = new Set_1.default();
             _this._projectValue = '005-initial.project.json';
             return _this;
         }
@@ -122,10 +125,29 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 console.error(err);
             });
         };
+        App.prototype._onFileClose = function (filename) {
+            var _openFiles = this._openFiles;
+            _openFiles.delete(filename);
+            if (this._editorFilename === filename) {
+                if (!_openFiles.size) {
+                    this._editorFilename = '';
+                }
+                else {
+                    this._editorFilename = _openFiles.values().next().value;
+                }
+            }
+            this.invalidate();
+        };
         App.prototype._onFileOpen = function (filename) {
             if (project_1.default.isLoaded() && project_1.default.includes(filename)) {
                 this._editorFilename = filename;
+                this._openFiles.add(filename);
+                this.invalidate();
             }
+        };
+        App.prototype._onFileSelect = function (filename) {
+            this._editorFilename = filename;
+            this.invalidate();
         };
         /**
          * Handles when the Runner widget finishes running the project
@@ -167,9 +189,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     files: isProjectLoaded ? project_1.default.getFileNames() : undefined,
                     icons: icons,
                     iconsSourcePath: iconsSourcePath,
+                    openFiles: array_1.from(this._openFiles),
                     program: this._program,
                     theme: theme_1.default,
+                    onFileClose: this._onFileClose,
                     onFileOpen: this._onFileOpen,
+                    onFileSelect: this._onFileSelect,
                     onRun: this._onRun
                 })
             ]);

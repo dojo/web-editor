@@ -5,5 +5,5 @@ if (typeof define === 'function' && define.amd) {
 	module.exports = factory();
 }
 }(this, function () {
-	return {"root":"_3wC3E6V0"," _key":"dojo-editor"};
+	return {"root":"_3wC3E6V0","rootFixed":"mm79T97F"," _key":"dojo-editor"};
 }));

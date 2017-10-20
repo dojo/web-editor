@@ -1,10 +1,13 @@
-/**
- * A base class for the editor
- */
+/* Themeable classes */
+
 ._3wC3E6V0 {
 	-ms-flex: 1;
 	    flex: 1;
-	height: 100%;
 }
 
-/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9zdHlsZXMvZWRpdG9yLm0uY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOztHQUVHO0FBQ0g7Q0FDQyxZQUFRO0tBQVIsUUFBUTtDQUNSLGFBQWE7Q0FDYiIsImZpbGUiOiJlZGl0b3IubS5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEEgYmFzZSBjbGFzcyBmb3IgdGhlIGVkaXRvclxuICovXG4ucm9vdCB7XG5cdGZsZXg6IDE7XG5cdGhlaWdodDogMTAwJTtcbn1cbiJdfQ== */
+/* Fixed classes */
+
+.mm79T97F {
+	height: 100%;
+}
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9zdHlsZXMvZWRpdG9yLm0uY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLHVCQUF1Qjs7QUFFdkI7Q0FDQyxZQUFRO0tBQVIsUUFBUTtDQUNSOztBQUVELG1CQUFtQjs7QUFFbkI7Q0FDQyxhQUFhO0NBQ2IiLCJmaWxlIjoiZWRpdG9yLm0uY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLyogVGhlbWVhYmxlIGNsYXNzZXMgKi9cblxuLnJvb3Qge1xuXHRmbGV4OiAxO1xufVxuXG4vKiBGaXhlZCBjbGFzc2VzICovXG5cbi5yb290Rml4ZWQge1xuXHRoZWlnaHQ6IDEwMCU7XG59Il19 */

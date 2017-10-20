@@ -2,13 +2,18 @@
 	"name": "dojo2",
 	"type": "dark",
 	"colors": {
-		"dropdown.background": "#292d35",
-		"editor.background": "#16181C",
-		"list.hoverBackground": "#292d35",
-		"peekViewTitle.background": "#292d35",
-		"peekViewEditor.background": "#292d35",
-		"peekViewResult.background": "#16181C",
-		"scrollbarSlider.background": "#16181C"
+		"dropdown.background": "#333844",
+		"editor.background": "#262932",
+		"editor.lineHighlightBackground": "#333844",
+		"editor.selectionBackground": "#3C454E",
+		"editorHoverWidget.background": "#333844",
+		"editorLineNumber.foreground": "#FFFFFFAA",
+		"list.hoverBackground": "#333844",
+		"peekViewTitle.background": "#333844",
+		"peekViewEditor.background": "#333844",
+		"peekViewResult.background": "#262932",
+		"scrollbarSlider.background": "#262932",
+		"textSeparator.foreground": "#333844"
 	},
 	"rules": [
 		{

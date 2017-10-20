@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/meta/Drag", "@dojo/widget-core/mixins/Themeable", "./styles/treepane.m.css", "./support/ScrollBar"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/meta/Drag", "@dojo/widget-core/mixins/Themeable", "./styles/treepane.m.css", "./styles/icons.m.css", "./support/ScrollBar"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -32,6 +32,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var Drag_1 = require("@dojo/widget-core/meta/Drag");
     var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
     var css = require("./styles/treepane.m.css");
+    var iconCss = require("./styles/icons.m.css");
     var ScrollBar_1 = require("./support/ScrollBar");
     var ROW_HEIGHT = 22;
     var ROW_LEVEL_LEFT_PADDING = 12;
@@ -74,7 +75,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     classes: this.classes(css.content)
                 }, [
                     d_1.v('div', {
-                        classes: this.classes(css.label).fixed(css.labelFixed, rowClass || null),
+                        classes: this.classes(css.label).fixed(iconCss.label, rowClass || null),
                         title: title
                     }, [
                         d_1.v('a', {

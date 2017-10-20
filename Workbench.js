@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/object", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "./Editor", "./IconCss", "./Runner", "./TreePane", "./support/icons", "./styles/treepane.m.css", "./styles/workbench.m.css"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/object", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "./Editor", "./IconCss", "./Runner", "./TreePane", "./Toolbar", "./support/icons", "./styles/icons.m.css", "./styles/workbench.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -34,23 +34,62 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var IconCss_1 = require("./IconCss");
     var Runner_1 = require("./Runner");
     var TreePane_1 = require("./TreePane");
+    var Toolbar_1 = require("./Toolbar");
     var icons_1 = require("./support/icons");
-    var treepaneCss = require("./styles/treepane.m.css");
+    var iconCss = require("./styles/icons.m.css");
     var css = require("./styles/workbench.m.css");
     var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
     var Workbench = (function (_super) {
         __extends(Workbench, _super);
         function Workbench() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this._expanded = ['/', '/src'];
+            _this._expanded = ['./', './src'];
+            _this._fileTreeOpen = true;
             _this._iconResolver = new icons_1.IconResolver();
+            _this._layoutEditor = false;
+            _this._runnerOpen = true;
+            _this._selected = '';
             _this._getItemClass = function (item, expanded) {
                 if (typeof item.label === 'string') {
                     return item.children && item.children.length ? _this._iconResolver.folder(item.label, expanded) : _this._iconResolver.file(item.label);
                 }
             };
+            _this._onFileTabClose = function (key, label) {
+                var _a = _this.properties, openFiles = _a.openFiles, onFileClose = _a.onFileClose;
+                var idx = Number(key);
+                if (onFileClose && openFiles && openFiles[idx]) {
+                    onFileClose(openFiles[idx]);
+                }
+            };
+            _this._onFileTabSelect = function (key, label) {
+                var _a = _this.properties, openFiles = _a.openFiles, onFileSelect = _a.onFileSelect;
+                var idx = Number(key);
+                if (onFileSelect && openFiles && openFiles[idx]) {
+                    onFileSelect(openFiles[idx]);
+                }
+            };
             return _this;
         }
+        Workbench.prototype._getTabs = function () {
+            var _this = this;
+            var _a = this.properties, openFilename = _a.filename, openFiles = _a.openFiles, theme = _a.theme;
+            if (!openFiles) {
+                return [];
+            }
+            return openFiles.map(function (filename, idx) {
+                var parts = filename.split(/[\/\\]/);
+                return d_1.w(Toolbar_1.Tab, {
+                    iconClass: _this._iconResolver.file(filename),
+                    key: "" + idx,
+                    label: parts[parts.length - 1],
+                    selected: filename === openFilename,
+                    title: filename,
+                    theme: theme,
+                    onClose: _this._onFileTabClose,
+                    onSelect: _this._onFileTabSelect
+                });
+            });
+        };
         Workbench.prototype._getTreeRoot = function () {
             /**
              * Add a file to a tree of files, by parsing the filename and adding generating a `TreePaneItem`
@@ -130,23 +169,38 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             }
             this.invalidate();
         };
+        Workbench.prototype._onToggleFiles = function () {
+            this._fileTreeOpen = !this._fileTreeOpen;
+            this._layoutEditor = true;
+            this.invalidate();
+        };
+        Workbench.prototype._onToggleRunner = function () {
+            this._runnerOpen = !this._runnerOpen;
+            this._layoutEditor = true;
+            this.invalidate();
+        };
         Workbench.prototype.render = function () {
-            var _a = this, _expanded = _a._expanded, getItemClass = _a._getItemClass, selected = _a._selected, _b = _a.properties, filename = _b.filename, icons = _b.icons, sourcePath = _b.iconsSourcePath, program = _b.program, theme = _b.theme, onRun = _b.onRun;
+            var _a = this, _expanded = _a._expanded, filesOpen = _a._fileTreeOpen, getItemClass = _a._getItemClass, layout = _a._layoutEditor, runnerOpen = _a._runnerOpen, selected = _a._selected, _b = _a.properties, filename = _b.filename, icons = _b.icons, sourcePath = _b.iconsSourcePath, program = _b.program, theme = _b.theme, onRun = _b.onRun;
             if (icons && sourcePath) {
                 this._iconResolver.setProperties({ icons: icons, sourcePath: sourcePath });
             }
             var runnerProperties = object_1.assign({}, program, { key: 'runner', theme: theme, onRun: onRun });
+            // if we are laying out the editor on this render, we can reset the state
+            if (layout) {
+                this._layoutEditor = false;
+            }
             return d_1.v('div', {
-                classes: this.classes(css.root)
+                classes: this.classes(css.root).fixed(css.rootFixed)
             }, [
                 d_1.w(IconCss_1.default, {
-                    baseClass: treepaneCss.labelFixed,
+                    baseClass: iconCss.label,
                     icons: icons,
                     key: 'icons',
                     sourcePath: sourcePath
                 }),
                 d_1.v('div', {
-                    classes: this.classes(css.filetree)
+                    classes: this.classes(css.left, filesOpen ? null : css.closed),
+                    key: 'left'
                 }, [
                     d_1.w(TreePane_1.default, {
                         expanded: _expanded.slice(),
@@ -160,15 +214,35 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                         onItemToggle: this._onItemToggle
                     })
                 ]),
-                d_1.w(Editor_1.default, {
-                    filename: filename,
-                    key: 'editor',
-                    options: {
-                        minimap: { enabled: false }
-                    },
-                    theme: theme
-                }),
-                d_1.w(Runner_1.default, runnerProperties)
+                d_1.v('div', {
+                    classes: this.classes(css.middle),
+                    key: 'middle'
+                }, [
+                    d_1.w(Toolbar_1.default, {
+                        runnerOpen: runnerOpen,
+                        filesOpen: filesOpen,
+                        theme: theme,
+                        onToggleFiles: this._onToggleFiles,
+                        onToggleRunner: this._onToggleRunner
+                    }, this._getTabs()),
+                    d_1.w(Editor_1.default, {
+                        filename: filename,
+                        key: 'editor',
+                        layout: layout,
+                        options: {
+                            folding: true,
+                            minimap: { enabled: false },
+                            renderWhitespace: 'boundary'
+                        },
+                        theme: theme
+                    })
+                ]),
+                d_1.v('div', {
+                    classes: this.classes(css.right, runnerOpen ? null : css.closed),
+                    key: 'right'
+                }, [
+                    d_1.w(Runner_1.default, runnerProperties)
+                ])
             ]);
         };
         Workbench = __decorate([

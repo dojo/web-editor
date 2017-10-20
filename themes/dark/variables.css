@@ -6,14 +6,15 @@
 	--dark-off-white: #FBFBFB;
 	--dark-light-gray: #CCCCCC;
 	--dark-shade-gray: rgba(0, 0, 0, 0.3);
-	--dark-gray: #9E9E9E;
-	--dark-light-gray: #F2F2F2;
+	--dark-gray: rgba(255, 255, 255, 0.5);
+	--dark-light-gray: rgba(255, 255, 255, 0.7);
 	--dark-red: #ED5153;
 	--dark-green: #01D48E;
 	--dark-gray: #BBB;
-	--dark-black: #16181C;
-	--dark-med-black: #292d35;
-	--dark-light-black: #3F4552;
+	--dark-black: rgb(31, 34, 33);
+	--dark-med-black: #262932;
+	--dark-light-black: #333844;
+	--dark-highlight-black: rgb(60, 66, 78);
 
 	--dark-error-color: var(--dark-red);
 	--dark-success-color: var(--dark-green);
