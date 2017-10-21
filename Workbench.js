@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/object", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "./Editor", "./IconCss", "./Runner", "./TreePane", "./Toolbar", "./support/icons", "./styles/icons.m.css", "./styles/workbench.m.css"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/object", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "./widgets/Editor", "./widgets/IconCss", "./widgets/Runner", "./widgets/Tablist", "./widgets/TreePane", "./widgets/Toolbar", "./support/icons", "./styles/icons.m.css", "./styles/workbench.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -30,16 +30,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var d_1 = require("@dojo/widget-core/d");
     var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
-    var Editor_1 = require("./Editor");
-    var IconCss_1 = require("./IconCss");
-    var Runner_1 = require("./Runner");
-    var TreePane_1 = require("./TreePane");
-    var Toolbar_1 = require("./Toolbar");
+    var Editor_1 = require("./widgets/Editor");
+    var IconCss_1 = require("./widgets/IconCss");
+    var Runner_1 = require("./widgets/Runner");
+    var Tablist_1 = require("./widgets/Tablist");
+    var TreePane_1 = require("./widgets/TreePane");
+    var Toolbar_1 = require("./widgets/Toolbar");
     var icons_1 = require("./support/icons");
     var iconCss = require("./styles/icons.m.css");
     var css = require("./styles/workbench.m.css");
     var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
-    var Workbench = (function (_super) {
+    var Workbench = /** @class */ (function (_super) {
         __extends(Workbench, _super);
         function Workbench() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -58,6 +59,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 var _a = _this.properties, openFiles = _a.openFiles, onFileClose = _a.onFileClose;
                 var idx = Number(key);
                 if (onFileClose && openFiles && openFiles[idx]) {
+                    if (!_this._fileTreeOpen && openFiles.length === 1) {
+                        _this._onToggleFiles();
+                    }
                     onFileClose(openFiles[idx]);
                 }
             };
@@ -79,7 +83,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             return openFiles.map(function (filename, idx) {
                 var parts = filename.split(/[\/\\]/);
                 // TODO: deal with adding a labelDescription when duplicate files are opened
-                return d_1.w(Toolbar_1.Tab, {
+                return d_1.w(Tablist_1.Tab, {
                     iconClass: _this._iconResolver.file(filename),
                     key: "" + idx,
                     label: parts[parts.length - 1],
@@ -188,10 +192,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             this.invalidate();
         };
         Workbench.prototype.render = function () {
-            var _a = this, _expanded = _a._expanded, filesOpen = _a._fileTreeOpen, getItemClass = _a._getItemClass, layout = _a._layoutEditor, runnerOpen = _a._runnerOpen, selected = _a._selected, _b = _a.properties, filename = _b.filename, icons = _b.icons, sourcePath = _b.iconsSourcePath, program = _b.program, runnable = _b.runnable, theme = _b.theme, onDirty = _b.onDirty, onRunClick = _b.onRunClick;
+            var _a = this, _expanded = _a._expanded, filesOpen = _a._fileTreeOpen, getItemClass = _a._getItemClass, layout = _a._layoutEditor, runnerOpen = _a._runnerOpen, selected = _a._selected, _b = _a.properties, icons = _b.icons, sourcePath = _b.iconsSourcePath, model = _b.model, program = _b.program, runnable = _b.runnable, theme = _b.theme, onDirty = _b.onDirty, onRunClick = _b.onRunClick;
             if (icons && sourcePath) {
                 this._iconResolver.setProperties({ icons: icons, sourcePath: sourcePath });
             }
+            // Need to mixin the program into the Runner's properties
             var runnerProperties = object_1.assign({}, program, { key: 'runner', theme: theme, onRun: this._onRun });
             // if we are laying out the editor on this render, we can reset the state
             if (layout) {
@@ -236,9 +241,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                         onToggleRunner: this._onToggleRunner
                     }, this._getTabs()),
                     d_1.w(Editor_1.default, {
-                        filename: filename,
                         key: 'editor',
                         layout: layout,
+                        model: model,
                         options: {
                             folding: true,
                             minimap: { enabled: false },

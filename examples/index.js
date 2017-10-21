@@ -72,12 +72,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     /**
      * An example application widget that incorporates both the Editor and Runner widgets into a simplistic UI
      */
-    var App = (function (_super) {
+    var App = /** @class */ (function (_super) {
         __extends(App, _super);
         function App() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this._compiling = false;
             _this._editorFilename = '';
+            _this._emptyModel = monaco.editor.createModel('');
             _this._openFiles = new Set_1.default();
             _this._projectDirty = true;
             _this._projectValue = '005-initial.project.json';
@@ -176,6 +177,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         App.prototype.render = function () {
             var isProjectLoaded = project_1.default.isLoaded();
+            var filename = this._editorFilename;
             /* A UI to select a project and provide a button to load it */
             var projectLoad = d_1.v('div', { key: 'projectLoad' }, [
                 d_1.v('label', { for: 'project' }, ['Project to load:']),
@@ -188,15 +190,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 ]),
                 d_1.v('button', { type: 'button', name: 'load-project', id: 'load-project', onclick: this._onclickLoad, disabled: isProjectLoaded ? true : false }, ['Load'])
             ]);
+            var model = filename && isProjectLoaded && project_1.default.includes(filename) ? project_1.default.getFileModel(filename) : this._emptyModel;
             return d_1.v('div', {
                 classes: { app: true }
             }, [
                 projectLoad,
                 d_1.w(Workbench_1.default, {
-                    filename: this._editorFilename,
+                    filename: filename,
                     files: isProjectLoaded ? project_1.default.getFileNames() : undefined,
                     icons: icons,
                     iconsSourcePath: iconsSourcePath,
+                    model: model,
                     openFiles: array_1.from(this._openFiles),
                     program: this._program,
                     runnable: !this._compiling && isProjectLoaded && this._projectDirty,

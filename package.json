@@ -52,7 +52,7 @@
     "ts-node": "^3.3.0",
     "tslint": "^5.7.0",
     "typed-css-modules": "^0.3.0",
-    "typescript": "~2.4.2",
+    "typescript": "~2.5.3",
     "webpack": "^3.7.1"
   },
   "dependencies": {
@@ -61,7 +61,7 @@
     "@dojo/loader": "~0.1.0",
     "@dojo/routing": "~0.1.0",
     "@dojo/shim": "~0.1.0",
-    "@dojo/widget-core": "~0.1.1",
+    "@dojo/widget-core": "~0.1.2",
     "@dojo/widgets": "~0.1.0",
     "maquette": "^2.5.4",
     "monaco-editor": "^0.10.1",

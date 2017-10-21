@@ -57,7 +57,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
      * the scroll bar.  The properties of the scroll widget are relative, thereby not needing to translate from
      * the real DOM size of the scroll bar or scroll area it represents.
      */
-    var ScrollBar = (function (_super) {
+    var ScrollBar = /** @class */ (function (_super) {
         __extends(ScrollBar, _super);
         function ScrollBar() {
             var _this = _super !== null && _super.apply(this, arguments) || this;

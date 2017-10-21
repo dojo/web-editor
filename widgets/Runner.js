@@ -55,29 +55,32 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/lang", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/decorators/afterRender", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/util/DomWrapper", "./styles/runner.m.css", "./support/base64", "./support/DOMParser", "./support/sourceMap"], factory);
+        define(["require", "exports", "@dojo/core/base64", "@dojo/core/lang", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/decorators/afterRender", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/util/DomWrapper", "../styles/runner.m.css", "../support/DOMParser", "../support/sourceMap"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    var base64 = require("@dojo/core/base64");
     var lang_1 = require("@dojo/core/lang");
     var d_1 = require("@dojo/widget-core/d");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var afterRender_1 = require("@dojo/widget-core/decorators/afterRender");
     var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
     var DomWrapper_1 = require("@dojo/widget-core/util/DomWrapper");
-    var css = require("./styles/runner.m.css");
-    var base64 = require("./support/base64");
-    var DOMParser_1 = require("./support/DOMParser");
-    var sourceMap_1 = require("./support/sourceMap");
+    var css = require("../styles/runner.m.css");
+    var DOMParser_1 = require("../support/DOMParser");
+    var sourceMap_1 = require("../support/sourceMap");
     /**
      * The semver for the `tslib` package, which provides the TypeScript helper functions
      */
-    var TSLIB_SEMVER = '^1.6.0';
+    var TSLIB_SEMVER = '^1.8.0';
     /**
      * The default URI for the AMD loader to use when running a program
      */
     var DEFAULT_LOADER_URI = 'https://unpkg.com/@dojo/loader/loader.min.js';
+    /**
+     * The default source that should be displayed in the IFrame before the runner loads a program
+     */
     var DEFAULT_IFRAME_SRC = '../support/blank.html';
     /**
      * A map of custom package data that needs to be added if this package is part of project that is being run
@@ -244,7 +247,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     /**
      * A widget which will render its properties into a _runnable_ application within an `iframe`
      */
-    var Runner = (function (_super) {
+    var Runner = /** @class */ (function (_super) {
         __extends(Runner, _super);
         function Runner() {
             var _this = _super.call(this) || this;
@@ -256,8 +259,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             _this._updating = false;
             var iframe = _this._iframe = document.createElement('iframe');
             iframe.setAttribute('src', DEFAULT_IFRAME_SRC);
-            /* TODO: Remove when https://github.com/dojo/widget-core/issues/553 resolved */
-            iframe.classList.add(css.iframe);
             _this._IframeDom = DomWrapper_1.default(iframe);
             _this.own(lang_1.createHandle(function () {
                 if (iframe.contentWindow) {
@@ -289,6 +290,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             return d_1.v('div', {
                 classes: this.classes(css.root)
             }, [d_1.w(this._IframeDom, {
+                    classes: this.classes(css.iframe),
                     key: 'runner',
                     src: src
                 })]);

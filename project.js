@@ -127,7 +127,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             case 11 /* PlainText */:
                 return 'plaintext';
             case 9 /* XML */:
-            case 12 /* SVG */:
                 return 'xml';
             default:
                 return 'unknown';
@@ -156,7 +155,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 return ScriptTarget.ES5;
         }
     }
-    var Project = (function (_super) {
+    var Project = /** @class */ (function (_super) {
         __extends(Project, _super);
         function Project() {
             var _this = _super !== null && _super.apply(this, arguments) || this;

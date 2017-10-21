@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/meta/Drag", "@dojo/widget-core/mixins/Themeable", "./styles/treepane.m.css", "./styles/icons.m.css", "./support/ScrollBar"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/meta/Drag", "@dojo/widget-core/mixins/Themeable", "./ScrollBar", "../styles/treepane.m.css", "../styles/icons.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -31,16 +31,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var Dimensions_1 = require("@dojo/widget-core/meta/Dimensions");
     var Drag_1 = require("@dojo/widget-core/meta/Drag");
     var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
-    var css = require("./styles/treepane.m.css");
-    var iconCss = require("./styles/icons.m.css");
-    var ScrollBar_1 = require("./support/ScrollBar");
+    var ScrollBar_1 = require("./ScrollBar");
+    var css = require("../styles/treepane.m.css");
+    var iconCss = require("../styles/icons.m.css");
     var ROW_HEIGHT = 22;
     var ROW_LEVEL_LEFT_PADDING = 12;
     var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
     /**
      * The internal widget class which renders a row in the `TreePane`
      */
-    var Row = (function (_super) {
+    var Row = /** @class */ (function (_super) {
         __extends(Row, _super);
         function Row() {
             return _super !== null && _super.apply(this, arguments) || this;
@@ -96,7 +96,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
      * a hierarchical set of rows, providing events that allow expansion/collapse of parent nodes, scrolling, and the
      * ability to _open_ nodes.
      */
-    var TreePane = (function (_super) {
+    var TreePane = /** @class */ (function (_super) {
         __extends(TreePane, _super);
         function TreePane() {
             var _this = _super !== null && _super.apply(this, arguments) || this;

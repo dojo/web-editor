@@ -43,7 +43,7 @@ var __extends = (this && this.__extends) || (function () {
     /**
      * Wraps an XHR request in a response that mimics the fetch API
      */
-    var XhrResponse = (function (_super) {
+    var XhrResponse = /** @class */ (function (_super) {
         __extends(XhrResponse, _super);
         function XhrResponse(request) {
             var _this = _super.call(this) || this;

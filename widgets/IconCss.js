@@ -14,14 +14,14 @@ var __extends = (this && this.__extends) || (function () {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "./support/icons"], factory);
+        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "../support/icons"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var d_1 = require("@dojo/widget-core/d");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
-    var icons_1 = require("./support/icons");
+    var icons_1 = require("../support/icons");
     /**
      * A function that converts an `IconJson` structure into CSS text
      * @param sourcePath The base URL where the icons are located
@@ -32,25 +32,34 @@ var __extends = (this && this.__extends) || (function () {
         var resolver = new icons_1.IconResolver();
         resolver.setProperties({ icons: icons, sourcePath: sourcePath });
         var styles = '';
-        function before(selector) {
-            return selector + '::before';
-        }
-        function toSelector() {
-            var classes = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                classes[_i] = arguments[_i];
-            }
-            return '.' + classes.join('.');
-        }
-        function iconStyle(selector, iconUrl) {
-            return before(selector) + " { content: ' '; background-image: url('" + iconUrl + "'); }\n";
-        }
         for (var key in icons.iconDefinitions) {
             styles += iconStyle(toSelector(baseClass, key), resolver.iconUrl(key));
         }
         return styles;
     }
-    var IconCss = (function (_super) {
+    /**
+     * Generate a CSS style for a given selector and icon URL
+     * @param selector The selector to use
+     * @param iconUrl The URL of the icon to use
+     */
+    function iconStyle(selector, iconUrl) {
+        return selector + "::before { content: ' '; background-image: url('" + iconUrl + "'); }\n";
+    }
+    /**
+     * Take a set of string and create a CSS class selector out of it
+     * @param classes Any number of strings
+     */
+    function toSelector() {
+        var classes = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            classes[_i] = arguments[_i];
+        }
+        return '.' + classes.join('.');
+    }
+    /**
+     * A class which generates a set of CSS for placing icons on elements
+     */
+    var IconCss = /** @class */ (function (_super) {
         __extends(IconCss, _super);
         function IconCss() {
             return _super !== null && _super.apply(this, arguments) || this;

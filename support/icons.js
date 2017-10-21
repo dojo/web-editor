@@ -49,7 +49,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var global_1 = require("@dojo/core/global");
     var request_1 = require("@dojo/core/request");
     var globalURL = global_1.default.window.URL;
-    var IconResolver = (function () {
+    var IconResolver = /** @class */ (function () {
         function IconResolver() {
         }
         /**

@@ -25,7 +25,7 @@ var __extends = (this && this.__extends) || (function () {
     var Headers_1 = require("@dojo/core/request/Headers");
     var Response_1 = require("@dojo/core/request/Response");
     var xhr_1 = require("@dojo/core/request/providers/xhr");
-    var AMDRequireResponse = (function (_super) {
+    var AMDRequireResponse = /** @class */ (function (_super) {
         __extends(AMDRequireResponse, _super);
         function AMDRequireResponse(url, response) {
             var _this = _super.call(this) || this;
