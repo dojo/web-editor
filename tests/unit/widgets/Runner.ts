@@ -4,11 +4,11 @@ import { assign } from '@dojo/core/lang';
 import harness, { Harness } from '@dojo/test-extras/harness';
 import { HNode, WNode } from '@dojo/widget-core/interfaces';
 import { stub, SinonStub } from 'sinon';
-import createMockIframe, { callContentWindowListener, getDocumentStrings } from '../support/createMockIframe';
-import { Program } from '../../src/project';
-import Runner, { RunnerProperties } from '../../src/Runner';
-import * as css from '../../src/styles/runner.m.css';
-import DOMParser from '../../src/support/DOMParser';
+import createMockIframe, { callContentWindowListener, getDocumentStrings } from '../../support/createMockIframe';
+import { Program } from '../../../src/project';
+import Runner, { RunnerProperties } from '../../../src/widgets/Runner';
+import * as css from '../../../src/styles/runner.m.css';
+import DOMParser from '../../../src/support/DOMParser';
 
 let widget: Harness<RunnerProperties, typeof Runner>;
 let iframe: HTMLIFrameElement;

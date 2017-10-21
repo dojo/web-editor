@@ -1,3 +1,4 @@
+import * as base64 from '@dojo/core/base64';
 import { createHandle } from '@dojo/core/lang';
 import { v, w } from '@dojo/widget-core/d';
 import { Constructor, DNode, VirtualDomProperties, WidgetProperties } from '@dojo/widget-core/interfaces';
@@ -5,43 +6,49 @@ import WidgetBase from '@dojo/widget-core/WidgetBase';
 import afterRender from '@dojo/widget-core/decorators/afterRender';
 import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
 import DomWrapper from '@dojo/widget-core/util/DomWrapper';
-import { Program } from './project';
-import * as css from './styles/runner.m.css';
-import * as base64 from './support/base64';
-import DOMParser from './support/DOMParser';
-import { wrapCode } from './support/sourceMap';
+import { Program } from '../project';
+import * as css from '../styles/runner.m.css';
+import DOMParser from '../support/DOMParser';
+import { wrapCode } from '../support/sourceMap';
 
-/**
- * @type RunnerProperties
- *
- * Properties that can be set on a Runner widget
- *
- * @property loader A URI that points to an AMD loader which will be used when running the program.
- *                  Defaults to `https://unpkg.com/@dojo/loader/loader.min.js`
- * @property src A URI that points to the `src` to set on the Runner's `iframe`. Defaults to
- *               `../support/blank.html`
- * @property onError A method that will be called whenever there is an error in the running program
- * @property onRun A method that will be called when the `Runner` has fully loaded the program.  *Note* this does not
- *                 represent the state of the running program, it simply indicates that the `Runner` no longer has
- *                 involvement in the process of loading the program
- */
 export interface RunnerProperties extends Partial<Program>, WidgetProperties, ThemeableProperties {
+	/**
+	 * A URI that points to an AMD loader which will be used when running the program.
+	 * Defaults to `https://unpkg.com/@dojo/loader/loader.min.js`
+	 */
 	loader?: string;
+
+	/**
+	 * A URI that points to the `src` to set on the Runner's `iframe`. Defaults to `../support/blank.html`
+	 */
 	src?: string;
 
+	/**
+	 * A method that will be called whenever there is an error in the running program
+	 */
 	onError?(err: Error): void;
+
+	/**
+	 * A method that will be called when the `Runner` has fully loaded the program.  *Note* this does not
+	 * represent the state of the running program, it simply indicates that the `Runner` no longer has
+	 * involvement in the process of loading the program
+	 */
 	onRun?(): void;
 }
 
 /**
  * The semver for the `tslib` package, which provides the TypeScript helper functions
  */
-const TSLIB_SEMVER = '^1.6.0';
+const TSLIB_SEMVER = '^1.8.0';
 
 /**
  * The default URI for the AMD loader to use when running a program
  */
 const DEFAULT_LOADER_URI = 'https://unpkg.com/@dojo/loader/loader.min.js';
+
+/**
+ * The default source that should be displayed in the IFrame before the runner loads a program
+ */
 const DEFAULT_IFRAME_SRC = '../support/blank.html';
 
 /**
@@ -276,12 +283,9 @@ export default class Runner extends RunnerBase<RunnerProperties> {
 
 	constructor() {
 		super();
+
 		const iframe = this._iframe = document.createElement('iframe');
 		iframe.setAttribute('src', DEFAULT_IFRAME_SRC);
-
-		/* TODO: Remove when https://github.com/dojo/widget-core/issues/553 resolved */
-		iframe.classList.add(css.iframe);
-
 		this._IframeDom = DomWrapper(iframe);
 		this.own(createHandle(() => {
 			if (iframe.contentWindow) {
@@ -314,6 +318,7 @@ export default class Runner extends RunnerBase<RunnerProperties> {
 		return v('div', {
 			classes: this.classes(css.root)
 		}, [ w(this._IframeDom, {
+			classes: this.classes(css.iframe),
 			key: 'runner',
 			src
 		}) ]);

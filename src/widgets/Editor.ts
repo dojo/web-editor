@@ -1,4 +1,3 @@
-import global from '@dojo/core/global';
 import { createHandle } from '@dojo/core/lang';
 import { queueTask } from '@dojo/core/queue';
 import { debounce } from '@dojo/core/util';
@@ -7,28 +6,27 @@ import { WidgetProperties } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
 import DomWrapper from '@dojo/widget-core/util/DomWrapper';
-import project from './project';
-import * as css from './styles/editor.m.css';
+
+import * as css from '../styles/editor.m.css';
 
 /**
  * The minimum width we should ever display the monaco-editor;
  */
 const MINIMUM_WIDTH = 150;
-const globalMonaco: typeof monaco = global.monaco;
 
 /**
  * Properties that can be set on an `Editor` widget
  */
 export interface EditorProperties extends WidgetProperties, ThemeableProperties {
 	/**
-	 * The filename to display in the editor
-	 */
-	filename?: string;
-
-	/**
 	 * Ensure that monaco-editor instance is layed out in a way that allows the document to reflow and resize the editor properly
 	 */
 	layout?: boolean;
+
+	/**
+	 * The monaco-editor _model_ (file) that is displayed in the editor
+	 */
+	model?: monaco.editor.IModel;
 
 	/**
 	 * Options to pass to the monaco-editor on creation
@@ -51,27 +49,41 @@ export interface EditorProperties extends WidgetProperties, ThemeableProperties 
 	onLayout?(): void;
 }
 
+/**
+ * Internal interface to represent sizes
+ */
 interface Size {
 	height: number;
 	width: number;
 }
 
-function getSize(element: HTMLElement): Size {
-	const { clientHeight: height, clientWidth: width } = element;
+/**
+ * Return the size of an `HTMLElement`
+ * @param target The target `HTMLElement`
+ */
+function getSize(target: HTMLElement): Size {
+	const { clientHeight: height, clientWidth: width } = target;
 	return { height, width };
 }
 
+/**
+ * Compare the two sizes and return `true` if they are equal, otherwise `false`
+ * @param a The first size to compare
+ * @param b The second size to compare
+ */
 function isEqualSize(a: Size, b: Size): boolean {
 	return a.height === b.height && a.width === b.width;
 }
 
-const EditorBase = ThemeableMixin(WidgetBase);
+const ThemeableBase = ThemeableMixin(WidgetBase);
 
+/**
+ * A class which wraps the `monaco-editor`
+ */
 @theme(css)
-export default class Editor extends EditorBase<EditorProperties> {
-	private _currentModel: monaco.editor.IModel;
+export default class Editor extends ThemeableBase<EditorProperties> {
+	private _currentModel: monaco.editor.IModel | undefined;
 	private _editor: monaco.editor.IStandaloneCodeEditor | undefined;
-	private _emptyModel = monaco.editor.createModel('');
 	private _EditorDom: DomWrapper;
 	private _didChangeHandle: monaco.IDisposable;
 	private _originalSize: Size;
@@ -100,14 +112,13 @@ export default class Editor extends EditorBase<EditorProperties> {
 	}
 
 	private _onAttached = () => {
-		const { _onDidChangeModelContent, _root, properties: { onInit, onLayout, options } } = this;
+		const { _onDidChangeModelContent, _root, properties: { model, onInit, onLayout, options } } = this;
 		// _onAttached fires when the DOM is actually attached to the document, but the rest of the virtual DOM hasn't
 		// been layed out which causes issues for monaco-editor when figuring out its initial size, so we will schedule
 		// it to be run at the end of the turn, which will provide more reliable layout
 		queueTask(() => {
-			const editor = this._editor = globalMonaco.editor.create(_root, options);
+			const editor = this._editor = monaco.editor.create(_root, options);
 			const didChangeHandle = this._didChangeHandle = editor.onDidChangeModelContent(debounce(_onDidChangeModelContent, 1000));
-			this._setModel();
 			onInit && onInit(editor);
 
 			this.own(createHandle(() => {
@@ -117,30 +128,15 @@ export default class Editor extends EditorBase<EditorProperties> {
 			this._originalSize = getSize(_root);
 			editor.layout();
 			onLayout && onLayout();
+			if (model) {
+				editor.setModel(model);
+			}
 		});
 	}
 
 	private _onDidChangeModelContent = () => {
-		const { filename, onDirty } = this.properties;
-		if (filename) {
-			project.setFileDirty(filename);
-			onDirty && onDirty();
-		}
-	}
-
-	private _setModel() {
-		const { _editor, _emptyModel, properties: { filename } } = this;
-		if (_editor && filename && project.includes(filename)) {
-			const fileModel = project.getFileModel(filename);
-			if (fileModel !== this._currentModel) {
-				_editor.setModel(fileModel);
-				this._currentModel = fileModel;
-			}
-		}
-		else if (_editor && filename === '' && this._currentModel !== _emptyModel) {
-			_editor.setModel(_emptyModel);
-			this._currentModel = _emptyModel;
-		}
+		const { onDirty } = this.properties;
+		onDirty && onDirty();
 	}
 
 	constructor() {
@@ -150,6 +146,7 @@ export default class Editor extends EditorBase<EditorProperties> {
 	}
 
 	public render() {
+		const { _currentModel, _editor, properties: { model } } = this;
 		// getting the monaco-editor to layout and not interfere with the layout of other elements is a complicated affair
 		// we have to do some quite obstuse logic in order for it to behave properly, but only do so if we suspect the
 		// root node might resize after the render
@@ -157,8 +154,12 @@ export default class Editor extends EditorBase<EditorProperties> {
 			this._layout();
 		}
 
-		// Ensure we are displaying the correct file
-		this._setModel();
+		// display the _model_ (file) in the editor
+		// re-renders fire a lot more often then model changes, so caching it for performance reasons
+		if (_editor && model && _currentModel !== model) {
+			_editor.setModel(model);
+			this._currentModel = model;
+		}
 
 		return w(this._EditorDom, {
 			classes: this.classes(css.root).fixed(css.rootFixed),

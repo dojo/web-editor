@@ -5,12 +5,12 @@ import { assign } from '@dojo/core/lang';
 import { Handle } from '@dojo/interfaces/core';
 import harness, { Harness } from '@dojo/test-extras/harness';
 import { HNode, WNode } from '@dojo/widget-core/interfaces';
-import loadModule from '../support/loadModule';
-import * as css from '../../src/styles/editor.m.css';
-import UnitUnderTest, { EditorProperties } from '../../src/Editor';
+import loadModule from '../../support/loadModule';
+import * as css from '../../../src/styles/editor.m.css';
+import UnitUnderTest, { EditorProperties } from '../../../src/widgets/Editor';
 
 import { sandbox as sinonSandbox, SinonSandbox, SinonSpy, SinonStub } from 'sinon';
-import { enable, register } from '../support/mock';
+import { enable, register } from '../../support/mock';
 
 /* tslint:disable:variable-name */
 let Editor: typeof UnitUnderTest;
@@ -138,9 +138,7 @@ registerSuite({
 	async 'sets the proper file'() {
 		projectFileMap['./src/main.ts'] = true;
 		await getMonacoEditor();
-		widget.setProperties({
-			filename: './src/main.ts'
-		});
+		widget.setProperties({});
 		assert.isFalse(setModelStub.called, 'should not have been called yet');
 		widget.getRender();
 		assert.isTrue(setModelStub.called, 'should have set the model on the editor');
@@ -149,9 +147,7 @@ registerSuite({
 
 	async 'setting to missing file is a no-op'() {
 		await getMonacoEditor();
-		widget.setProperties({
-			filename: './src/main.ts'
-		});
+		widget.setProperties({});
 		assert.isFalse(setModelStub.called, 'should not have been called yet');
 		widget.getRender();
 		assert.isFalse(setModelStub.called, 'should not have been called');
@@ -167,7 +163,6 @@ registerSuite({
 		});
 		const currentCallCount = called;
 		widget.setProperties({
-			filename: './src/foo.ts',
 			onLayout
 		});
 		widget.getRender();
@@ -187,9 +182,7 @@ registerSuite({
 	async '_onDidChangeModelContent'(this: any) {
 		projectFileMap['./src/foo.ts'] = true;
 		await getMonacoEditor();
-		widget.setProperties({
-			filename: './src/foo.ts'
-		});
+		widget.setProperties({});
 		widget.getRender();
 		const _onDidChangeModelContent: () => void = onDidChangeModelContentStub.lastCall.args[0];
 		assert.strictEqual(setFileDirtyStub.callCount, 0, 'should not have been called');

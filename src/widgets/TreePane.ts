@@ -6,9 +6,9 @@ import Dimensions from '@dojo/widget-core/meta/Dimensions';
 import Drag from '@dojo/widget-core/meta/Drag';
 import { theme, ThemeableMixin, ThemeableProperties } from '@dojo/widget-core/mixins/Themeable';
 import { Keys } from '@dojo/widgets/common/util';
-import * as css from './styles/treepane.m.css';
-import * as iconCss from './styles/icons.m.css';
-import ScrollBar from './support/ScrollBar';
+import ScrollBar from './ScrollBar';
+import * as css from '../styles/treepane.m.css';
+import * as iconCss from '../styles/icons.m.css';
 
 /**
  * The interface for items that can be rendered in the `TreePane`.

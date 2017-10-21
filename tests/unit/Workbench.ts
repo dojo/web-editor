@@ -4,7 +4,7 @@ import harness, { Harness } from '@dojo/test-extras/harness';
 import { WNode } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import * as css from '../../src/styles/workbench.m.css';
-import { EditorProperties } from '../../src/Editor';
+import { EditorProperties } from '../../src/widgets/Editor';
 import UnitUnderTest, { WorkbenchProperties } from '../../src/Workbench';
 
 import { Handle } from '@dojo/interfaces/core';

@@ -1,9 +1,9 @@
 import * as registerSuite from 'intern!object';
 import harness from '@dojo/test-extras/harness';
 import { v, w } from '@dojo/widget-core/d';
-import TreePane from '../../src/TreePane';
-import * as css from '../../src/styles/treepane.m.css';
-import ScrollBar from '../../src/support/ScrollBar';
+import TreePane from '../../../src/widgets/TreePane';
+import * as css from '../../../src/styles/treepane.m.css';
+import ScrollBar from '../../../src/widgets/ScrollBar';
 
 registerSuite({
 	name: 'TreePane',

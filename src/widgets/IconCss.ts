@@ -1,7 +1,7 @@
 import { v } from '@dojo/widget-core/d';
 import { WidgetProperties } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
-import { IconJson, IconResolver } from './support/icons';
+import { IconJson, IconResolver } from '../support/icons';
 
 export interface IconCssProperties extends WidgetProperties {
 	/**
@@ -26,23 +26,10 @@ export interface IconCssProperties extends WidgetProperties {
  * @param baseClass The base class name which an icon is based off of
  * @param icons An object structure that defines icon classes
  */
-function getStylesFromJson(sourcePath: string, baseClass: string, icons: IconJson): string {
-
+function getStylesFromJson(sourcePath: string, baseClass: string, icons: IconJson) {
 	const resolver = new IconResolver();
 	resolver.setProperties({ icons, sourcePath });
 	let styles = '';
-
-	function before(selector: string): string {
-		return selector + '::before';
-	}
-
-	function toSelector(...classes: string[]): string {
-		return '.' + classes.join('.');
-	}
-
-	function iconStyle(selector: string, iconUrl: string): string {
-		return `${before(selector)} { content: ' '; background-image: url('${iconUrl}'); }\n`;
-	}
 
 	for (const key in icons.iconDefinitions) {
 		styles += iconStyle(toSelector(baseClass, key), resolver.iconUrl(key));
@@ -51,6 +38,26 @@ function getStylesFromJson(sourcePath: string, baseClass: string, icons: IconJso
 	return styles;
 }
 
+/**
+ * Generate a CSS style for a given selector and icon URL
+ * @param selector The selector to use
+ * @param iconUrl The URL of the icon to use
+ */
+function iconStyle(selector: string, iconUrl: string) {
+	return `${selector}::before { content: ' '; background-image: url('${iconUrl}'); }\n`;
+}
+
+/**
+ * Take a set of string and create a CSS class selector out of it
+ * @param classes Any number of strings
+ */
+function toSelector(...classes: string[]) {
+	return '.' + classes.join('.');
+}
+
+/**
+ * A class which generates a set of CSS for placing icons on elements
+ */
 export default class IconCss extends WidgetBase<IconCssProperties> {
 	render() {
 		return v('style', {

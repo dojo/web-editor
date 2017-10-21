@@ -1,4 +1,3 @@
-import './base64';
 import './css';
 import './DOMParser';
 import './editorThemes';
@@ -8,7 +7,6 @@ import './json';
 import './postcss';
 import './postcssCssnext';
 import './postcssModules';
-import './ScrollBar';
 import './sourceMap';
 import './URL';
 import './providers/all';

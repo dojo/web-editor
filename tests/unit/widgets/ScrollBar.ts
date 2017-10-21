@@ -2,7 +2,7 @@ import * as registerSuite from 'intern!object';
 import harness from '@dojo/test-extras/harness';
 import { v } from '@dojo/widget-core/d';
 import * as css from '../../../src/styles/scrollbar.m.css';
-import ScrollBar from '../../../src/support/ScrollBar';
+import ScrollBar from '../../../src/widgets/ScrollBar';
 
 registerSuite({
 	name: 'support/ScrollBar',

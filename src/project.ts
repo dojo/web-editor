@@ -128,7 +128,6 @@ function getLanguageFromType(type: ProjectFileType): string {
 	case ProjectFileType.PlainText:
 		return 'plaintext';
 	case ProjectFileType.XML:
-	case ProjectFileType.SVG:
 		return 'xml';
 	default:
 		return 'unknown';

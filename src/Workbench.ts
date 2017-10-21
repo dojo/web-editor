@@ -4,12 +4,13 @@ import { v, w } from '@dojo/widget-core/d';
 import { WNode } from '@dojo/widget-core/interfaces';
 import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
-import Editor from './Editor';
-import IconCss from './IconCss';
+import Editor from './widgets/Editor';
+import IconCss from './widgets/IconCss';
 import { Program } from './project';
-import Runner, { RunnerProperties } from './Runner';
-import TreePane, { TreePaneItem } from './TreePane';
-import Toolbar, { Tab } from './Toolbar';
+import Runner, { RunnerProperties } from './widgets/Runner';
+import { Tab } from './widgets/Tablist';
+import TreePane, { TreePaneItem } from './widgets/TreePane';
+import Toolbar from './widgets/Toolbar';
 import { IconJson, IconResolver } from './support/icons';
 import * as iconCss from './styles/icons.m.css';
 import * as css from './styles/workbench.m.css';
@@ -37,8 +38,16 @@ export interface WorkbenchProperties extends ThemeableProperties {
 	 */
 	iconsSourcePath?: string;
 
+	model?: monaco.editor.IModel;
+
+	/**
+	 * An array of filenames that have open tabs
+	 */
 	openFiles?: string[];
 
+	/**
+	 * Is the current program _runnable_ (meaning the UI should have an active run button)
+	 */
 	runnable?: boolean;
 
 	/**
@@ -46,16 +55,27 @@ export interface WorkbenchProperties extends ThemeableProperties {
 	 */
 	program?: Program;
 
+	/**
+	 * Called whenver a change is made to a file in the editor
+	 */
 	onDirty?(): void;
 
+	/**
+	 * Called when a file is attempting to close from the open tabs in the editor
+	 * @param filename The name of the file that is being request to be closed
+	 */
 	onFileClose?(filename: string): void;
 
 	/**
 	 * Called when a file is opened on the workbench
-	 * @param filename The name of file that is being requested to be opened
+	 * @param filename The name of the file that is being requested to be opened
 	 */
 	onFileOpen?(filename: string): void;
 
+	/**
+	 * Called when a file is attempted to be selected from the pen tabs in the editor
+	 * @param filename The name of the file that is being requested to be selected
+	 */
 	onFileSelect?(filename: string): void;
 
 	/**
@@ -63,6 +83,9 @@ export interface WorkbenchProperties extends ThemeableProperties {
 	 */
 	onRun?(): void;
 
+	/**
+	 * Called when a run of the project is requested
+	 */
 	onRunClick?(): void;
 }
 
@@ -75,7 +98,7 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 	private _runnerOpen = true;
 	private _selected = '';
 
-	private _getItemClass = (item: TreePaneItem, expanded?: boolean) => {
+	private _getItemClass = (item: TreePaneItem, expanded?: boolean): string | undefined => {
 		if (typeof item.label === 'string') {
 			return item.children && item.children.length ? this._iconResolver.folder(item.label, expanded) : this._iconResolver.file(item.label);
 		}
@@ -190,6 +213,9 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 		const { openFiles, onFileClose } = this.properties;
 		const idx = Number(key);
 		if (onFileClose && openFiles && openFiles[idx]) {
+			if (!this._fileTreeOpen && openFiles.length === 1) {
+				this._onToggleFiles();
+			}
 			onFileClose(openFiles[idx]);
 		}
 	}
@@ -231,9 +257,9 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 			_runnerOpen: runnerOpen,
 			_selected: selected,
 			properties: {
-				filename,
 				icons,
 				iconsSourcePath: sourcePath,
+				model,
 				program,
 				runnable,
 				theme,
@@ -246,6 +272,7 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 			this._iconResolver.setProperties({ icons, sourcePath });
 		}
 
+		// Need to mixin the program into the Runner's properties
 		const runnerProperties: RunnerProperties = assign({}, program, { key: 'runner', theme, onRun: this._onRun });
 
 		// if we are laying out the editor on this render, we can reset the state
@@ -293,9 +320,9 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 					onToggleRunner: this._onToggleRunner
 				}, this._getTabs()),
 				w(Editor, {
-					filename,
 					key: 'editor',
 					layout,
+					model,
 					options: {
 						folding: true,
 						minimap: { enabled: false },
