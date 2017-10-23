@@ -1,12 +1,17 @@
+import { find } from '@dojo/shim/array';
 import { v, w } from '@dojo/widget-core/d';
 import { WNode } from '@dojo/widget-core/interfaces';
+import Dimensions, { DimensionResults } from '@dojo/widget-core/meta/Dimensions';
 import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import ActionBar, { ActionBarButton } from './ActionBar';
+import ScrollBar from './ScrollBar';
+import Hover from './meta/Hover';
 
 import * as iconCss from '../styles/icons.m.css';
 import * as tabCss from '../styles/tab.m.css';
 import * as tablistCss from '../styles/tablist.m.css';
+import * as tablistScrollbarCss from '../styles/tablistscrollbar.m.css';
 
 const ThemeableBase = ThemeableMixin(WidgetBase);
 
@@ -69,11 +74,12 @@ export class Tab extends ThemeableBase<TabProperties, null> {
 	}
 
 	render() {
-		const { iconClass, label, labelDescription, selected, title } = this.properties;
+		const { iconClass, key, label, labelDescription, selected, title } = this.properties;
 		return v('div', {
 			'aria-label': `${label}, tab`,
 			classes: this.classes(tabCss.root, selected ? tabCss.selected : null).fixed(tabCss.rootFixed),
-			role: 'presentation',
+			key,
+			role: 'tab',
 			tabIndex: 0,
 			title,
 
@@ -109,11 +115,89 @@ export class Tab extends ThemeableBase<TabProperties, null> {
 }
 
 /**
+ * A scrollbar where the theme is tied to the Tablist
+ */
+@theme(tablistScrollbarCss)
+class TablistScrollBar extends ScrollBar {}
+
+/**
  * A widget which contains tabs
  */
 @theme(tablistCss)
 export default class Tablist extends ThemeableBase<ThemeableProperties, WNode<Tab>> {
+	private _cachedSelectedKey: string | number | undefined;
+	private _position = 0;
+
+	private _getChildren() {
+		return this.children.map((child) => {
+			if (!child) {
+				return child;
+			}
+			return v('div', {
+				key: child.properties.key,
+				classes: this.classes(tablistCss.tab).fixed(tablistCss.tabFixed)
+			}, [ child ]);
+		});
+	}
+
+	private _getSelectedKey() {
+		const { children } = this;
+		const selectedChild = find(children, (child) => {
+			return Boolean(child && child.properties.selected);
+		});
+		if (selectedChild && selectedChild.properties.key) {
+			return selectedChild.properties.key;
+		}
+	}
+
+	private _onScroll(delta: number) {
+		this._position += delta;
+		this.invalidate();
+	}
+
+	private _onwheel = (event: WheelEvent) => {
+		const { deltaX: delta } = event;
+		if (delta) {
+			event.preventDefault();
+			this._position += delta;
+			this.invalidate();
+		}
+	}
+
+	private _setPosition(dimensions: DimensionResults) {
+		const selectedKey = this._getSelectedKey();
+		if (selectedKey && selectedKey !== this._cachedSelectedKey) {
+			const selectedDimensions = this.meta(Dimensions).get(selectedKey);
+			if (selectedDimensions.size.width) {
+				this._cachedSelectedKey = selectedKey;
+			}
+			else {
+				return;
+			}
+			if (this._position > selectedDimensions.offset.left) {
+				this._position = selectedDimensions.offset.left;
+			}
+			else if ((this._position + dimensions.size.width) < (selectedDimensions.offset.left + selectedDimensions.offset.width)) {
+				this._position = selectedDimensions.offset.left + selectedDimensions.offset.width - dimensions.size.width;
+			}
+		}
+		else {
+			if (this._position < 0)  {
+				this._position = 0;
+			}
+			else if ((this._position + dimensions.size.width) > dimensions.scroll.width) {
+				this._position = dimensions.scroll.width - dimensions.size.width;
+			}
+		}
+	}
+
 	render () {
+		const visible = this.meta(Hover).get('root');
+		const tablistDimensions = this.meta(Dimensions).get('tablist');
+		this._setPosition(tablistDimensions);
+
+		const { _position, properties: { theme } } = this;
+
 		return v('div', {
 			classes: this.classes(tablistCss.root).fixed(tablistCss.rootFixed),
 			key: 'root',
@@ -122,8 +206,23 @@ export default class Tablist extends ThemeableBase<ThemeableProperties, WNode<Ta
 			v('div', {
 				classes: this.classes(tablistCss.tablist).fixed(tablistCss.tablistFixed),
 				key: 'tablist',
-				role: 'tablist'
-			}, this.children)
+				role: 'tablist',
+				styles: {
+					left: _position ? `-${_position}px` : '0'
+				},
+
+				onwheel: this._onwheel
+			}, this._getChildren()),
+			w(TablistScrollBar, {
+				horizontal: true,
+				position: _position,
+				size: tablistDimensions.scroll.width,
+				sliderSize: tablistDimensions.size.width,
+				theme,
+				visible,
+
+				onScroll: this._onScroll
+			})
 		]);
 	}
 }

@@ -192,7 +192,6 @@ export class Row extends ThemeableBase<RowProperties> {
 		return v('div', {
 			'aria-level': String(level),
 			'aria-selected': selected,
-			'aria-role': 'treeitem',
 			classes: this.classes(...classes),
 			role: 'treeitem',
 			styles: {
@@ -528,6 +527,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 		const size = this._size = rows.length;
 
 		return v('div', {
+			'aria-hidden': false,
 			'aria-label': label,
 			classes: this.classes(css.root),
 			key,

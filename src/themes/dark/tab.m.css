@@ -7,15 +7,17 @@
 	box-sizing: border-box;
 	color: var(--dark-light-gray);
 	font-size: 13px;
-	height: 36px;
+	height: 100%;
 	line-height: 1.4em;
 	outline: none;
 	padding-left: 10px;
-	width: 120px;
+	transition: background-color .2s linear;
+	width: 100%;
 }
 
 .selected {
 	background-color: var(--dark-med-black);
+	transition: background-color .2s linear;
 }
 
 .label {

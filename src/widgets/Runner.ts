@@ -7,9 +7,10 @@ import afterRender from '@dojo/widget-core/decorators/afterRender';
 import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
 import DomWrapper from '@dojo/widget-core/util/DomWrapper';
 import { Program } from '../project';
-import * as css from '../styles/runner.m.css';
 import DOMParser from '../support/DOMParser';
 import { wrapCode } from '../support/sourceMap';
+
+import * as runnerCss from '../styles/runner.m.css';
 
 export interface RunnerProperties extends Partial<Program>, WidgetProperties, ThemeableProperties {
 	/**
@@ -270,7 +271,7 @@ const RunnerBase = ThemeableMixin(WidgetBase);
 /**
  * A widget which will render its properties into a _runnable_ application within an `iframe`
  */
-@theme(css)
+@theme(runnerCss)
 export default class Runner extends RunnerBase<RunnerProperties> {
 	private _iframe: HTMLIFrameElement;
 	private _IframeDom: Constructor<WidgetBase<VirtualDomProperties & WidgetProperties>>;
@@ -302,7 +303,7 @@ export default class Runner extends RunnerBase<RunnerProperties> {
 		if (this.properties.modules) {
 			this._updating = true;
 			const source = getSource(this.properties);
-			this._iframe.classList.add(css.running);
+			this._iframe.classList.add(runnerCss.running);
 			writeIframeDoc(this._iframe, source, this._onIframeError)
 				.then(() => {
 					this._updating = false;
@@ -316,11 +317,12 @@ export default class Runner extends RunnerBase<RunnerProperties> {
 	public render() {
 		const { src = DEFAULT_IFRAME_SRC } = this.properties;
 		return v('div', {
-			classes: this.classes(css.root)
+			classes: this.classes(runnerCss.root).fixed(runnerCss.rootFixed)
 		}, [ w(this._IframeDom, {
-			classes: this.classes(css.iframe),
+			classes: this.classes(runnerCss.iframe).fixed(runnerCss.iframeFixed),
 			key: 'runner',
-			src
+			src,
+			title: 'Runner'
 		}) ]);
 	}
 }

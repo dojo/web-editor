@@ -1,5 +1,16 @@
+/* Themeable classes */
+
 .root {
 	flex: 1;
+}
+
+.iframe {
+	border: none;
+}
+
+/* Fixed classes */
+
+.rootFixed {
 	height: 100%;
 }
 
@@ -7,9 +18,8 @@
 	background: white;
 }
 
-.iframe {
-	border: none;
+.iframeFixed {
 	position: relative;
 	height: 100%;
-	width: 100%;
+	width: 100%
 }

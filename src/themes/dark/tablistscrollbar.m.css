@@ -1,3 +1,5 @@
+/* ScrollBar styles */
+
 .slider {
 	background: rgba(78, 86, 102, 0.5);
 }
@@ -8,12 +10,7 @@
 
 .horizontal,
 .horizontal .slider {
-	height: 8px;
-}
-
-.vertical,
-.vertical .slider {
-	width: 8px;
+	height: 4px;
 }
 
 .invisible {

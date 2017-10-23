@@ -4,6 +4,12 @@
 	background: inherit;
 }
 
+.tab {
+	box-sizing: border-box;
+	height: 36px;
+	width: 120px;
+}
+
 .tablist {
 	height: 36px;
 }
@@ -16,7 +22,12 @@
 	overflow: hidden;
 }
 
+.tabFixed {
+	min-width: fit-content;
+}
+
 .tablistFixed {
 	display: flex;
-	overflow: hidden;
+	position: absolute;
+	width: 100%;
 }
