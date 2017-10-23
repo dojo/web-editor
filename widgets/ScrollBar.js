@@ -31,7 +31,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var Matches_1 = require("@dojo/widget-core/meta/Matches");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
-    var css = require("../styles/scrollbar.m.css");
+    var scrollbarCss = require("../styles/scrollbar.m.css");
     var DEFAULT_KEY = 'root';
     var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
     /**
@@ -128,14 +128,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 _g[horizontal ? 'width' : 'height'] = renderSliderSize,
                 _g);
             return d_1.v('div', {
-                classes: this.classes(css.root, horizontal ? css.horizontal : css.vertical, visible || dragging ? css.visible : css.invisible),
+                classes: this.classes(scrollbarCss.root, horizontal ? scrollbarCss.horizontal : scrollbarCss.vertical, visible || dragging ? scrollbarCss.visible : scrollbarCss.invisible).fixed(scrollbarCss.rootFixed, horizontal ? scrollbarCss.horizontalFixed : scrollbarCss.verticalFixed, visible || dragging ? scrollbarCss.visibleFixed : scrollbarCss.invisibleFixed),
                 key: key,
                 onclick: this._onclick,
                 onpointerenter: this._onpointerenter,
                 onpointerleave: this._onpointerleave
             }, [
                 d_1.v('div', {
-                    classes: this.classes(css.slider, dragging ? css.dragging : null),
+                    classes: this.classes(scrollbarCss.slider, dragging ? scrollbarCss.dragging : null)
+                        .fixed(scrollbarCss.sliderFixed),
                     key: 'slider',
                     styles: styles
                 })
@@ -143,7 +144,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             var _g;
         };
         ScrollBar = __decorate([
-            Themeable_1.theme(css)
+            Themeable_1.theme(scrollbarCss)
         ], ScrollBar);
         return ScrollBar;
     }(ThemeableBase));

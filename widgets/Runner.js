@@ -55,7 +55,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/base64", "@dojo/core/lang", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/decorators/afterRender", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/util/DomWrapper", "../styles/runner.m.css", "../support/DOMParser", "../support/sourceMap"], factory);
+        define(["require", "exports", "@dojo/core/base64", "@dojo/core/lang", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/decorators/afterRender", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/util/DomWrapper", "../support/DOMParser", "../support/sourceMap", "../styles/runner.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -67,9 +67,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var afterRender_1 = require("@dojo/widget-core/decorators/afterRender");
     var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
     var DomWrapper_1 = require("@dojo/widget-core/util/DomWrapper");
-    var css = require("../styles/runner.m.css");
     var DOMParser_1 = require("../support/DOMParser");
     var sourceMap_1 = require("../support/sourceMap");
+    var runnerCss = require("../styles/runner.m.css");
     /**
      * The semver for the `tslib` package, which provides the TypeScript helper functions
      */
@@ -275,7 +275,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             if (this.properties.modules) {
                 this._updating = true;
                 var source = getSource(this.properties);
-                this._iframe.classList.add(css.running);
+                this._iframe.classList.add(runnerCss.running);
                 writeIframeDoc(this._iframe, source, this._onIframeError)
                     .then(function () {
                     _this._updating = false;
@@ -288,18 +288,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         Runner.prototype.render = function () {
             var _a = this.properties.src, src = _a === void 0 ? DEFAULT_IFRAME_SRC : _a;
             return d_1.v('div', {
-                classes: this.classes(css.root)
+                classes: this.classes(runnerCss.root).fixed(runnerCss.rootFixed)
             }, [d_1.w(this._IframeDom, {
-                    classes: this.classes(css.iframe),
+                    classes: this.classes(runnerCss.iframe).fixed(runnerCss.iframeFixed),
                     key: 'runner',
-                    src: src
+                    src: src,
+                    title: 'Runner'
                 })]);
         };
         __decorate([
             afterRender_1.default()
         ], Runner.prototype, "updateSource", null);
         Runner = __decorate([
-            Themeable_1.theme(css)
+            Themeable_1.theme(runnerCss)
         ], Runner);
         return Runner;
     }(RunnerBase));

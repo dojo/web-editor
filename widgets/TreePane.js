@@ -62,7 +62,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             return d_1.v('div', {
                 'aria-level': String(level),
                 'aria-selected': selected,
-                'aria-role': 'treeitem',
                 classes: this.classes.apply(this, classes),
                 role: 'treeitem',
                 styles: {
@@ -343,6 +342,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             var sliderSize = this._sliderSize = visibleRowCount > rows.length ? rows.length : visibleRowCount;
             var size = this._size = rows.length;
             return d_1.v('div', {
+                'aria-hidden': false,
                 'aria-label': label,
                 classes: this.classes(css.root),
                 key: key,

@@ -20,18 +20,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "./ActionBar", "../styles/icons.m.css", "../styles/tab.m.css", "../styles/tablist.m.css"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "./ActionBar", "./ScrollBar", "./meta/Hover", "../styles/icons.m.css", "../styles/tab.m.css", "../styles/tablist.m.css", "../styles/tablistscrollbar.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    var array_1 = require("@dojo/shim/array");
     var d_1 = require("@dojo/widget-core/d");
+    var Dimensions_1 = require("@dojo/widget-core/meta/Dimensions");
     var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var ActionBar_1 = require("./ActionBar");
+    var ScrollBar_1 = require("./ScrollBar");
+    var Hover_1 = require("./meta/Hover");
     var iconCss = require("../styles/icons.m.css");
     var tabCss = require("../styles/tab.m.css");
     var tablistCss = require("../styles/tablist.m.css");
+    var tablistScrollbarCss = require("../styles/tablistscrollbar.m.css");
     var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
     /**
      * A widget which provides a tab representation of its properties
@@ -53,11 +58,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             }
         };
         Tab.prototype.render = function () {
-            var _a = this.properties, iconClass = _a.iconClass, label = _a.label, labelDescription = _a.labelDescription, selected = _a.selected, title = _a.title;
+            var _a = this.properties, iconClass = _a.iconClass, key = _a.key, label = _a.label, labelDescription = _a.labelDescription, selected = _a.selected, title = _a.title;
             return d_1.v('div', {
                 'aria-label': label + ", tab",
                 classes: this.classes(tabCss.root, selected ? tabCss.selected : null).fixed(tabCss.rootFixed),
-                role: 'presentation',
+                key: key,
+                role: 'tab',
                 tabIndex: 0,
                 title: title,
                 onclick: this._onclick
@@ -96,14 +102,92 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     }(ThemeableBase));
     exports.Tab = Tab;
     /**
+     * A scrollbar where the theme is tied to the Tablist
+     */
+    var TablistScrollBar = /** @class */ (function (_super) {
+        __extends(TablistScrollBar, _super);
+        function TablistScrollBar() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        TablistScrollBar = __decorate([
+            Themeable_1.theme(tablistScrollbarCss)
+        ], TablistScrollBar);
+        return TablistScrollBar;
+    }(ScrollBar_1.default));
+    /**
      * A widget which contains tabs
      */
     var Tablist = /** @class */ (function (_super) {
         __extends(Tablist, _super);
         function Tablist() {
-            return _super !== null && _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this._position = 0;
+            _this._onwheel = function (event) {
+                var delta = event.deltaX;
+                if (delta) {
+                    event.preventDefault();
+                    _this._position += delta;
+                    _this.invalidate();
+                }
+            };
+            return _this;
         }
+        Tablist.prototype._getChildren = function () {
+            var _this = this;
+            return this.children.map(function (child) {
+                if (!child) {
+                    return child;
+                }
+                return d_1.v('div', {
+                    key: child.properties.key,
+                    classes: _this.classes(tablistCss.tab).fixed(tablistCss.tabFixed)
+                }, [child]);
+            });
+        };
+        Tablist.prototype._getSelectedKey = function () {
+            var children = this.children;
+            var selectedChild = array_1.find(children, function (child) {
+                return Boolean(child && child.properties.selected);
+            });
+            if (selectedChild && selectedChild.properties.key) {
+                return selectedChild.properties.key;
+            }
+        };
+        Tablist.prototype._onScroll = function (delta) {
+            this._position += delta;
+            this.invalidate();
+        };
+        Tablist.prototype._setPosition = function (dimensions) {
+            var selectedKey = this._getSelectedKey();
+            if (selectedKey && selectedKey !== this._cachedSelectedKey) {
+                var selectedDimensions = this.meta(Dimensions_1.default).get(selectedKey);
+                if (selectedDimensions.size.width) {
+                    this._cachedSelectedKey = selectedKey;
+                }
+                else {
+                    return;
+                }
+                if (this._position > selectedDimensions.offset.left) {
+                    this._position = selectedDimensions.offset.left;
+                }
+                else if ((this._position + dimensions.size.width) < (selectedDimensions.offset.left + selectedDimensions.offset.width)) {
+                    this._position = selectedDimensions.offset.left + selectedDimensions.offset.width - dimensions.size.width;
+                }
+            }
+            else {
+                if (this._position < 0) {
+                    this._position = 0;
+                }
+                else if ((this._position + dimensions.size.width) > dimensions.scroll.width) {
+                    this._position = dimensions.scroll.width - dimensions.size.width;
+                }
+            }
+        };
         Tablist.prototype.render = function () {
+            var visible = this.meta(Hover_1.default).get('root');
+            var tablistDimensions = this.meta(Dimensions_1.default).get('tablist');
+            this._setPosition(tablistDimensions);
+            var _a = this, _position = _a._position, theme = _a.properties.theme;
             return d_1.v('div', {
                 classes: this.classes(tablistCss.root).fixed(tablistCss.rootFixed),
                 key: 'root',
@@ -112,8 +196,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 d_1.v('div', {
                     classes: this.classes(tablistCss.tablist).fixed(tablistCss.tablistFixed),
                     key: 'tablist',
-                    role: 'tablist'
-                }, this.children)
+                    role: 'tablist',
+                    styles: {
+                        left: _position ? "-" + _position + "px" : '0'
+                    },
+                    onwheel: this._onwheel
+                }, this._getChildren()),
+                d_1.w(TablistScrollBar, {
+                    horizontal: true,
+                    position: _position,
+                    size: tablistDimensions.scroll.width,
+                    sliderSize: tablistDimensions.size.width,
+                    theme: theme,
+                    visible: visible,
+                    onScroll: this._onScroll
+                })
             ]);
         };
         Tablist = __decorate([

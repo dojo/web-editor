@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./actionbar.m.css", "./actionbarbutton.m.css", "./editor.m.css", "./runner.m.css", "./scrollbar.m.css", "./tab.m.css", "./tablist.m.css", "./toolbar.m.css", "./treepane.m.css", "./workbench.m.css"], factory);
+        define(["require", "exports", "./actionbar.m.css", "./actionbarbutton.m.css", "./editor.m.css", "./runner.m.css", "./scrollbar.m.css", "./tab.m.css", "./tablist.m.css", "./tablistscrollbar.m.css", "./toolbar.m.css", "./treepane.m.css", "./workbench.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -16,6 +16,7 @@
     var scrollbar = require("./scrollbar.m.css");
     var tab = require("./tab.m.css");
     var tablist = require("./tablist.m.css");
+    var tablistscrollbar = require("./tablistscrollbar.m.css");
     var toolbar = require("./toolbar.m.css");
     var treepane = require("./treepane.m.css");
     var workbench = require("./workbench.m.css");
@@ -27,6 +28,7 @@
         'dojo-scrollbar': scrollbar,
         'dojo-tab': tab,
         'dojo-tablist': tablist,
+        'dojo-tablistscrollbar': tablistscrollbar,
         'dojo-toolbar': toolbar,
         'dojo-treepane': treepane,
         'dojo-workbench': workbench,
@@ -37,6 +39,7 @@
         scrollbar: scrollbar,
         tab: tab,
         tablist: tablist,
+        tablistscrollbar: tablistscrollbar,
         toolbar: toolbar,
         treepane: treepane,
         workbench: workbench

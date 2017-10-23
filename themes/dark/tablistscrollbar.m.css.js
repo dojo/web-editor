@@ -5,5 +5,5 @@ if (typeof define === 'function' && define.amd) {
 	module.exports = factory();
 }
 }(this, function () {
-	return {"root":"_1a1Rc7fL","tab":"_2zz3-ag-","tablist":"_3fPz4kR9"," _key":"dojo-tablist"};
+	return {"slider":"_1stW9QW4","dragging":"_3uRs3O7E","horizontal":"zm4-Omzp","invisible":"_1qyz0Wr4","visible":"_1X59718l"," _key":"dojo-tablistscrollbar"};
 }));
