@@ -6,11 +6,11 @@ import { HNode, WNode } from '@dojo/widget-core/interfaces';
 import { stub, SinonStub } from 'sinon';
 import createMockIframe, { callContentWindowListener, getDocumentStrings } from '../../support/createMockIframe';
 import { Program } from '../../../src/project';
-import Runner, { RunnerProperties } from '../../../src/widgets/Runner';
+import Runner from '../../../src/widgets/Runner';
 import * as css from '../../../src/styles/runner.m.css';
 import DOMParser from '../../../src/support/DOMParser';
 
-let widget: Harness<RunnerProperties, typeof Runner>;
+let widget: Harness<Runner>;
 let iframe: HTMLIFrameElement;
 
 const originalCreateElement = document.createElement.bind(document);
@@ -86,7 +86,7 @@ registerSuite({
 		 * expected render */
 		const render = widget.getRender() as HNode;
 		assert.strictEqual(render.tag, 'div', 'should be a "div" tag');
-		assert.deepEqual(render.properties.classes, widget.classes(css.root)(), 'should have proper classes');
+		assert.deepEqual(render.properties.classes, widget.classes(css.root, css.rootFixed)(), 'should have proper classes');
 		assert.lengthOf(render.children, 1, 'should have only one child');
 		assert.isFunction((render.children[0] as WNode).widgetConstructor, 'should be a function');
 		assert.strictEqual((render.children[0] as WNode).properties.key, 'runner', 'should have runner key set');

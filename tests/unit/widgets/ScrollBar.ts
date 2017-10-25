@@ -11,7 +11,7 @@ registerSuite({
 		const widget = harness(ScrollBar);
 
 		const expected = v('div', {
-			classes: widget.classes(css.root, css.vertical, css.invisible),
+			classes: widget.classes(css.root, css.rootFixed, css.vertical, css.verticalFixed, css.invisible, css.invisibleFixed),
 			key: 'root',
 
 			onclick: widget.listener,
@@ -19,7 +19,7 @@ registerSuite({
 			onpointerleave: widget.listener
 		}, [
 			v('div', {
-				classes: widget.classes(css.slider),
+				classes: widget.classes(css.slider, css.sliderFixed),
 				key: 'slider',
 				styles: {
 					height: '10px',

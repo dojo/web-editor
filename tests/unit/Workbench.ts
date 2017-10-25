@@ -5,13 +5,13 @@ import { WNode } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import * as css from '../../src/styles/workbench.m.css';
 import { EditorProperties } from '../../src/widgets/Editor';
-import UnitUnderTest, { WorkbenchProperties } from '../../src/Workbench';
+import UnitUnderTest from '../../src/Workbench';
 
 import { Handle } from '@dojo/interfaces/core';
 import loadModule from '../support/loadModule';
 import { enable, register } from '../support/mock';
 
-let widget: Harness<WorkbenchProperties, typeof UnitUnderTest>;
+let widget: Harness<UnitUnderTest>;
 let mockHandle: Handle;
 /* tslint:disable:variable-name */
 let Workbench: typeof UnitUnderTest;
@@ -44,10 +44,10 @@ registerSuite({
 			onRun
 		});
 
-		widget.classes(css.left)();
+		widget.classes(css.left, css.middle, css.right)();
 
 		const render = widget.getRender() as WNode<UnitUnderTest>;
 		assert.lengthOf(render.children, 4, 'Should have four children');
-		assert.deepEqual((render.properties as any).classes, widget.classes(css.root)(), 'Has correct classes');
+		assert.deepEqual((render.properties as any).classes, widget.classes(css.root, css.rootFixed)(), 'Has correct classes');
 	}
 });

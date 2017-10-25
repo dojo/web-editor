@@ -12,6 +12,7 @@ registerSuite({
 		const widget = harness(TreePane);
 
 		const expected = v('div', {
+			'aria-hidden': false,
 			'aria-label': undefined,
 			classes: widget.classes(css.root),
 			key: undefined,

@@ -87,23 +87,23 @@ export default class Editor extends ThemeableBase<EditorProperties> {
 	private _EditorDom: DomWrapper;
 	private _didChangeHandle: monaco.IDisposable;
 	private _originalSize: Size;
-	private _root: HTMLDivElement;
+	private _editorRoot: HTMLDivElement;
 
 	private _layout() {
-		const { _editor, _originalSize, _root, properties: { onLayout } } = this;
+		const { _editor, _originalSize, _editorRoot, properties: { onLayout } } = this;
 		if (!_editor) {
 			return;
 		}
 
 		// If we are currently not at our original size, we will restore it, so that it won't interfere with the layout
 		// of other elements
-		if (!isEqualSize(getSize(_root), _originalSize)) {
+		if (!isEqualSize(getSize(_editorRoot), _originalSize)) {
 			_editor.layout({ height: _originalSize.height, width: MINIMUM_WIDTH });
 		}
 
 		// Now at the end of the turn, we need to do the layout of the editor properly
 		queueTask(() => {
-			const size = getSize(_root);
+			const size = getSize(_editorRoot);
 			if (!isEqualSize(size, { height: _originalSize.height, width: MINIMUM_WIDTH })) {
 				_editor.layout(size);
 				onLayout && onLayout();
@@ -112,12 +112,12 @@ export default class Editor extends ThemeableBase<EditorProperties> {
 	}
 
 	private _onAttached = () => {
-		const { _onDidChangeModelContent, _root, properties: { model, onInit, onLayout, options } } = this;
+		const { _onDidChangeModelContent, _editorRoot, properties: { model, onInit, onLayout, options } } = this;
 		// _onAttached fires when the DOM is actually attached to the document, but the rest of the virtual DOM hasn't
 		// been layed out which causes issues for monaco-editor when figuring out its initial size, so we will schedule
 		// it to be run at the end of the turn, which will provide more reliable layout
 		queueTask(() => {
-			const editor = this._editor = monaco.editor.create(_root, options);
+			const editor = this._editor = monaco.editor.create(_editorRoot, options);
 			const didChangeHandle = this._didChangeHandle = editor.onDidChangeModelContent(debounce(_onDidChangeModelContent, 1000));
 			onInit && onInit(editor);
 
@@ -125,7 +125,7 @@ export default class Editor extends ThemeableBase<EditorProperties> {
 				editor.dispose();
 				didChangeHandle.dispose();
 			}));
-			this._originalSize = getSize(_root);
+			this._originalSize = getSize(_editorRoot);
 			editor.layout();
 			onLayout && onLayout();
 			if (model) {
@@ -141,7 +141,7 @@ export default class Editor extends ThemeableBase<EditorProperties> {
 
 	constructor() {
 		super();
-		const root = this._root = document.createElement('div');
+		const root = this._editorRoot = document.createElement('div');
 		this._EditorDom = DomWrapper(root, { onAttached: this._onAttached });
 	}
 
