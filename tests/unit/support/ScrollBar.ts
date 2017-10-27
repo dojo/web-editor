@@ -14,6 +14,7 @@ registerSuite({
 			classes: widget.classes(css.root, css.vertical, css.invisible),
 			key: 'scrollbar',
 
+			onclick: widget.listener,
 			onmouseenter: widget.listener,
 			onmouseleave: widget.listener
 		}, [
@@ -23,14 +24,7 @@ registerSuite({
 				styles: {
 					height: '10px',
 					top: '0px'
-				},
-
-				onmousedown: widget.listener,
-				onmousemove: widget.listener,
-				onmouseup: widget.listener,
-				ontouchstart: widget.listener,
-				ontouchmove: widget.listener,
-				ontouchend: widget.listener
+				}
 			} as any)
 		]);
 
