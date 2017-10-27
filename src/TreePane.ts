@@ -244,7 +244,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 	private _sliderSize: number;
 
 	/**
-	 * Search the tree of items to find one item, in a BFS fashion
+	 * Search the tree of items to find one item, in a breadth first search fashion
 	 * @param id The tree pane item ID to match
 	 */
 	private _findItem(id: string): TreePaneItem | undefined {
