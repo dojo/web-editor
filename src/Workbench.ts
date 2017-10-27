@@ -127,7 +127,6 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 			});
 		});
 	}
-
 	private _getTreeRoot(): TreePaneItem | undefined {
 		/**
 		 * Add a file to a tree of files, by parsing the filename and adding generating a `TreePaneItem`

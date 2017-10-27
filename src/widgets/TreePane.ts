@@ -6,9 +6,14 @@ import Dimensions from '@dojo/widget-core/meta/Dimensions';
 import Drag from '@dojo/widget-core/meta/Drag';
 import { theme, ThemeableMixin, ThemeableProperties } from '@dojo/widget-core/mixins/Themeable';
 import { Keys } from '@dojo/widgets/common/util';
+<<<<<<< HEAD:src/widgets/TreePane.ts
 import ScrollBar from './ScrollBar';
 import * as css from '../styles/treepane.m.css';
 import * as iconCss from '../styles/icons.m.css';
+=======
+import * as css from './styles/treepane.m.css';
+import ScrollBar from './support/ScrollBar';
+>>>>>>> upstream/master:src/TreePane.ts
 
 /**
  * The interface for items that can be rendered in the `TreePane`.
@@ -244,7 +249,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 	private _sliderSize: number;
 
 	/**
-	 * Search the tree of items to find one item, in a BFS fashion
+	 * Search the tree of items to find one item, in a Breadth First Search fashion
 	 * @param id The tree pane item ID to match
 	 */
 	private _findItem(id: string): TreePaneItem | undefined {
