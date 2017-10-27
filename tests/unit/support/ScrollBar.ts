@@ -12,11 +12,11 @@ registerSuite({
 
 		const expected = v('div', {
 			classes: widget.classes(css.root, css.vertical, css.invisible),
-			key: 'scrollbar',
+			key: 'root',
 
 			onclick: widget.listener,
-			onmouseenter: widget.listener,
-			onmouseleave: widget.listener
+			onpointerenter: widget.listener,
+			onpointerleave: widget.listener
 		}, [
 			v('div', {
 				classes: widget.classes(css.slider),
