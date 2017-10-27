@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import loadModule from '../../../support/loadModule';
 import UnitUnderTest from '../../../../src/support/providers/amdRequire';
 
@@ -12,10 +12,9 @@ let xhrStub: SinonStub;
 let requireStub: NodeRequire;
 let moduleMap: { [mid: string]: any } = {};
 
-registerSuite({
-	name: 'support/providers/amdRequire',
+registerSuite('support/providers/amdRequire', {
 
-	async setup() {
+	async before() {
 		sandbox = sinonSandbox.create();
 
 		const xhrModule = await loadModule('@dojo/core/request/providers/xhr', require);
@@ -35,7 +34,7 @@ registerSuite({
 		});
 	},
 
-	teardown() {
+	after() {
 		sandbox.restore();
 	},
 
@@ -44,6 +43,7 @@ registerSuite({
 		moduleMap = {};
 	},
 
+	tests: {
 	'getProvider()'() {
 		assert.isFunction(getProvider, 'default export should be a function');
 		const amdProvider = getProvider();
@@ -59,7 +59,7 @@ registerSuite({
 			assert.isFalse(xhrStub.called, 'xhr stub should not have been called');
 			const result = amdProvider('http://example.com/');
 			assert.isTrue(xhrStub.called, 'xhr stub should have been called');
-			assert.strictEqual(result, 'foo', 'should have called the xhr stub');
+			assert.strictEqual(<any> result, 'foo', 'should have called the xhr stub');
 		},
 
 		'passes through to xhr for "https://"'() {
@@ -68,7 +68,7 @@ registerSuite({
 			assert.isFalse(xhrStub.called, 'xhr stub should not have been called');
 			const result = amdProvider('https://example.com/');
 			assert.isTrue(xhrStub.called, 'xhr stub should have been called');
-			assert.strictEqual(result, 'foo', 'should have called the xhr stub');
+			assert.strictEqual(<any> result, 'foo', 'should have called the xhr stub');
 		},
 
 		async 'detects i18n URLs'() {
@@ -222,5 +222,6 @@ registerSuite({
 					assert.instanceOf(e, Error, 'should have rejected an error');
 				}));
 		}
+	}
 	}
 });

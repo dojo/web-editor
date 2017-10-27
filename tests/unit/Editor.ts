@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import global from '@dojo/core/global';
 import { assign } from '@dojo/core/lang';
 import { Handle } from '@dojo/interfaces/core';
@@ -45,10 +45,9 @@ function getMonacoEditor(properties: Partial<EditorProperties> = {}): Promise<mo
 	}) as Promise<any>;
 }
 
-registerSuite({
-	name: 'Editor',
+registerSuite('Editor', {
 
-	async setup() {
+	async before() {
 		sandbox = sinonSandbox.create();
 		setModelStub = sandbox.stub();
 		onDidChangeModelContentDisposeStub = sandbox.stub();
@@ -57,7 +56,7 @@ registerSuite({
 		layoutStub = sandbox.stub();
 		setFileDirtyStub = sandbox.stub();
 
-		register('src/project', {
+		register('dev/src/project', {
 			default: {
 				includes: sandbox.spy((filename: string) => {
 					return projectFileMap[filename];
@@ -101,12 +100,13 @@ registerSuite({
 		sandbox.reset();
 	},
 
-	teardown() {
+	after() {
 		delete global.monaco;
 		sandbox.restore();
 		mockHandle.destroy();
 	},
 
+	tests: {
 	'expected render'() {
 		/* decomposing this as the DomWrapper constructor function is not exposed and therefore can't put it in the
 		 * expected render */
@@ -210,5 +210,6 @@ registerSuite({
 				}
 			}, 1500);
 		});
+	}
 	}
 });

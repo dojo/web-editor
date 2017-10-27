@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { Handle } from '@dojo/interfaces/core';
 import loadModule from '../../support/loadModule';
 import * as UnitUnderTest from '../../../src/support/css';
@@ -23,10 +23,9 @@ let getJSON: (filename: string, json: { [className: string]: string }) => void;
 
 const getJSONMocks: any[] = [ undefined, { foo: '._foo_abc' }, undefined ];
 
-registerSuite({
-	name: 'support/css',
+registerSuite('support/css', {
 
-	async setup() {
+	async before() {
 		sandbox = sinonSandbox.create();
 		cssnextStub = sandbox.stub();
 
@@ -46,13 +45,13 @@ registerSuite({
 			};
 		});
 
-		register('src/support/postcss', {
+		register('dev/src/support/postcss', {
 			default: postcssSpy
 		});
-		register('src/support/postcssCssnext', {
+		register('dev/src/support/postcssCssnext', {
 			default: cssnextStub
 		});
-		register('src/support/postcssModules', {
+		register('dev/src/support/postcssModules', {
 			default: postcssModulesSpy
 		});
 
@@ -63,7 +62,7 @@ registerSuite({
 		getDefinitions = css.getDefinitions;
 	},
 
-	teardown() {
+	after() {
 		sandbox.restore();
 		mockHandle.destroy();
 	},
@@ -72,6 +71,7 @@ registerSuite({
 		sandbox.reset();
 	},
 
+	tests: {
 	'getEmit()': {
 		async 'processes a css file'() {
 			const file = {
@@ -163,5 +163,6 @@ registerSuite({
 			});
 			assert.strictEqual(cssnextStub.callCount, 0, 'should not have been called once');
 		}
+	}
 	}
 });

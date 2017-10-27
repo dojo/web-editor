@@ -1,12 +1,11 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import * as UnitUnderTest from '../../../src/support/postcssCssnext';
 
 import global from '@dojo/core/global';
 import loadModule from '../../support/loadModule';
 
-registerSuite({
-	name: 'support/postcssCssnext',
+registerSuite('support/postcssCssnext', {
 
 	async 'global.cssnext default return'() {
 		assert.isUndefined(global.cssnext, 'should not be defined');

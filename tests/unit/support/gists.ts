@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import loadModule from '../../support/loadModule';
 import { enable, register } from '../../support/mock';
 import * as UnitUnderTest from '../../../src/support/gists';
@@ -11,10 +11,9 @@ let getByUsername: typeof UnitUnderTest.getByUsername;
 
 let mockHandle: any;
 
-registerSuite({
-	name: 'gists',
+registerSuite('gists', {
 
-	async setup() {
+	async before() {
 		register('@dojo/core/request', {
 			default: requestStub
 		});
@@ -25,7 +24,7 @@ registerSuite({
 		getByUsername = gists.getByUsername;
 	},
 
-	teardown() {
+	after() {
 		mockHandle.destroy();
 	},
 
@@ -33,6 +32,7 @@ registerSuite({
 		responseMap.clear();
 	},
 
+	tests: {
 	'getById()': {
 		async 'resolves with data'() {
 			responseMap.set('https://api.github.com/gists/foobar', JSON.stringify({
@@ -100,5 +100,6 @@ registerSuite({
 			const result = await getByUsername('foo');
 			assert.deepEqual(result, []);
 		}
+	}
 	}
 });

@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import harness, { Harness } from '@dojo/test-extras/harness';
 import { WNode } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
@@ -18,10 +18,9 @@ let Workbench: typeof UnitUnderTest;
 
 class Editor extends WidgetBase<EditorProperties> {}
 
-registerSuite({
-	name: 'Workbench',
+registerSuite('Workbench', {
 
-	async setup() {
+	async before() {
 		register('src/Editor', {
 			default: Editor
 		});
@@ -29,7 +28,7 @@ registerSuite({
 		Workbench = (await loadModule('../../src/Workbench', require)).default;
 	},
 
-	teardown() {
+	after() {
 		mockHandle.destroy();
 	},
 
@@ -37,6 +36,7 @@ registerSuite({
 		widget = harness(Workbench);
 	},
 
+	tests: {
 	'basic rendering'() {
 		const onRun = () => {};
 		widget.setProperties({
@@ -49,5 +49,6 @@ registerSuite({
 		const render = widget.getRender() as WNode<UnitUnderTest>;
 		assert.lengthOf(render.children, 4, 'Should have four children');
 		assert.deepEqual((render.properties as any).classes, widget.classes(css.root)(), 'Has correct classes');
+	}
 	}
 });

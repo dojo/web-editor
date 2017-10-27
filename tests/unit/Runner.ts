@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { assign } from '@dojo/core/lang';
 import harness, { Harness } from '@dojo/test-extras/harness';
 import { HNode, WNode } from '@dojo/widget-core/interfaces';
@@ -61,10 +61,9 @@ function getRunnerDoc(program?: Partial<Program>): Promise<Document> {
 		}) as Promise<Document>;
 }
 
-registerSuite({
-	name: 'Runner',
+registerSuite('Runner', {
 
-	setup() {
+	before() {
 		stubCreateElement = stub(document, 'createElement').callsFake((elementName: string) => {
 			if (elementName === 'iframe') {
 				return iframe = createMockIframe();
@@ -73,7 +72,7 @@ registerSuite({
 		});
 	},
 
-	teardown() {
+	after() {
 		stubCreateElement.restore();
 	},
 
@@ -81,6 +80,7 @@ registerSuite({
 		widget = harness(Runner);
 	},
 
+	tests: {
 	'default render'() {
 		/* decomposing this as the DomWrapper constructor function is not exposed and therefore can't put it in the
 		 * expected render */
@@ -260,5 +260,6 @@ registerSuite({
 				widget.setProperties(assign(createProgram(), { onRun, onError }));
 				widget.getRender();
 			});
+	}
 	}
 });

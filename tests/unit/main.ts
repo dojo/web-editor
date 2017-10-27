@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import loadModule from '../support/loadModule';
 
 import { enable, register } from '../support/mock';
@@ -13,23 +13,22 @@ let project: any;
 let Runner: any;
 let routing: any;
 
-registerSuite({
-	name: 'main',
+registerSuite('main', {
 
-	async setup() {
+	async before() {
 		Editor = {};
 		project = {};
 		routing = {};
 		Runner = {};
 
-		register('src/Editor', {
+		register('dev/src/Editor', {
 			default: Editor
 		});
-		register('src/project', {
+		register('dev/src/project', {
 			default: project
 		});
-		register('src/routing', routing);
-		register('src/Runner', {
+		register('dev/src/routing', routing);
+		register('dev/src/Runner', {
 			default: Runner
 		});
 		handle = enable();
@@ -37,15 +36,17 @@ registerSuite({
 		main = await loadModule('../../src/main', require);
 	},
 
-	teardown() {
+	after() {
 		handle.destroy();
 	},
 
+	tests: {
 	async 'validate API'() {
 		assert.strictEqual(main.Editor, Editor);
 		assert.strictEqual(main.project, project);
 		assert.strictEqual(main.routing, routing);
 		assert.strictEqual(main.Runner, Runner);
 		assert.lengthOf(Object.keys(main), 4, 'should have only 3 exports');
+	}
 	}
 });

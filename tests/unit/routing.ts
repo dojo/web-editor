@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import loadModule from '../support/loadModule';
 import { enable, register } from '../support/mock';
 import * as UnitUnderTest from '../../src/routing';
@@ -12,10 +12,9 @@ let startGistRouter: typeof UnitUnderTest.startGistRouter;
 
 let mockHandle: { destroy(): void; };
 
-registerSuite({
-	name: 'routing',
+registerSuite('routing', {
 
-	async setup() {
+	async before() {
 		register('@dojo/routing/history/HashHistory', {
 			default: HashHistoryStub
 		});
@@ -32,7 +31,7 @@ registerSuite({
 		startGistRouter = routing.startGistRouter;
 	},
 
-	teardown() {
+	after() {
 		mockHandle.destroy();
 	},
 
@@ -40,6 +39,7 @@ registerSuite({
 		currentRouter.__reset__();
 	},
 
+	tests: {
 	'setPath()': {
 		'is a function'() {
 			assert.isFunction(setPath, 'should be a function');
@@ -82,5 +82,6 @@ registerSuite({
 			assert.isTrue(called);
 			handle.destroy();
 		}
+	}
 	}
 });

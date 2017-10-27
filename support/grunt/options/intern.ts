@@ -1,32 +1,35 @@
-export = function(grunt: IGrunt) {
+export = function (grunt: IGrunt) {
 	grunt.loadNpmTasks('intern');
 
 	return {
 		options: {
-			runType: 'runner',
-			config: '<%= devDirectory %>/tests/intern',
-			reporters: [
-				{ id: 'support/intern/Reporter', file: 'coverage-unmapped.json' }
-			]
-		},
-
-		browserstack: {},
-
-		local: {
-			options: {
-				config: '<%= devDirectory %>/tests/intern-local'
+			config: '<%= internConfig %>',
+			node: {
+				plugins: [
+					'./support/intern/Reporter.js'
+				]
 			}
 		},
-
-		node: {
+		browserstack: {
 			options: {
-				runType: 'client'
+				config: '<%= internConfig %>@browserstack'
 			}
 		},
-
 		saucelabs: {
 			options: {
-				config: '<%= devDirectory %>/tests/intern-saucelabs'
+				config: '<%= internConfig %>@saucelabs'
+			}
+		},
+		node: {},
+		remote: {},
+		local: {
+			options: {
+				config: '<%= internConfig %>@local'
+			}
+		},
+		serve: {
+			options: {
+				serveOnly: true
 			}
 		}
 	};

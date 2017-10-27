@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { ProjectJson, ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
 import global from '@dojo/core/global';
 import loadModule from '../support/loadModule';
@@ -27,16 +27,15 @@ const testJS = `define(["require", "exports"], function (require, exports) {
 
 const testMap = `{"version":3,"file":"test.js","sourceRoot":"","sources":["test.ts"],"names":[],"mappings":";;;IAAA,iBAAwB,OAAO,CAAC,GAAG,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC;IAA7C,kBAA6C;IAAA,CAAC","sourcesContent":["export function foo() { console.log('bar'); };\\n"]}`;
 
-registerSuite({
-	name: 'project',
+registerSuite('project', {
 
-	async setup() {
+	async before() {
 		register('@dojo/core/request', {
 			default: requestStub
 		});
 		register('vs/editor/editor.main', {});
-		register('src/support/css', cssStub);
-		register('src/support/json', jsonStub);
+		register('dev/src/support/css', cssStub);
+		register('dev/src/support/json', jsonStub);
 
 		global.monaco = monacoStub;
 
@@ -44,7 +43,7 @@ registerSuite({
 		project = (await loadModule('../../src/project')).default;
 	},
 
-	teardown() {
+	after() {
 		global.monaco = undefined;
 		mockHandle.destroy();
 	},
@@ -89,6 +88,7 @@ registerSuite({
 		project = (await loadModule('../../src/project')).default;
 	},
 
+	tests: {
 	async 'load'() {
 		await project.load('project.json');
 		assert.isTrue(setCompilerOptionsSpy.called);
@@ -396,5 +396,6 @@ registerSuite({
 		async 'get() is undefined'() {
 			assert.isUndefined(project.get(), 'should retrun undefined when unloaded');
 		}
+	}
 	}
 });

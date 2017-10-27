@@ -13,7 +13,5 @@ install:
 - travis_retry npm install
 script:
 - grunt dev
-- grunt intern:node
-- grunt intern:browserstack
-- grunt remapIstanbul:ci
+- grunt intern:browserstack --test-reporter
 - grunt uploadCoverage
