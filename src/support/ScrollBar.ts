@@ -55,7 +55,7 @@ const ThemeableBase = ThemeableMixin(WidgetBase);
 /**
  * Convert a relative number to an absolute number
  * @param relative The relative value to convert to an absolute value
- * @param relativeSize The relative size to compare with the abosolute size
+ * @param relativeSize The relative size to compare with the absolute size
  * @param absoluteSize The absolute size to compare with the relative size
  */
 function fromRelative(relative: number, relativeSize: number, absoluteSize: number): number {
@@ -65,7 +65,7 @@ function fromRelative(relative: number, relativeSize: number, absoluteSize: numb
 /**
  * Convert an absolute number to a relative number
  * @param absolute The absolute value to convert to a relative value
- * @param relativeSize The realtive size to compare with the absolute size
+ * @param relativeSize The relative size to compare with the absolute size
  * @param absoluteSize The absolute size to compare with the relative size
  */
 function toRelative(absolute: number, relativeSize: number, absoluteSize: number): number {
@@ -86,7 +86,7 @@ export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
 	 */
 	private _getDomSize(): number {
 		const { horizontal, key = DEFAULT_KEY } = this.properties;
-		// TODO: Remove string coersion when dojo/widget-core#721 is published
+		// TODO: Remove string coercion when dojo/widget-core#721 is published
 		const { height, width } = this.meta(Dimensions).get(`${key}`).size;
 		return horizontal ? width : height;
 	}
@@ -97,7 +97,7 @@ export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
 	 * @param evt The mouse event
 	 */
 	private _onclick(evt: MouseEvent) {
-		// TODO: Remove string coersion when dojo/widget-core#721 is published
+		// TODO: Remove string coercion when dojo/widget-core#721 is published
 		if (this.meta(Matches).get(`${this.properties.key}` || DEFAULT_KEY, evt)) {
 			evt.preventDefault();
 			const domSize = this._getDomSize();
