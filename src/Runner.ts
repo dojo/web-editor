@@ -298,6 +298,7 @@ export default class Runner extends RunnerBase<RunnerProperties> {
 		if (this.properties.modules) {
 			this._updating = true;
 			const source = getSource(this.properties);
+			this._iframe.classList.add(css.running);
 			writeIframeDoc(this._iframe, source, this._onIframeError)
 				.then(() => {
 					this._updating = false;
@@ -309,11 +310,12 @@ export default class Runner extends RunnerBase<RunnerProperties> {
 	}
 
 	public render() {
+		const { src = DEFAULT_IFRAME_SRC } = this.properties;
 		return v('div', {
 			classes: this.classes(css.root)
 		}, [ w(this._IframeDom, {
 			key: 'runner',
-			src: this.properties.src || DEFAULT_IFRAME_SRC
+			src
 		}) ]);
 	}
 }

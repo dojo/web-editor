@@ -3,6 +3,10 @@
 	height: 100%;
 }
 
+.running {
+	background: white;
+}
+
 .iframe {
 	border: none;
 	position: relative;
