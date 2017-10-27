@@ -38,7 +38,7 @@ export interface WorkbenchProperties extends ThemeableProperties {
 	 */
 	iconsSourcePath?: string;
 
-	model?: monaco.editor.IModel;
+	model?: Editor['properties']['model'];
 
 	/**
 	 * An array of filenames that have open tabs
