@@ -118,7 +118,7 @@ export class Tab extends ThemeableBase<TabProperties, null> {
  * A scrollbar where the theme is tied to the Tablist
  */
 @theme(tablistScrollbarCss)
-class TablistScrollBar extends ScrollBar {}
+export class TablistScrollBar extends ScrollBar {}
 
 /**
  * A widget which contains tabs

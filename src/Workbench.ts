@@ -13,7 +13,7 @@ import TreePane, { TreePaneItem } from './widgets/TreePane';
 import Toolbar from './widgets/Toolbar';
 import { IconJson, IconResolver } from './support/icons';
 import * as iconCss from './styles/icons.m.css';
-import * as css from './styles/workbench.m.css';
+import * as workbenchCss from './styles/workbench.m.css';
 
 const ThemeableBase = ThemeableMixin(WidgetBase);
 
@@ -89,7 +89,7 @@ export interface WorkbenchProperties extends ThemeableProperties {
 	onRunClick?(): void;
 }
 
-@theme(css)
+@theme(workbenchCss)
 export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 	private _expanded = [ './', './src' ];
 	private _fileTreeOpen = true;
@@ -281,7 +281,7 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 		}
 
 		return v('div', {
-			classes: this.classes(css.root).fixed(css.rootFixed)
+			classes: this.classes(workbenchCss.root).fixed(workbenchCss.rootFixed)
 		}, [
 			w(IconCss, {
 				baseClass: iconCss.label,
@@ -290,7 +290,7 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 				sourcePath
 			}),
 			v('div', {
-				classes: this.classes(css.left, filesOpen ? null : css.closed),
+				classes: this.classes(workbenchCss.left, filesOpen ? null : workbenchCss.closed),
 				key: 'left'
 			}, [
 				w(TreePane, {
@@ -307,7 +307,7 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 				})
 			]),
 			v('div', {
-				classes: this.classes(css.middle),
+				classes: this.classes(workbenchCss.middle),
 				key: 'middle'
 			}, [
 				w(Toolbar, {
@@ -333,7 +333,7 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 				})
 			]),
 			v('div', {
-				classes: this.classes(css.right, runnerOpen ? null : css.closed),
+				classes: this.classes(workbenchCss.right, runnerOpen ? null : workbenchCss.closed),
 				key: 'right'
 			}, [
 				w(Runner, runnerProperties)

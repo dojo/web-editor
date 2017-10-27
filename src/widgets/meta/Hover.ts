@@ -10,16 +10,18 @@ class HoverController {
 	private _nodeMap = new WeakMap<HTMLElement, NodeData>();
 
 	private _onmouseenter = (event: MouseEvent) => {
-		const data = this._nodeMap.get(event.target as HTMLElement);
-		if (data && !data.hovering) {
+		// cannot end up here unless we have data in the map
+		const data = this._nodeMap.get(event.target as HTMLElement)!;
+		if (!data.hovering) {
 			data.hovering = true;
 			data.invalidate();
 		}
 	}
 
 	private _onmouseleave = (event: MouseEvent) => {
-		const data = this._nodeMap.get(event.target as HTMLElement);
-		if (data && data.hovering) {
+		// cannot end up here unless we have data in the map
+		const data = this._nodeMap.get(event.target as HTMLElement)!;
+		if (data.hovering) {
 			data.hovering = false;
 			data.invalidate();
 		}
