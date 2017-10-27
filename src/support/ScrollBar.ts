@@ -55,7 +55,7 @@ const ThemeableBase = ThemeableMixin(WidgetBase);
 /**
  * Convert a relative number to an absolute number
  * @param relative The relative value to convert to an absolute value
- * @param relativeSize The relative size to compare with the abosolute size
+ * @param relativeSize The relative size to compare with the absolute size
  * @param absoluteSize The absolute size to compare with the relative size
  */
 function fromRelative(relative: number, relativeSize: number, absoluteSize: number): number {
@@ -65,7 +65,7 @@ function fromRelative(relative: number, relativeSize: number, absoluteSize: numb
 /**
  * Convert an absolute number to a relative number
  * @param absolute The absolute value to convert to a relative value
- * @param relativeSize The realtive size to compare with the absolute size
+ * @param relativeSize The relative size to compare with the absolute size
  * @param absoluteSize The absolute size to compare with the relative size
  */
 function toRelative(absolute: number, relativeSize: number, absoluteSize: number): number {
