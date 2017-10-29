@@ -123,7 +123,7 @@ registerSuite('Editor', {
 		const createSpy = monaco.editor.create as SinonSpy;
 		assert(editor, 'editor should exist');
 		assert.isTrue(createSpy.called, 'create should have been called');
-		assert.instanceOf(monacoEditorCreateElement, global.window.HTMLDivElement);
+		assert.isTrue(monacoEditorCreateElement instanceof global.window.HTMLDivElement);
 	},
 
 	async 'editor passes options'() {
