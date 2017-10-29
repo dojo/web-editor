@@ -6,7 +6,7 @@ export = function (grunt: IGrunt) {
 			config: '<%= internConfig %>',
 			node: {
 				plugins: [
-					'./support/intern/Reporter.js'
+					'./dev/support/intern/Reporter.js'
 				]
 			}
 		},

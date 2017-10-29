@@ -27,6 +27,7 @@
 	},
 	"include": [
 		"./src/**/*.ts",
-		"./tests/**/*.ts"
+		"./tests/**/*.ts",
+		"./support/intern/Reporter.ts"
 	]
 }

@@ -55,12 +55,8 @@
 	},
 
 	"coverage": [
-		"./dev/src/**/*.js",
-		"!./dev/src/examples/**/*",
-		"!./dev/src/external/**/*",
-		"!./dev/src/styles/**/*",
-		"!./dev/src/themes/**/*",
-		"!./dev/src/extensions/**/*",
+		"./dev/src/*.js",
+		"./dev/src/support/**/*.js",
 		"!./dev/src/support/worker-proxy.js",
 		"!./dev/src/support/providers/xhr.js"
 	],
