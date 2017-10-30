@@ -93,7 +93,7 @@ registerSuite('Editor', {
 				assert.deepEqual(vnode.properties!.classes, { [css.root]: true, [css.rootFixed]: true });
 				assert.strictEqual(vnode.properties!.key, 'root');
 				assert.lengthOf(vnode.children!, 0);
-				assert.isTrue(monacoEditorCreateElement instanceof global.window.HTMLDivElement);
+				assert.isFalse(monacoEditorCreateElement instanceof global.window.HTMLDivElement);
 			}
 			else {
 				throw new Error('vnode of wrong type');
