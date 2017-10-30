@@ -1,0 +1,108 @@
+{
+	"capabilities": {
+		"project": "Dojo 2",
+		"name": "@dojo/widgets",
+		"browserstack.debug": false
+	},
+
+	"environments": [
+		{ "browserName": "node" }
+	],
+
+	"suites": [
+		"./dev/tests/unit/all.js"
+	],
+
+	"functionalSuites": [
+		"./dev/tests/functional/all.js"
+	],
+
+	"plugins": [
+		{
+			"script": "@dojo/shim/Promise",
+			"useLoader": true
+		},
+		{
+			"script": "@dojo/test-extras/support/loadJsdom",
+			"useLoader": true
+		}
+	],
+
+	"loader": {
+		"script": "dojo2",
+		"options": {
+			"packages": [
+				{ "name": "@dojo", "location": "node_modules/@dojo" },
+				{ "name": "cldr-data", "location": "node_modules/cldr-data" },
+				{ "name": "cldrjs", "location": "node_modules/cldrjs" },
+				{ "name": "globalize", "location": "node_modules/globalize", "main": "dist/globalize" },
+				{ "name": "maquette", "location": "node_modules/maquette/dist", "main": "maquette.min" },
+				{ "name": "pepjs", "location": "node_modules/pepjs/dist", "main": "pep" },
+				{ "name": "src", "location": "dev/src" },
+				{ "name": "sinon", "location": "node_modules/sinon/pkg", "main": "sinon" },
+				{ "name": "source-map", "location": "node_modules/source-map/dist", "main": "source-map.debug" },
+				{ "name": "tests", "location": "dev/tests" }
+			],
+			"map": {
+				"globalize": {
+					"cldr": "cldrjs/dist/cldr",
+					"cldr/event": "cldrjs/dist/cldr/event",
+					"cldr/supplemental": "cldrjs/dist/cldr/supplemental",
+					"cldr/unresolved": "cldrjs/dist/cldr/unresolved"
+				}
+			}
+		}
+	},
+
+	"coverage": [
+		"./dev/src/*.js",
+		"./dev/src/support/**/*.js",
+		"!./dev/src/support/worker-proxy.js",
+		"!./dev/src/support/providers/xhr.js"
+	],
+
+	"configs": {
+		"browserstack": {
+			"tunnel": "browserstack",
+
+			"environments+": [
+				{ "browserName": "internet explorer", "version": "11" },
+				{ "browserName": "edge" },
+				{ "browserName": "firefox", "platform": "WINDOWS" },
+				{ "browserName": "chrome", "platform": "WINDOWS" },
+				{ "browserName": "safari", "version": "9.1", "platform": "MAC" },
+				{ "browserName": "iPhone", "version": "9.1" }
+			],
+
+			"maxConcurrency": 5
+		},
+
+		"local": {
+			"tunnel": "selenium",
+			"tunnelOptions": {
+				"hostname": "localhost",
+				"port": 4444
+			},
+
+			"environments+": [
+				{ "browserName": "chrome" }
+			]
+		},
+
+		"saucelabs": {
+			"tunnel": "saucelabs",
+			"tunnelOptions": {},
+
+			"defaultTimeout": 10000,
+			"environments+": [
+				{ "browserName": "internet explorer", "version": [ "11.0" ], "platform": "Windows 7" },
+				{ "browserName": "MicrosoftEdge", "platform": "Windows 10" },
+				{ "browserName": "firefox", "version": "43", "platform": "Windows 10" },
+				{ "browserName": "chrome", "platform": "Windows 10" },
+				{ "browserName": "safari", "version": "9.0", "platform": "OS X 10.11" },
+				{ "browserName": "iphone", "version": "9.3" }
+			],
+			"maxConcurrency": 4
+		}
+	}
+}

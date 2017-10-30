@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import loadModule from '../support/loadModule';
 
 import { enable, register } from '../support/mock';
@@ -12,19 +12,18 @@ let routing: any;
 /* tslint:disable:variable-name */
 let Workbench: any;
 
-registerSuite({
-	name: 'main',
+registerSuite('main', {
 
-	async setup() {
+	async before() {
 		project = {};
 		routing = {};
 		Workbench = {};
 
-		register('src/project', {
+		register('dev/src/project', {
 			default: project
 		});
-		register('src/routing', routing);
-		register('src/Workbench', {
+		register('dev/src/routing', routing);
+		register('dev/src/Workbench', {
 			default: Workbench
 		});
 		handle = enable();
@@ -32,14 +31,16 @@ registerSuite({
 		main = await loadModule('../../src/main', require);
 	},
 
-	teardown() {
+	after() {
 		handle.destroy();
 	},
 
-	async 'validate API'() {
-		assert.strictEqual(main.project, project);
-		assert.strictEqual(main.routing, routing);
-		assert.strictEqual(main.Workbench, Workbench);
-		assert.lengthOf(Object.keys(main), 3, 'should have only 3 exports');
+	tests: {
+		async 'validate API'() {
+			assert.strictEqual(main.project, project);
+			assert.strictEqual(main.routing, routing);
+			assert.strictEqual(main.Workbench, Workbench);
+			assert.lengthOf(Object.keys(main), 3, 'should have only 3 exports');
+		}
 	}
 });

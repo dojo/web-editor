@@ -1,12 +1,11 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import * as UnitUnderTest from '../../../src/support/postcss';
 
 import global from '@dojo/core/global';
 import loadModule from '../../support/loadModule';
 
-registerSuite({
-	name: 'support/postcss',
+registerSuite('support/postcss', {
 
 	async 'global.postcss default return'() {
 		assert.isUndefined(global.postcss, 'should not be defined');

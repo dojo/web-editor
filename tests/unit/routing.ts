@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import loadModule from '../support/loadModule';
 import { enable, register } from '../support/mock';
 import * as UnitUnderTest from '../../src/routing';
@@ -12,10 +12,9 @@ let startGistRouter: typeof UnitUnderTest.startGistRouter;
 
 let mockHandle: { destroy(): void; };
 
-registerSuite({
-	name: 'routing',
+registerSuite('routing', {
 
-	async setup() {
+	async before() {
 		register('@dojo/routing/history/HashHistory', {
 			default: HashHistoryStub
 		});
@@ -32,7 +31,7 @@ registerSuite({
 		startGistRouter = routing.startGistRouter;
 	},
 
-	teardown() {
+	after() {
 		mockHandle.destroy();
 	},
 
@@ -40,47 +39,49 @@ registerSuite({
 		currentRouter.__reset__();
 	},
 
-	'setPath()': {
-		'is a function'() {
-			assert.isFunction(setPath, 'should be a function');
+	tests: {
+		'setPath()': {
+			'is a function'() {
+				assert.isFunction(setPath, 'should be a function');
+			},
+
+			'changes the location'() {
+				setPath('foobar');
+				assert.strictEqual(currentPath, 'foobar');
+			}
 		},
 
-		'changes the location'() {
-			setPath('foobar');
-			assert.strictEqual(currentPath, 'foobar');
-		}
-	},
+		'startGistRouter()': {
+			'calls root callback'() {
+				let called = false;
+				const handle = startGistRouter({
+					onGist() {
+						throw new Error('Unexpected Path');
+					},
+					onRoot() {
+						called = true;
+					}
+				});
+				setPath('');
+				assert.isTrue(called);
+				handle.destroy();
+			},
 
-	'startGistRouter()': {
-		'calls root callback'() {
-			let called = false;
-			const handle = startGistRouter({
-				onGist() {
-					throw new Error('Unexpected Path');
-				},
-				onRoot() {
-					called = true;
-				}
-			});
-			setPath('');
-			assert.isTrue(called);
-			handle.destroy();
-		},
-
-		'calls on gist callback'() {
-			let called = false;
-			const handle = startGistRouter({
-				onGist(request) {
-					called = true;
-					assert.strictEqual(request.params.id, 'foobar');
-				},
-				onRoot() {
-					throw new Error('Unexpected Path');
-				}
-			});
-			setPath('foobar');
-			assert.isTrue(called);
-			handle.destroy();
+			'calls on gist callback'() {
+				let called = false;
+				const handle = startGistRouter({
+					onGist(request) {
+						called = true;
+						assert.strictEqual(request.params.id, 'foobar');
+					},
+					onRoot() {
+						throw new Error('Unexpected Path');
+					}
+				});
+				setPath('foobar');
+				assert.isTrue(called);
+				handle.destroy();
+			}
 		}
 	}
 });

@@ -1,13 +1,12 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import harness from '@dojo/test-extras/harness';
 import { v } from '@dojo/widget-core/d';
 import { HNode } from '@dojo/widget-core/interfaces';
 import IconCss from '../../../src/widgets/IconCss';
 import icons from '../../support/iconJson';
 
-registerSuite({
-	name: 'IconCss',
+registerSuite('IconCss', {
 
 	'rendering'() {
 		const widget = harness(IconCss);

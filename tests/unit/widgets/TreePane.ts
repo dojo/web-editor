@@ -1,12 +1,11 @@
-import * as registerSuite from 'intern!object';
+const { registerSuite } = intern.getInterface('object');
 import harness from '@dojo/test-extras/harness';
 import { v, w } from '@dojo/widget-core/d';
 import TreePane from '../../../src/widgets/TreePane';
 import * as css from '../../../src/styles/treepane.m.css';
 import ScrollBar from '../../../src/widgets/ScrollBar';
 
-registerSuite({
-	name: 'TreePane',
+registerSuite('TreePane', {
 
 	'basic rendering'() {
 		const widget = harness(TreePane);

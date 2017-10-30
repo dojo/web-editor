@@ -1,10 +1,9 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import global from '@dojo/shim/global';
 import '../../../src/support/URL';
 
-registerSuite({
-	name: 'support/URL',
+registerSuite('support/URL', {
 
 	'exists'() {
 		assert(global.window.URL);

@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import global from '@dojo/core/global';
 import { assign } from '@dojo/core/lang';
 import { Constructor } from '@dojo/widget-core/interfaces';
@@ -40,10 +40,9 @@ function getMonacoEditor(properties: Partial<EditorProperties> = {}): Promise<mo
 	});
 }
 
-registerSuite({
-	name: 'Editor',
+registerSuite('Editor', {
 
-	async setup() {
+	async before() {
 		sandbox = sinonSandbox.create();
 		setModelStub = sandbox.stub();
 		onDidChangeModelContentDisposeStub = sandbox.stub();
@@ -81,86 +80,88 @@ registerSuite({
 		sandbox.reset();
 	},
 
-	teardown() {
+	after() {
 		delete global.monaco;
 		sandbox.restore();
 	},
 
-	'expected render'() {
-		projector.append();
-		const vnode = projector.__render__();
-		if (vnode !== null && typeof vnode === 'object' && !Array.isArray(vnode)) {
-			assert.deepEqual(vnode.properties!.classes, { [css.root]: true, [css.rootFixed]: true });
-			assert.strictEqual(vnode.properties!.key, 'root');
-			assert.lengthOf(vnode.children, 0);
-			assert.instanceOf(vnode.domNode, global.window.HTMLDivElement);
-		}
-		else {
-			throw new Error('vnode of wrong type');
-		}
-	},
-
-	async 'editor is initalized'() {
-		const editor = await getMonacoEditor();
-		const createSpy = monaco.editor.create as SinonSpy;
-		assert(editor, 'editor should exist');
-		assert.isTrue(createSpy.called, 'create should have been called');
-		assert.instanceOf(monacoEditorCreateElement, global.window.HTMLDivElement);
-	},
-
-	async 'editor passes options'() {
-		await getMonacoEditor({
-			options: {
-				theme: 'vs-code-pretty'
+	tests: {
+		'expected render'() {
+			projector.append();
+			const vnode = projector.__render__();
+			if (vnode !== null && typeof vnode === 'object' && !Array.isArray(vnode)) {
+				assert.deepEqual(vnode.properties!.classes, { [css.root]: true, [css.rootFixed]: true });
+				assert.strictEqual(vnode.properties!.key, 'root');
+				assert.lengthOf(vnode.children!, 0);
+				assert.instanceOf(vnode.domNode, global.window.HTMLDivElement);
 			}
-		} as any); // theme is now missing from editor?!
-		assert.deepEqual(monacoEditorCreateOptions, { theme: 'vs-code-pretty' }, 'should pass options properly');
-	},
-
-	async 'sets the proper model'() {
-		await getMonacoEditor();
-		const model = {} as monaco.editor.IModel;
-		projector.setProperties({ model });
-		assert.isFalse(setModelStub.called, 'should not have been called yet');
-		projector.__render__();
-		assert.isTrue(setModelStub.called, 'should have set the model on the editor');
-		assert.strictEqual(setModelStub.lastCall.args[0], model, 'should have set the proper model');
-	},
-
-	async 'setting to missing file is a no-op'() {
-		await getMonacoEditor();
-		projector.setProperties({});
-		assert.isFalse(setModelStub.called, 'should not have been called yet');
-		projector.__render__();
-		assert.isFalse(setModelStub.called, 'should not have been called');
-	},
-
-	async '_onDidChangeModelContent'(this: any) {
-		await getMonacoEditor();
-		let onDirtyCount = 0;
-		projector.setProperties({
-			onDirty() {
-				onDirtyCount++;
+			else {
+				throw new Error('vnode of wrong type');
 			}
-		});
-		projector.__render__();
-		const _onDidChangeModelContent: () => void = onDidChangeModelContentStub.lastCall.args[0];
-		assert.strictEqual(onDirtyCount, 0, 'should not have been called');
-		[ 10, 20, 30, 40, 50, 100 ].forEach((interval) => {
-			setTimeout(() => {
-				_onDidChangeModelContent();
-			}, interval);
-		});
-		return new Promise((resolve, reject) => {
-			setTimeout(() => {
-				try {
-					assert.strictEqual(onDirtyCount, 1, 'should have been called once, being debounced');
-					resolve();
+		},
+
+		async 'editor is initalized'() {
+			const editor = await getMonacoEditor();
+			const createSpy = monaco.editor.create as SinonSpy;
+			assert(editor, 'editor should exist');
+			assert.isTrue(createSpy.called, 'create should have been called');
+			assert.instanceOf(monacoEditorCreateElement, global.window.HTMLDivElement);
+		},
+
+		async 'editor passes options'() {
+			await getMonacoEditor({
+				options: {
+					theme: 'vs-code-pretty'
 				}
-				catch (e) {
-					reject(e);
+			} as any); // theme is now missing from editor?!
+			assert.deepEqual(monacoEditorCreateOptions, { theme: 'vs-code-pretty' }, 'should pass options properly');
+		},
+
+		async 'sets the proper model'() {
+			await getMonacoEditor();
+			const model = {} as monaco.editor.IModel;
+			projector.setProperties({ model });
+			assert.isFalse(setModelStub.called, 'should not have been called yet');
+			projector.__render__();
+			assert.isTrue(setModelStub.called, 'should have set the model on the editor');
+			assert.strictEqual(setModelStub.lastCall.args[0], model, 'should have set the proper model');
+		},
+
+		async 'setting to missing file is a no-op'() {
+			await getMonacoEditor();
+			projector.setProperties({});
+			assert.isFalse(setModelStub.called, 'should not have been called yet');
+			projector.__render__();
+			assert.isFalse(setModelStub.called, 'should not have been called');
+		},
+
+		async '_onDidChangeModelContent'(this: any) {
+			await getMonacoEditor();
+			let onDirtyCount = 0;
+			projector.setProperties({
+				onDirty() {
+					onDirtyCount++;
 				}
-			}, 1500);
-		});
+			});
+			projector.__render__();
+			const _onDidChangeModelContent: () => void = onDidChangeModelContentStub.lastCall.args[0];
+			assert.strictEqual(onDirtyCount, 0, 'should not have been called');
+			[ 10, 20, 30, 40, 50, 100 ].forEach((interval) => {
+				setTimeout(() => {
+					_onDidChangeModelContent();
+				}, interval);
+			});
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					try {
+						assert.strictEqual(onDirtyCount, 1, 'should have been called once, being debounced');
+						resolve();
+					}
+					catch (e) {
+						reject(e);
+					}
+				}, 1500);
+			});
+		}
 	}
 });
