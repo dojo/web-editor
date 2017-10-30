@@ -107,109 +107,109 @@ registerSuite('Editor', {
 	},
 
 	tests: {
-	'expected render'() {
-		/* decomposing this as the DomWrapper constructor function is not exposed and therefore can't put it in the
-		 * expected render */
-		const render = widget.getRender() as HNode;
-		assert.strictEqual(render.tag, 'div', 'should be a "div" tag');
-		assert.deepEqual(render.properties.classes, widget.classes(css.root)(), 'should have proper classes');
-		assert.lengthOf(render.children, 1, 'should have only one child');
-		assert.isFunction((render.children[0] as WNode).widgetConstructor, 'should be a function');
-		assert.strictEqual((render.children[0] as WNode).properties.key, 'editor', 'should have editor key set');
-	},
+		'expected render'() {
+			/* decomposing this as the DomWrapper constructor function is not exposed and therefore can't put it in the
+			 * expected render */
+			const render = widget.getRender() as HNode;
+			assert.strictEqual(render.tag, 'div', 'should be a "div" tag');
+			assert.deepEqual(render.properties.classes, widget.classes(css.root)(), 'should have proper classes');
+			assert.lengthOf(render.children, 1, 'should have only one child');
+			assert.isFunction((render.children[0] as WNode).widgetConstructor, 'should be a function');
+			assert.strictEqual((render.children[0] as WNode).properties.key, 'editor', 'should have editor key set');
+		},
 
-	async 'editor is initalized'() {
-		const editor = await getMonacoEditor();
-		const createSpy = monaco.editor.create as SinonSpy;
-		assert(editor, 'editor should exist');
-		assert.isTrue(createSpy.called, 'create should have been called');
-		assert.isTrue(monacoEditorCreateElement instanceof global.window.HTMLDivElement);
-	},
+		async 'editor is initalized'() {
+			const editor = await getMonacoEditor();
+			const createSpy = monaco.editor.create as SinonSpy;
+			assert(editor, 'editor should exist');
+			assert.isTrue(createSpy.called, 'create should have been called');
+			assert.isTrue(monacoEditorCreateElement instanceof global.window.HTMLDivElement);
+		},
 
-	async 'editor passes options'() {
-		await getMonacoEditor({
-			options: {
-				theme: 'vs-code-pretty'
+		async 'editor passes options'() {
+			await getMonacoEditor({
+				options: {
+					theme: 'vs-code-pretty'
+				}
+			} as any); // theme is now missing from editor?!
+			assert.deepEqual(monacoEditorCreateOptions, { theme: 'vs-code-pretty' }, 'should pass options properly');
+		},
+
+		async 'sets the proper file'() {
+			projectFileMap['./src/main.ts'] = true;
+			await getMonacoEditor();
+			widget.setProperties({
+				filename: './src/main.ts'
+			});
+			assert.isFalse(setModelStub.called, 'should not have been called yet');
+			widget.getRender();
+			assert.isTrue(setModelStub.called, 'should have set the model on the editor');
+			assert.strictEqual(setModelStub.lastCall.args[0], `model('./src/main.ts')`, 'should have set the proper model');
+		},
+
+		async 'setting to missing file is a no-op'() {
+			await getMonacoEditor();
+			widget.setProperties({
+				filename: './src/main.ts'
+			});
+			assert.isFalse(setModelStub.called, 'should not have been called yet');
+			widget.getRender();
+			assert.isFalse(setModelStub.called, 'should not have been called');
+		},
+
+		async 'does layout on re-renders'() {
+			let called = 0;
+			function onEditorLayout() {
+				called++;
 			}
-		} as any); // theme is now missing from editor?!
-		assert.deepEqual(monacoEditorCreateOptions, { theme: 'vs-code-pretty' }, 'should pass options properly');
-	},
+			await getMonacoEditor({
+				onEditorLayout
+			});
+			const currentCallCount = called;
+			widget.setProperties({
+				filename: './src/foo.ts',
+				onEditorLayout
+			});
+			widget.getRender();
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					try {
+						assert.strictEqual(called, currentCallCount + 1, 'should have called layout');
+						resolve();
+					}
+					catch (e) {
+						reject(e);
+					}
+				}, 500);
+			});
+		},
 
-	async 'sets the proper file'() {
-		projectFileMap['./src/main.ts'] = true;
-		await getMonacoEditor();
-		widget.setProperties({
-			filename: './src/main.ts'
-		});
-		assert.isFalse(setModelStub.called, 'should not have been called yet');
-		widget.getRender();
-		assert.isTrue(setModelStub.called, 'should have set the model on the editor');
-		assert.strictEqual(setModelStub.lastCall.args[0], `model('./src/main.ts')`, 'should have set the proper model');
-	},
-
-	async 'setting to missing file is a no-op'() {
-		await getMonacoEditor();
-		widget.setProperties({
-			filename: './src/main.ts'
-		});
-		assert.isFalse(setModelStub.called, 'should not have been called yet');
-		widget.getRender();
-		assert.isFalse(setModelStub.called, 'should not have been called');
-	},
-
-	async 'does layout on re-renders'() {
-		let called = 0;
-		function onEditorLayout() {
-			called++;
+		async '_onDidChangeModelContent'(this: any) {
+			projectFileMap['./src/foo.ts'] = true;
+			await getMonacoEditor();
+			widget.setProperties({
+				filename: './src/foo.ts'
+			});
+			widget.getRender();
+			const _onDidChangeModelContent: () => void = onDidChangeModelContentStub.lastCall.args[0];
+			assert.strictEqual(setFileDirtyStub.callCount, 0, 'should not have been called');
+			[ 10, 20, 30, 40, 50, 100 ].forEach((interval) => {
+				setTimeout(() => {
+					_onDidChangeModelContent();
+				}, interval);
+			});
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					try {
+						assert.strictEqual(setFileDirtyStub.callCount, 1, 'should have been called once, being debounced');
+						assert.strictEqual(setFileDirtyStub.lastCall.args[0], './src/foo.ts', 'should have called with proper filename');
+						resolve();
+					}
+					catch (e) {
+						reject(e);
+					}
+				}, 1500);
+			});
 		}
-		await getMonacoEditor({
-			onEditorLayout
-		});
-		const currentCallCount = called;
-		widget.setProperties({
-			filename: './src/foo.ts',
-			onEditorLayout
-		});
-		widget.getRender();
-		return new Promise((resolve, reject) => {
-			setTimeout(() => {
-				try {
-					assert.strictEqual(called, currentCallCount + 1, 'should have called layout');
-					resolve();
-				}
-				catch (e) {
-					reject(e);
-				}
-			}, 500);
-		});
-	},
-
-	async '_onDidChangeModelContent'(this: any) {
-		projectFileMap['./src/foo.ts'] = true;
-		await getMonacoEditor();
-		widget.setProperties({
-			filename: './src/foo.ts'
-		});
-		widget.getRender();
-		const _onDidChangeModelContent: () => void = onDidChangeModelContentStub.lastCall.args[0];
-		assert.strictEqual(setFileDirtyStub.callCount, 0, 'should not have been called');
-		[ 10, 20, 30, 40, 50, 100 ].forEach((interval) => {
-			setTimeout(() => {
-				_onDidChangeModelContent();
-			}, interval);
-		});
-		return new Promise((resolve, reject) => {
-			setTimeout(() => {
-				try {
-					assert.strictEqual(setFileDirtyStub.callCount, 1, 'should have been called once, being debounced');
-					assert.strictEqual(setFileDirtyStub.lastCall.args[0], './src/foo.ts', 'should have called with proper filename');
-					resolve();
-				}
-				catch (e) {
-					reject(e);
-				}
-			}, 1500);
-		});
-	}
 	}
 });

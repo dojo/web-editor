@@ -72,97 +72,97 @@ registerSuite('support/css', {
 	},
 
 	tests: {
-	'getEmit()': {
-		async 'processes a css file'() {
-			const file = {
-				name: './styles/foo.css',
-				text: '.foo { font-size: 48px; }',
-				type: ProjectFileType.CSS
-			};
-			const emit = await getEmit(file);
-			assert.lengthOf(emit, 2, 'should have emitted two files');
-			assert.deepEqual(emit[0], {
-				name: './styles/foo.css',
-				text: 'mock',
-				type: ProjectFileType.CSS
-			});
-			assert.deepEqual(emit[1], {
-				name: './styles/foo.css.js',
-				text: 'define([], function () {\n\t\treturn {\n\t\t\t\'foo\': \'._foo_abc\',\n\t\' _key\': \'foo\'\n\t\t};\n\t});\n',
-				type: ProjectFileType.JavaScript
-			});
-			assert.strictEqual(cssnextStub.callCount, 1, 'should have been called once');
+		'getEmit()': {
+			async 'processes a css file'() {
+				const file = {
+					name: './styles/foo.css',
+					text: '.foo { font-size: 48px; }',
+					type: ProjectFileType.CSS
+				};
+				const emit = await getEmit(file);
+				assert.lengthOf(emit, 2, 'should have emitted two files');
+				assert.deepEqual(emit[0], {
+					name: './styles/foo.css',
+					text: 'mock',
+					type: ProjectFileType.CSS
+				});
+				assert.deepEqual(emit[1], {
+					name: './styles/foo.css.js',
+					text: 'define([], function () {\n\t\treturn {\n\t\t\t\'foo\': \'._foo_abc\',\n\t\' _key\': \'foo\'\n\t\t};\n\t});\n',
+					type: ProjectFileType.JavaScript
+				});
+				assert.strictEqual(cssnextStub.callCount, 1, 'should have been called once');
+			},
+
+			async 'process multiple files one with no classes'() {
+				const filea = {
+					name: './styles/foo.css',
+					text: '.foo { font-size: 48px; }',
+					type: ProjectFileType.CSS
+				};
+				const fileb = {
+					name: './styles/bar.css',
+					text: '',
+					type: ProjectFileType.CSS
+				};
+				const emit = await getEmit(filea, fileb);
+				assert.lengthOf(emit, 3, 'should have emitted three files');
+				assert.deepEqual(emit[0], {
+					name: './styles/foo.css',
+					text: 'mock',
+					type: ProjectFileType.CSS
+				});
+				assert.deepEqual(emit[1], {
+					name: './styles/foo.css.js',
+					text: 'define([], function () {\n\t\treturn {\n\t\t\t\'foo\': \'._foo_abc\',\n\t\' _key\': \'foo\'\n\t\t};\n\t});\n',
+					type: ProjectFileType.JavaScript
+				});
+				assert.deepEqual(emit[2], {
+					name: './styles/bar.css',
+					text: 'mock',
+					type: ProjectFileType.CSS
+				});
+				assert.strictEqual(cssnextStub.callCount, 1, 'should have been called once');
+			}
 		},
 
-		async 'process multiple files one with no classes'() {
-			const filea = {
-				name: './styles/foo.css',
-				text: '.foo { font-size: 48px; }',
-				type: ProjectFileType.CSS
-			};
-			const fileb = {
-				name: './styles/bar.css',
-				text: '',
-				type: ProjectFileType.CSS
-			};
-			const emit = await getEmit(filea, fileb);
-			assert.lengthOf(emit, 3, 'should have emitted three files');
-			assert.deepEqual(emit[0], {
-				name: './styles/foo.css',
-				text: 'mock',
-				type: ProjectFileType.CSS
-			});
-			assert.deepEqual(emit[1], {
-				name: './styles/foo.css.js',
-				text: 'define([], function () {\n\t\treturn {\n\t\t\t\'foo\': \'._foo_abc\',\n\t\' _key\': \'foo\'\n\t\t};\n\t});\n',
-				type: ProjectFileType.JavaScript
-			});
-			assert.deepEqual(emit[2], {
-				name: './styles/bar.css',
-				text: 'mock',
-				type: ProjectFileType.CSS
-			});
-			assert.strictEqual(cssnextStub.callCount, 1, 'should have been called once');
-		}
-	},
+		'getDefinitions()': {
+			async 'processes a css file'() {
+				const file = {
+					name: './styles/foo.css',
+					text: '.foo { font-size: 48px; }',
+					type: ProjectFileType.CSS
+				};
+				const definitions = await getDefinitions(file);
+				assert.lengthOf(definitions, 1, 'should have emitted one file');
+				assert.deepEqual(definitions[0], {
+					name: './styles/foo.css.d.ts',
+					text: 'export const foo: string;\n',
+					type: ProjectFileType.Definition
+				});
+				assert.strictEqual(cssnextStub.callCount, 0, 'should not have been called once');
+			},
 
-	'getDefinitions()': {
-		async 'processes a css file'() {
-			const file = {
-				name: './styles/foo.css',
-				text: '.foo { font-size: 48px; }',
-				type: ProjectFileType.CSS
-			};
-			const definitions = await getDefinitions(file);
-			assert.lengthOf(definitions, 1, 'should have emitted one file');
-			assert.deepEqual(definitions[0], {
-				name: './styles/foo.css.d.ts',
-				text: 'export const foo: string;\n',
-				type: ProjectFileType.Definition
-			});
-			assert.strictEqual(cssnextStub.callCount, 0, 'should not have been called once');
-		},
-
-		async 'process multiple files one with no classes'() {
-			const filea = {
-				name: './styles/foo.css',
-				text: '.foo { font-size: 48px; }',
-				type: ProjectFileType.CSS
-			};
-			const fileb = {
-				name: './styles/bar.css',
-				text: '',
-				type: ProjectFileType.CSS
-			};
-			const definitions = await getDefinitions(filea, fileb);
-			assert.lengthOf(definitions, 1, 'should have emitted one file');
-			assert.deepEqual(definitions[0], {
-				name: './styles/foo.css.d.ts',
-				text: 'export const foo: string;\n',
-				type: ProjectFileType.Definition
-			});
-			assert.strictEqual(cssnextStub.callCount, 0, 'should not have been called once');
+			async 'process multiple files one with no classes'() {
+				const filea = {
+					name: './styles/foo.css',
+					text: '.foo { font-size: 48px; }',
+					type: ProjectFileType.CSS
+				};
+				const fileb = {
+					name: './styles/bar.css',
+					text: '',
+					type: ProjectFileType.CSS
+				};
+				const definitions = await getDefinitions(filea, fileb);
+				assert.lengthOf(definitions, 1, 'should have emitted one file');
+				assert.deepEqual(definitions[0], {
+					name: './styles/foo.css.d.ts',
+					text: 'export const foo: string;\n',
+					type: ProjectFileType.Definition
+				});
+				assert.strictEqual(cssnextStub.callCount, 0, 'should not have been called once');
+			}
 		}
-	}
 	}
 });

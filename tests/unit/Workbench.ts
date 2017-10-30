@@ -37,18 +37,18 @@ registerSuite('Workbench', {
 	},
 
 	tests: {
-	'basic rendering'() {
-		const onRun = () => {};
-		widget.setProperties({
-			filename: 'foobar',
-			onRun
-		});
+		'basic rendering'() {
+			const onRun = () => {};
+			widget.setProperties({
+				filename: 'foobar',
+				onRun
+			});
 
-		widget.classes(css.filetree)();
+			widget.classes(css.filetree)();
 
-		const render = widget.getRender() as WNode<UnitUnderTest>;
-		assert.lengthOf(render.children, 4, 'Should have four children');
-		assert.deepEqual((render.properties as any).classes, widget.classes(css.root)(), 'Has correct classes');
-	}
+			const render = widget.getRender() as WNode<UnitUnderTest>;
+			assert.lengthOf(render.children, 4, 'Should have four children');
+			assert.deepEqual((render.properties as any).classes, widget.classes(css.root)(), 'Has correct classes');
+		}
 	}
 });

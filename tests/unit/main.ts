@@ -41,12 +41,12 @@ registerSuite('main', {
 	},
 
 	tests: {
-	async 'validate API'() {
-		assert.strictEqual(main.Editor, Editor);
-		assert.strictEqual(main.project, project);
-		assert.strictEqual(main.routing, routing);
-		assert.strictEqual(main.Runner, Runner);
-		assert.lengthOf(Object.keys(main), 4, 'should have only 3 exports');
-	}
+		async 'validate API'() {
+			assert.strictEqual(main.Editor, Editor);
+			assert.strictEqual(main.project, project);
+			assert.strictEqual(main.routing, routing);
+			assert.strictEqual(main.Runner, Runner);
+			assert.lengthOf(Object.keys(main), 4, 'should have only 3 exports');
+		}
 	}
 });
