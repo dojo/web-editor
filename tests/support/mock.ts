@@ -23,7 +23,9 @@ export function register(mid: string, mock: any): Handle {
 	if (disableHandle) {
 		throw new Error('Cannot register modules while mock is enabled.');
 	}
-	map[mid] = () => define(mid, [], () => mock);
+	map[mid] = () => {
+		define(mid, [], () => mock);
+	};
 	return createHandle(() => {
 		if (disableHandle) {
 			require.undef(mid);

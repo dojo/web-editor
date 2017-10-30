@@ -10,7 +10,6 @@ export = function(grunt: IGrunt) {
 
 		grunt.task.run('dev');
 		flags.forEach((flag) => grunt.task.run(`intern:${flag}`));
-		grunt.task.run('remapIstanbul:coverage');
 		grunt.task.run('clean:coverage');
 	});
 };

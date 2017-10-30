@@ -1,11 +1,10 @@
-import * as registerSuite from 'intern!object';
+const { registerSuite } = intern.getInterface('object');
 import harness from '@dojo/test-extras/harness';
 import { v } from '@dojo/widget-core/d';
 import * as css from '../../../src/styles/scrollbar.m.css';
 import ScrollBar from '../../../src/support/ScrollBar';
 
-registerSuite({
-	name: 'support/ScrollBar',
+registerSuite('support/ScrollBar', {
 
 	'basic rendering'() {
 		const widget = harness(ScrollBar);

@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { wrapCode } from '../../../src/support/sourceMap';
 import * as sourceMap from 'source-map';
 
@@ -30,8 +30,7 @@ const map = `{"version":3,"file":"main.js","sourceRoot":"","sources":["../../src
 
 const smc = new sourceMap.SourceMapConsumer(map);
 
-registerSuite({
-	name: 'support/sourceMap',
+registerSuite('support/sourceMap', {
 
 	'wrapCode()': {
 		'module with sourcemap'() {
@@ -55,7 +54,7 @@ registerSuite({
 			const actual = wrapCode(`/* a\nmulti-line\ncomment */\n`, {
 				code
 			}, `/* some\nsort of\ncomment postscript */`);
-			assert.deepEqual(actual.map.toJSON(), { version: 3, sources: [], names: [], mappings: '' }, 'should return an empty source map');
+			assert.deepEqual(<any> actual.map.toJSON(), { version: 3, sources: [], names: [], mappings: '' }, 'should return an empty source map');
 		}
 	}
 });

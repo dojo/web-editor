@@ -1,11 +1,10 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { getEmit } from '../../../src/support/json';
 
 import { ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
 
-registerSuite({
-	name: 'support/json',
+registerSuite('support/json', {
 
 	'getEmit()': {
 		'can take a single argument'() {

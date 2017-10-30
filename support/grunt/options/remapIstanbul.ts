@@ -1,8 +1,8 @@
 export = function(grunt: IGrunt) {
-	grunt.loadNpmTasks('remap-istanbul');
+	// grunt.loadNpmTasks('remap-istanbul');
 
 	return {
-		coverage: {
+		/*coverage: {
 			options: {
 				reports: {
 					'html': 'html-report',
@@ -20,6 +20,6 @@ export = function(grunt: IGrunt) {
 				}
 			},
 			src: [ 'coverage-unmapped.json' ]
-		}
+		}*/
 	};
 };

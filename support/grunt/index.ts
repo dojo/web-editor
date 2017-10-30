@@ -13,7 +13,8 @@ export function initConfig(grunt: IGrunt, otherOptions: any) {
 		tsconfigDist,
 
 		devDirectory: '<%= tsconfig.compilerOptions.outDir %>',
-		distDirectory: '<%= tsconfigDist.compilerOptions.outDir %>'
+		distDirectory: '<%= tsconfigDist.compilerOptions.outDir %>',
+		internConfig: 'intern.json'
 	});
 
 	/* load options */
