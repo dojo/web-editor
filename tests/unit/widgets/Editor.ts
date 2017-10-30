@@ -93,7 +93,7 @@ registerSuite('Editor', {
 				assert.deepEqual(vnode.properties!.classes, { [css.root]: true, [css.rootFixed]: true });
 				assert.strictEqual(vnode.properties!.key, 'root');
 				assert.lengthOf(vnode.children!, 0);
-				assert.instanceOf(vnode.domNode, global.window.HTMLDivElement);
+				assert.isTrue(monacoEditorCreateElement instanceof global.window.HTMLDivElement);
 			}
 			else {
 				throw new Error('vnode of wrong type');
@@ -105,7 +105,7 @@ registerSuite('Editor', {
 			const createSpy = monaco.editor.create as SinonSpy;
 			assert(editor, 'editor should exist');
 			assert.isTrue(createSpy.called, 'create should have been called');
-			assert.instanceOf(monacoEditorCreateElement, global.window.HTMLDivElement);
+			assert.isTrue(monacoEditorCreateElement instanceof global.window.HTMLDivElement);
 		},
 
 		async 'editor passes options'() {
