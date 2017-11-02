@@ -101,7 +101,8 @@ function flattenDiagnosticMessageText(messageText: string | DiagnosticMessageCha
  * @param param0 The project file to create the model from
  */
 function createMonacoModel({ name: filename, text, type }: ProjectFile): monaco.editor.IModel {
-	return monaco.editor.createModel(text, getLanguageFromType(type), monaco.Uri.file(filename));
+	const uri = monaco.Uri.file(filename);
+	return monaco.editor.getModel(uri) || monaco.editor.createModel(text, getLanguageFromType(type), uri);
 }
 
 /**
@@ -248,9 +249,24 @@ export class Project extends Evented {
 		const options: CompilerOptions = {};
 
 		/* copied from tsconfig.json */
-		const { experimentalDecorators, lib, noImplicitAny, noImplicitThis, noImplicitReturns, noLib, noUnusedLocals, noUnusedParameters, strictNullChecks, target, types } = compilerOptions;
-		assign(options, <CompilerOptions> {
+		const {
 			experimentalDecorators,
+			jsx,
+			jsxFactory,
+			lib, noImplicitAny,
+			noImplicitThis,
+			noImplicitReturns,
+			noLib,
+			noUnusedLocals,
+			noUnusedParameters,
+			strictNullChecks,
+			target,
+			types
+		} = compilerOptions;
+		assign(options, {
+			experimentalDecorators,
+			jsx,
+			jsxFactory,
 			lib,
 			noImplicitAny,
 			noImplicitThis,
@@ -261,17 +277,17 @@ export class Project extends Evented {
 			strictNullChecks,
 			target: getScriptTarget(target),
 			types
-		});
+		} as CompilerOptions);
 
 		/* asserted for web editing */
-		assign(options, <CompilerOptions> {
+		assign(options, {
 			allowNonTsExtensions: true, /* needed for compiling like this */
 			inlineSources: true, /* we will embed the sources in the source maps */
 			module: monaco.languages.typescript.ModuleKind.AMD, /* only support AMD, so only compile to AMD */
 			moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs, /* only support this for of module resolution */
 			noEmitHelpers: true, /* we will add the helpers later */
 			sourceMap: true /* we will generate sourcemaps and remap them when we add them to the page */
-		});
+		} as CompilerOptions);
 
 		monaco.languages.typescript.typescriptDefaults.setCompilerOptions(options);
 	}
@@ -316,6 +332,17 @@ export class Project extends Evented {
 		fileData.extraLibHandle = monaco.languages.typescript.typescriptDefaults.addExtraLib(text, 'file:///' + name);
 	}
 
+	async addFile(file: ProjectFile): Promise<void> {
+		if (!this._project) {
+			throw new Error(`Project not loaded.`);
+		}
+		if (this.includes(file.name)) {
+			throw new Error(`File "${file.name}" already exists in project.`);
+		}
+		this._project.files.push(file);
+		await this.setFileDirty(file.name);
+	}
+
 	/**
 	 * Take the currently loaded project and emit it
 	 */
@@ -327,7 +354,7 @@ export class Project extends Evented {
 		const typescriptFileUris = this._project.files
 			.filter(({ type }) => type === ProjectFileType.Definition || type === ProjectFileType.TypeScript)
 			.map(({ name }) => this.getFileModel(name).uri);
-		const worker: TypeScriptWorker = await monaco.languages.typescript.getTypeScriptWorker();
+		const worker = (await monaco.languages.typescript.getTypeScriptWorker()) as TypeScriptWorker;
 		const services = await worker(...typescriptFileUris);
 
 		const output = await Promise.all(typescriptFileUris.map(async (file) => {
@@ -541,6 +568,14 @@ export class Project extends Evented {
 		else {
 			this._getProjectFileData(file).dirty = !reset;
 		}
+	}
+
+	async setFileText(filename: string, value: string): Promise<void> {
+		if (!this.includes(filename)) {
+			throw new Error(`File "${filename}" is not part of the project.`);
+		}
+		this.getFileModel(filename).setValue(value);
+		await this.setFileDirty(filename);
 	}
 }
 

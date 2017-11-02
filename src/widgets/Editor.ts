@@ -34,7 +34,7 @@ export interface EditorProperties extends WidgetProperties, ThemeableProperties 
 	options?: monaco.editor.IEditorOptions;
 
 	/**
-	 * Called when the monaco-editor updates a project file
+	 * Called when the monaco-editor updates the model
 	 */
 	onDirty?(): void;
 

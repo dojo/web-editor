@@ -1,0 +1,25 @@
+/* Themeable classes */
+
+.root,
+.root * {
+	box-sizing: border-box;
+}
+
+.root {
+	align-items: stretch;
+}
+
+.left {
+	flex: 2;
+}
+
+.right {
+	flex: 1;
+}
+
+/* Fixed classes */
+
+.rootFixed {
+	display: flex;
+	height: 100%;
+}
