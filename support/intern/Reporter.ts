@@ -34,7 +34,7 @@ interface ReportOptions {
 
 interface ReporterProperties extends CoverageProperties {
 	directory?: string;
-	lcovFilename?: string;
+	jsonFilename?: string;
 	htmlDirectory?: string;
 	watermarks?: Watermarks;
 }
@@ -50,14 +50,14 @@ export default class Reporter extends Runner {
 	private _errors: { [sessionId: string ]: ErrorObject[] } = {};
 
 	directory: string;
-	lcovFilename: string;
+	jsonFilename: string;
 	htmlDirectory: string;
 
 	constructor(executor: Node, options: Partial<ReporterProperties> = {}) {
 		super(executor, options);
 
 		this.directory = options.directory || '.';
-		this.lcovFilename = options.lcovFilename || 'coverage-final.lcov';
+		this.jsonFilename = options.jsonFilename || 'coverage-final.json';
 		this.htmlDirectory = options.htmlDirectory || 'html-report';
 	}
 
@@ -90,7 +90,6 @@ export default class Reporter extends Runner {
 	@eventHandler()
 	runEnd() {
 		let numTests = 0;
-		let numPassedTests = 0;
 		let numFailedTests = 0;
 		let numSkippedTests = 0;
 
@@ -100,7 +99,6 @@ export default class Reporter extends Runner {
 		sessionIds.forEach(sessionId => {
 			const session = this.sessions[sessionId];
 			numTests += session.suite.numTests;
-			numPassedTests += session.suite.numPassedTests;
 			numFailedTests += session.suite.numFailedTests;
 			numSkippedTests += session.suite.numSkippedTests;
 		});
@@ -117,8 +115,8 @@ export default class Reporter extends Runner {
 			charm.display('reset');
 
 			this.createCoverageReport('text', map, {});
-			this.createCoverageReport('lcovonly', map, {
-				filename: this.lcovFilename
+			this.createCoverageReport('json', map, {
+				filename: this.jsonFilename
 			});
 			this.createCoverageReport('html', map, {
 				directory: this.htmlDirectory
