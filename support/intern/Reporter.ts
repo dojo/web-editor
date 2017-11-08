@@ -7,18 +7,19 @@ import {
 } from 'istanbul-lib-coverage';
 import { createContext, summarizers, Watermarks } from 'istanbul-lib-report';
 
-import Node, { Events } from 'intern/lib/executors/Node';
+import Node, { NodeEvents } from 'intern/lib/executors/Node';
 import Test from 'intern/lib/Test';
 import Suite from 'intern/lib/Suite';
 import { CoverageProperties } from 'intern/lib/reporters/Coverage';
 import Runner from 'intern/lib/reporters/Runner';
 import { createEventHandler } from 'intern/lib/reporters/Reporter';
+import { InternError } from 'intern/lib/types';
 
 const LIGHT_RED = '\x1b[91m';
 const LIGHT_GREEN = '\x1b[92m';
 const LIGHT_MAGENTA = '\x1b[95m';
 
-const eventHandler = createEventHandler<Events>();
+const eventHandler = createEventHandler<NodeEvents>();
 
 interface ErrorObject {
 	id: string;
@@ -33,23 +34,30 @@ interface ReportOptions {
 
 interface ReporterProperties extends CoverageProperties {
 	directory?: string;
-	jsonFilename?: string;
+	lcovFilename?: string;
 	htmlDirectory?: string;
 	watermarks?: Watermarks;
+}
+
+interface SuiteOrTest {
+	sessionId: string;
+	readonly id: string;
+	timeElapsed: number;
+	error: InternError | undefined;
 }
 
 export default class Reporter extends Runner {
 	private _errors: { [sessionId: string ]: ErrorObject[] } = {};
 
 	directory: string;
-	jsonFilename: string;
+	lcovFilename: string;
 	htmlDirectory: string;
 
 	constructor(executor: Node, options: Partial<ReporterProperties> = {}) {
 		super(executor, options);
 
 		this.directory = options.directory || '.';
-		this.jsonFilename = options.jsonFilename || 'coverage-final.json';
+		this.lcovFilename = options.lcovFilename || 'coverage-final.lcov';
 		this.htmlDirectory = options.htmlDirectory || 'html-report';
 	}
 
@@ -75,7 +83,7 @@ export default class Reporter extends Runner {
 	}
 
 	@eventHandler()
-	error() {
+	error(_error: Error) {
 		this.hasRunErrors = true;
 	}
 
@@ -109,8 +117,8 @@ export default class Reporter extends Runner {
 			charm.display('reset');
 
 			this.createCoverageReport('text', map, {});
-			this.createCoverageReport('json', map, {
-				filename: this.jsonFilename
+			this.createCoverageReport('lcovonly', map, {
+				filename: this.lcovFilename
 			});
 			this.createCoverageReport('html', map, {
 				directory: this.htmlDirectory
@@ -142,7 +150,7 @@ export default class Reporter extends Runner {
 			this.sessions[suite.sessionId || ''] = { suite: suite };
 			if (suite.sessionId) {
 				this.charm.write('\n');
-				this.charm.write(`\n‣ Created session ${suite.name} (${suite.sessionId}\n`);
+				this.charm.write(`\n‣ Created session ${suite.name} (${suite.sessionId})\n`);
 			}
 		}
 	}
@@ -165,19 +173,15 @@ export default class Reporter extends Runner {
 
 		if (suite.error) {
 			this.hasSuiteErrors = session.hasSuiteErrors = true;
+			this._addError(suite);
 		}
-		else if (!suite.hasParent && this.executor.suites.length > 1) {
-			// Runner mode test with no sessionId was some failed test, not a bug
-			if (!suite.sessionId) {
-				return;
-			}
-
+		if (!suite.hasParent) {
 			const session = this.sessions[suite.sessionId];
 			const { charm } = this;
 
 			if (!session.coverage) {
-				charm.write('No unit test coverage for ' + suite.name)
-				charm.display('reset')
+				charm.write('No unit test coverage for ' + suite.name);
+				charm.display('reset');
 				charm.write('\n');
 			}
 
@@ -185,16 +189,22 @@ export default class Reporter extends Runner {
 
 			if (this._errors[suite.sessionId]) {
 				this._errors[suite.sessionId].forEach((test) => {
-					charm.write(LIGHT_RED)
-					charm.write('× ' + test.id)
-					charm.foreground('white')
-					charm.write(' (' + (test.timeElapsed / 1000) + 's)')
-					charm.write('\n')
-					charm.foreground('red')
-					charm.write(test.error)
-					charm.display('reset')
+					charm.write(LIGHT_RED);
+					charm.write('× ' + test.id);
+					charm.foreground('white');
+					charm.write(' (' + (test.timeElapsed / 1000) + 's)');
+					charm.write('\n');
+					charm.foreground('red');
+					charm.write(test.error);
+					charm.display('reset');
 					charm.write('\n\n');
 				});
+			}
+
+			if (this.executor.suites.length < 2) {
+				// If there's only one suite, skip outputting how many tests failed since
+				// it'll be the same as the number output in runEnd()
+				return;
 			}
 
 			const name = suite.name;
@@ -212,9 +222,9 @@ export default class Reporter extends Runner {
 				summary += '; suite error occurred';
 			}
 
-			charm.write(numFailedTests || hasError > 0 ? LIGHT_RED : LIGHT_GREEN)
-			charm.write(summary)
-			charm.display('reset')
+			charm.write(numFailedTests || hasError > 0 ? LIGHT_RED : LIGHT_GREEN);
+			charm.write(summary);
+			charm.display('reset');
 			charm.write('\n\n');
 		}
 	}
@@ -223,16 +233,7 @@ export default class Reporter extends Runner {
 	testEnd(test: Test) {
 		const { charm } = this;
 		if (test.error) {
-			if (!this._errors[test.sessionId]) {
-				this._errors[test.sessionId] = [];
-			}
-
-			this._errors[test.sessionId].push({
-				id: test.id,
-				timeElapsed: test.timeElapsed,
-				error: this.executor.formatError(test.error)
-			});
-
+			this._addError(test);
 			charm.write(LIGHT_RED);
 			charm.write('×');
 		}
@@ -246,29 +247,24 @@ export default class Reporter extends Runner {
 		}
 		charm.display('reset');
 	}
+
+	private _addError(suiteOrTest: SuiteOrTest) {
+		if (!this._errors[suiteOrTest.sessionId]) {
+			this._errors[suiteOrTest.sessionId] = [];
+		}
+
+		this._errors[suiteOrTest.sessionId].push({
+			id: suiteOrTest.id,
+			timeElapsed: suiteOrTest.timeElapsed,
+			error: this.executor.formatError(suiteOrTest.error!)
+		});
+	}
 }
 
 function isCoverageMap(value: any): value is CoverageMap {
 	return value != null && typeof value.files === 'function';
 }
 
-intern.registerPlugin('grunt-dojo2', () => {
-	intern.registerReporter('grunt-dojo2', Reporter);
-	const reporters: any[] = (<any> intern)._reporters || [];
-
-	// Intern currently initializes reporters before plugins are
-	// loaded, so we need a default reporter to report errors until our
-	// reporter is initialized. The default reporters have their event
-	// handlers set to a noop function so they don't output anything
-	// afterwards.
-	reporters.forEach(reporter => {
-		Object.keys(reporter._eventHandlers).forEach(key => {
-			const property: string = reporter._eventHandlers[key];
-			reporter[property] = () => {};
-		});
-	});
-
-	(<any> intern)._reporters = [
-		new Reporter(intern)
-	];
+intern.registerPlugin('web-editor', () => {
+	intern.registerReporter('web-editor', options => new Reporter(intern, options));
 });

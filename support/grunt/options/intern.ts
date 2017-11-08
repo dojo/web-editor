@@ -5,10 +5,13 @@ export = function (grunt: IGrunt) {
 		options: {
 			config: '<%= internConfig %>',
 			node: {
-				plugins: [
-					'./dev/support/intern/Reporter.js'
+				'plugins+': [
+					{ script: './dev/support/intern/Reporter.js', useLoader: true }
+				],
+				reporters: [
+					'web-editor'
 				]
-			}
+			},
 		},
 		browserstack: {
 			options: {
