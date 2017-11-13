@@ -1,17 +1,19 @@
 import { find, includes } from '@dojo/shim/array';
-import { assign } from '@dojo/shim/object';
+import { Subscription } from '@dojo/shim/Observable';
 import { v, w } from '@dojo/widget-core/d';
 import { WNode } from '@dojo/widget-core/interfaces';
 import { ThemedMixin, ThemedProperties, theme } from '@dojo/widget-core/mixins/Themed';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import Editor from './widgets/Editor';
 import IconCss from './widgets/IconCss';
-import { Program } from './project';
+import project, { Program } from './project';
 import Runner, { RunnerProperties } from './widgets/Runner';
+import Console, { ConsoleMessage, ConsoleMessageType } from './widgets/Console';
 import { Tab } from './widgets/Tablist';
 import TreePane, { TreePaneItem } from './widgets/TreePane';
 import Toolbar from './widgets/Toolbar';
 import { IconJson, IconResolver } from './support/icons';
+import { EmitError } from './interfaces';
 import * as iconCss from './styles/icons.m.css';
 import * as workbenchCss from './styles/workbench.m.css';
 
@@ -96,7 +98,10 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 	private _iconResolver = new IconResolver();
 	private _layoutEditor = false;
 	private _runnerOpen = true;
+	private _consoleOpen = true;
 	private _selected = '';
+	private _emitErrorsSub: Subscription;
+	private _messages: ConsoleMessage[] = [];
 
 	private _getItemClass = (item: TreePaneItem, expanded?: boolean): string | undefined => {
 		if (typeof item.label === 'string') {
@@ -239,6 +244,15 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 		this.invalidate();
 	}
 
+	private _onConsoleMessage = (message: ConsoleMessage) => {
+		this._addConsoleMessage(message);
+	}
+
+	private _onClearConsole = () => {
+		this._messages = [];
+		this.invalidate();
+	}
+
 	private _onRun() {
 		const { onRun } = this.properties;
 		if (!this._runnerOpen) {
@@ -253,6 +267,11 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 		this.invalidate();
 	}
 
+	private _onToggleConsole() {
+		this._consoleOpen = !this._consoleOpen;
+		this.invalidate();
+	}
+
 	private _onToggleRunner() {
 		this._runnerOpen = !this._runnerOpen;
 		this._layoutEditor = true;
@@ -262,11 +281,30 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 	protected onAttach() {
 		window.addEventListener('resize', this._onresize);
 		window.addEventListener('beforeunload', this._onbeforeunload);
+		this._emitErrorsSub = project.emitErrors.subscribe((errors: EmitError[]) => {
+			errors.map((error) => {
+				this._addConsoleMessage({
+					type: ConsoleMessageType.Error,
+					args: [ error.line, error.character, error.message ]
+				});
+			});
+		});
 	}
 
 	protected onDetach() {
 		window.removeEventListener('resize', this._onresize);
 		window.removeEventListener('beforeunload', this._onbeforeunload);
+		this._emitErrorsSub && this._emitErrorsSub.unsubscribe();
+	}
+
+	private _addConsoleMessage(message: ConsoleMessage) {
+		this._messages = [ ...this._messages, message ];
+		this.invalidate();
+	}
+
+	constructor() {
+		super();
+
 	}
 
 	protected render() {
@@ -276,6 +314,7 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 			_getItemClass: getItemClass,
 			_layoutEditor: layout,
 			_runnerOpen: runnerOpen,
+			_consoleOpen: consoleOpen,
 			_selected: selected,
 			properties: {
 				icons,
@@ -294,7 +333,13 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 		}
 
 		// Need to mixin the program into the Runner's properties
-		const runnerProperties: RunnerProperties = assign({}, program, { key: 'runner', theme, onRun: this._onRun });
+		const runnerProperties: RunnerProperties = {
+			...program,
+			key: 'runner',
+			theme,
+			onRun: this._onRun,
+			onConsoleMessage: this._onConsoleMessage
+		};
 
 		// if we are laying out the editor on this render, we can reset the state
 		if (layout) {
@@ -334,8 +379,10 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 				w(Toolbar, {
 					runnable,
 					runnerOpen,
+					consoleOpen,
 					filesOpen,
 					theme,
+					onToggleConsole: this._onToggleConsole,
 					onRunClick,
 					onToggleFiles: this._onToggleFiles,
 					onToggleRunner: this._onToggleRunner
@@ -351,7 +398,12 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 					},
 					theme,
 					onDirty
-				})
+				}),
+				(consoleOpen ? w(Console, {
+					messages: this._messages,
+					onClear: this._onClearConsole,
+					theme
+				}) : null)
 			]),
 			v('div', {
 				classes: this.theme([ workbenchCss.right, runnerOpen ? null : workbenchCss.closed ]),

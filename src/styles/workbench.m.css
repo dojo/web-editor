@@ -8,6 +8,11 @@
 	flex: 1;
 }
 
+.middle {
+	display: flex;
+	flex-direction: column;
+}
+
 .middle,
 .right {
 	flex: 2;

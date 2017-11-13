@@ -1,13 +1,11 @@
 /* Themeable classes */
 
 .root {
-	flex: 1;
+	flex: 3 1 100%;
 }
 
 /* Fixed classes */
-
 .rootFixed {
-	height: 100%;
 }
 
 .hide > * {

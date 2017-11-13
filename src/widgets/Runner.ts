@@ -1,4 +1,5 @@
 import * as base64 from '@dojo/core/base64';
+import global from '@dojo/shim/global';
 import { v, w } from '@dojo/widget-core/d';
 import { Constructor, DNode, VirtualDomProperties, WidgetProperties } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
@@ -34,6 +35,11 @@ export interface RunnerProperties extends Partial<Program>, ThemedProperties {
 	 * involvement in the process of loading the program
 	 */
 	onRun?(): void;
+
+	/**
+	 * A method that will be called when the console has been invoked within the runner
+	 */
+	onConsoleMessage?(message: any): void; // TODO: give message a type
 }
 
 /**
@@ -265,7 +271,34 @@ async function writeIframeDoc(iframe: HTMLIFrameElement, source: string, errorLi
 	});
 }
 
-export const ThemedBase = ThemedMixin(WidgetBase);
+function hijackConsole(iframe: HTMLIFrameElement): void {
+	const win = iframe.contentWindow;
+	const context = win.parent;
+	const console = win.console as any;
+
+	function postMessage(method: string, args: any[]) {
+		if (context) {
+			const timestamp = Date.now();
+			context.parent.postMessage({
+				runnerConsoleMessage: true,
+				method,
+				timestamp,
+				body: JSON.stringify({ timestamp, args })
+			}, '*');
+		}
+	}
+
+	[ 'log', 'error', 'warn', 'info' ].forEach((method) => {
+		const originalMethod = console[method];
+
+		console[method] = (...args: any[]) => {
+			postMessage(method, args);
+			originalMethod(...args);
+		};
+	});
+}
+
+const ThemedBase = ThemedMixin(WidgetBase);
 
 /**
  * A widget which will render its properties into a _runnable_ application within an `iframe`
@@ -288,6 +321,15 @@ export default class Runner extends ThemedBase<RunnerProperties> {
 		this._IframeDom = DomWrapper(iframe);
 	}
 
+	private _handleConsoleMessage = ({ data, origin }: MessageEvent): void  => {
+		const { method, body = '{}', runnerConsoleMessage } = data;
+		if (runnerConsoleMessage) {
+			const { args = [] } = (JSON.parse(body));
+			const { onConsoleMessage } = this.properties;
+			onConsoleMessage && onConsoleMessage({type: method, args });
+		}
+	}
+
 	@afterRender()
 	protected updateSource(node?: DNode): DNode | undefined {
 		if (this._updating) {
@@ -299,6 +341,9 @@ export default class Runner extends ThemedBase<RunnerProperties> {
 			this._iframe.classList.add(runnerCss.running);
 			writeIframeDoc(this._iframe, source, this._onIframeError)
 				.then(() => {
+					hijackConsole(this._iframe);
+				})
+				.then(() => {
 					this._updating = false;
 					const { onRun } = this.properties;
 					onRun && onRun();
@@ -307,10 +352,15 @@ export default class Runner extends ThemedBase<RunnerProperties> {
 		return node;
 	}
 
+	protected onAttach() {
+		global.addEventListener('message', this._handleConsoleMessage);
+	}
+
 	protected onDetach() {
 		if (this._iframe.contentWindow) {
 			this._iframe.contentWindow.removeEventListener('error', this._onIframeError);
 		}
+		global.removeEventListener('message', this._handleConsoleMessage);
 	}
 
 	protected render() {

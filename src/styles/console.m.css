@@ -1,0 +1,23 @@
+.root {
+	display: inherit;
+	flex: 2 1 400px;
+}
+
+.rootFixed {
+}
+
+.logType {
+	font-weight: bold;
+}
+
+.log {
+}
+
+.error {
+}
+
+.info {
+}
+
+.warn {
+}

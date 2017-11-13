@@ -7,6 +7,12 @@ export interface EmitFile {
 	type: ProjectFileType;
 }
 
+export interface EmitError {
+	message: string;
+	line?: number;
+	character?: number;
+}
+
 export interface PromiseLanguageService {
 	getSyntacticDiagnostics(fileName: string): Promise<Diagnostic[]>;
 	getSemanticDiagnostics(fileName: string): Promise<Diagnostic[]>;

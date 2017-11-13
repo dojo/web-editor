@@ -1,0 +1,22 @@
+@import './variables.css';
+
+.root {
+	background: var(--dark-light-black);
+	flex: 2 1 400px;
+}
+
+.log {
+	color: green;
+}
+
+.error {
+	color: red;
+}
+
+.info {
+	color: blue;
+}
+
+.warn {
+	color: orange;
+}
