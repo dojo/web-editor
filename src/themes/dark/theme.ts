@@ -1,6 +1,7 @@
 import * as actionbar from './actionbar.m.css';
 import * as actionbarbutton from './actionbarbutton.m.css';
 import * as editor from './editor.m.css';
+import * as livecodeexample from './livecodeexample.m.css';
 import * as runner from './runner.m.css';
 import * as scrollbar from './scrollbar.m.css';
 import * as tab from './tab.m.css';
@@ -14,6 +15,7 @@ export default {
 	'dojo-actionbar': actionbar,
 	'dojo-actionbarbutton': actionbarbutton,
 	'dojo-editor': editor,
+	'dojo-livecodeexample': livecodeexample,
 	'dojo-runner': runner,
 	'dojo-scrollbar': scrollbar,
 	'dojo-tab': tab,
@@ -25,6 +27,7 @@ export default {
 	actionbar,
 	actionbarbutton,
 	editor,
+	livecodeexample,
 	runner,
 	scrollbar,
 	tab,
