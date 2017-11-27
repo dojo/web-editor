@@ -255,8 +255,10 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 			this.invalidate();
 		});
 		window.addEventListener('beforeunload', (evt) => {
-			evt.returnValue = 'Do you wish to navigate away from this page?';
-			return evt.returnValue;
+			if (this.properties.model) {
+				evt.returnValue = 'Do you wish to navigate away from this page?';
+				return evt.returnValue;
+			}
 		});
 	}
 
