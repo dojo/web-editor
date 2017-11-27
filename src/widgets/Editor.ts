@@ -161,8 +161,14 @@ export default class Editor extends ThemeableBase<EditorProperties> {
 			this._currentModel = model;
 		}
 
+		// displaying a model can be an issue, so we are going to hide the editor when there is no valid model
+		const hasModel = model && model.uri.toString().match(/^file:\/{2}/);
+		// for some reason, this evaluates differently when it actually gets called during rendering.
+		// this shouldn't be an issue in the Beta 4 version of the widget-core
+		const classes = this.classes(css.root).fixed(css.rootFixed, hasModel ? null : css.hide)();
+
 		return w(this._EditorDom, {
-			classes: this.classes(css.root).fixed(css.rootFixed),
+			classes,
 			key: 'root'
 		});
 	}

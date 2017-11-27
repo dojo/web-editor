@@ -247,6 +247,19 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 		this.invalidate();
 	}
 
+	constructor() {
+		super();
+		// we need to "trap" window resize events so we can layout the editor intelligently
+		window.addEventListener('resize', () => {
+			this._layoutEditor = true;
+			this.invalidate();
+		});
+		window.addEventListener('beforeunload', (evt) => {
+			evt.returnValue = 'Do you wish to navigate away from this page?';
+			return evt.returnValue;
+		});
+	}
+
 	render() {
 		const {
 			_expanded,
