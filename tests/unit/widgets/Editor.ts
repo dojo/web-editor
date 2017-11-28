@@ -90,7 +90,7 @@ registerSuite('Editor', {
 			projector.append();
 			const vnode = projector.__render__();
 			if (vnode !== null && typeof vnode === 'object' && !Array.isArray(vnode)) {
-				assert.deepEqual(vnode.properties!.classes, { [css.root]: true, [css.rootFixed]: true, [css.hide]: true });
+				assert.deepEqual((vnode.properties as any).classes, [ css.root, css.rootFixed, css.hide ]);
 				assert.strictEqual(vnode.properties!.key, 'root');
 				assert.lengthOf(vnode.children!, 0);
 				assert.isFalse(monacoEditorCreateElement instanceof global.window.HTMLDivElement);

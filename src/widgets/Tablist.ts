@@ -2,7 +2,7 @@ import { find } from '@dojo/shim/array';
 import { v, w } from '@dojo/widget-core/d';
 import { WNode } from '@dojo/widget-core/interfaces';
 import Dimensions, { DimensionResults } from '@dojo/widget-core/meta/Dimensions';
-import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
+import { ThemedMixin, ThemedProperties, theme } from '@dojo/widget-core/mixins/Themed';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import ActionBar, { ActionBarButton } from './ActionBar';
 import ScrollBar from './ScrollBar';
@@ -13,9 +13,9 @@ import * as tabCss from '../styles/tab.m.css';
 import * as tablistCss from '../styles/tablist.m.css';
 import * as tablistScrollbarCss from '../styles/tablistscrollbar.m.css';
 
-const ThemeableBase = ThemeableMixin(WidgetBase);
+const ThemeableBase = ThemedMixin(WidgetBase);
 
-export interface TabProperties extends ThemeableProperties {
+export interface TabProperties extends ThemedProperties {
 	/**
 	 * The icon class to set on the tab
 	 */
@@ -77,7 +77,7 @@ export class Tab extends ThemeableBase<TabProperties, null> {
 		const { iconClass, key, label, labelDescription, selected, title } = this.properties;
 		return v('div', {
 			'aria-label': `${label}, tab`,
-			classes: this.classes(tabCss.root, selected ? tabCss.selected : null).fixed(tabCss.rootFixed),
+			classes: [ ...this.theme([ tabCss.root, selected ? tabCss.selected : null ]), tabCss.rootFixed ],
 			key,
 			role: 'tab',
 			tabIndex: 0,
@@ -86,18 +86,18 @@ export class Tab extends ThemeableBase<TabProperties, null> {
 			onclick: this._onclick
 		}, [
 			v('div', {
-				classes: this.classes(tabCss.label).fixed(tabCss.labelFixed, iconCss.label, iconClass || null),
+				classes: [ this.theme(tabCss.label), tabCss.labelFixed, iconCss.label, iconClass || null ],
 				title
 			}, [
 				v('a', {
-					classes: this.classes().fixed(tabCss.link)
+					classes: tabCss.link
 				}, [ label ]),
 				v('span', {
-					classes: this.classes(tabCss.description).fixed(tabCss.descriptionFixed)
+					classes: [ this.theme(tabCss.description), tabCss.descriptionFixed ]
 				}, [ labelDescription ])
 			]),
 			v('div', {
-				classes: this.classes(tabCss.closer),
+				classes: this.theme(tabCss.closer),
 				key: 'closer'
 			}, [
 				w(ActionBar, {
@@ -124,7 +124,7 @@ export class TablistScrollBar extends ScrollBar {}
  * A widget which contains tabs
  */
 @theme(tablistCss)
-export default class Tablist extends ThemeableBase<ThemeableProperties, WNode<Tab>> {
+export default class Tablist extends ThemeableBase<ThemedProperties, WNode<Tab>> {
 	private _cachedSelectedKey: string | number | undefined;
 	private _position = 0;
 
@@ -135,7 +135,7 @@ export default class Tablist extends ThemeableBase<ThemeableProperties, WNode<Ta
 			}
 			return v('div', {
 				key: child.properties.key,
-				classes: this.classes(tablistCss.tab).fixed(tablistCss.tabFixed)
+				classes: [ this.theme(tablistCss.tab), tablistCss.tabFixed ]
 			}, [ child ]);
 		});
 	}
@@ -199,12 +199,12 @@ export default class Tablist extends ThemeableBase<ThemeableProperties, WNode<Ta
 		const { _position, properties: { theme } } = this;
 
 		return v('div', {
-			classes: this.classes(tablistCss.root).fixed(tablistCss.rootFixed),
+			classes: [ this.theme(tablistCss.root), tablistCss.rootFixed ],
 			key: 'root',
 			role: 'presentation'
 		}, [
 			v('div', {
-				classes: this.classes(tablistCss.tablist).fixed(tablistCss.tablistFixed),
+				classes: [ this.theme(tablistCss.tablist), tablistCss.tablistFixed ],
 				key: 'tablist',
 				role: 'tablist',
 				styles: {

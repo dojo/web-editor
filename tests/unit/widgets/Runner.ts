@@ -87,7 +87,10 @@ registerSuite('Runner', {
 			* expected render */
 			const render = widget.getRender() as HNode;
 			assert.strictEqual(render.tag, 'div', 'should be a "div" tag');
-			assert.deepEqual(render.properties.classes, widget.classes(css.root, css.rootFixed)(), 'should have proper classes');
+			assert.deepEqual(render.properties.classes, [ css.root, css.rootFixed ], 'should have proper classes');
+			if (!render.children) {
+				throw new Error('Missing children from render');
+			}
 			assert.lengthOf(render.children, 1, 'should have only one child');
 			assert.isFunction((render.children[0] as WNode).widgetConstructor, 'should be a function');
 			assert.strictEqual((render.children[0] as WNode).properties.key, 'runner', 'should have runner key set');
@@ -99,6 +102,9 @@ registerSuite('Runner', {
 				src: 'foo.html'
 			});
 			const render = widget.getRender() as HNode;
+			if (!render.children) {
+				throw new Error('Missing children from render');
+			}
 			assert.strictEqual(((render.children[0] as WNode).properties as any).src, 'foo.html', 'should have src set to default');
 		},
 

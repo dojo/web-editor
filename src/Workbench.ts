@@ -2,7 +2,7 @@ import { find, includes } from '@dojo/shim/array';
 import { assign } from '@dojo/shim/object';
 import { v, w } from '@dojo/widget-core/d';
 import { WNode } from '@dojo/widget-core/interfaces';
-import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
+import { ThemedMixin, ThemedProperties, theme } from '@dojo/widget-core/mixins/Themed';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import Editor from './widgets/Editor';
 import IconCss from './widgets/IconCss';
@@ -15,9 +15,9 @@ import { IconJson, IconResolver } from './support/icons';
 import * as iconCss from './styles/icons.m.css';
 import * as workbenchCss from './styles/workbench.m.css';
 
-const ThemeableBase = ThemeableMixin(WidgetBase);
+const ThemedBase = ThemedMixin(WidgetBase);
 
-export interface WorkbenchProperties extends ThemeableProperties {
+export interface WorkbenchProperties extends ThemedProperties {
 	/**
 	 * The filename that the editor should be displaying, otherwise `undefined`
 	 */
@@ -90,7 +90,7 @@ export interface WorkbenchProperties extends ThemeableProperties {
 }
 
 @theme(workbenchCss)
-export default class Workbench extends ThemeableBase<WorkbenchProperties> {
+export default class Workbench extends ThemedBase<WorkbenchProperties> {
 	private _expanded = [ './', './src' ];
 	private _fileTreeOpen = true;
 	private _iconResolver = new IconResolver();
@@ -295,7 +295,7 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 		}
 
 		return v('div', {
-			classes: this.classes(workbenchCss.root).fixed(workbenchCss.rootFixed)
+			classes: [ this.theme(workbenchCss.root), workbenchCss.rootFixed ]
 		}, [
 			w(IconCss, {
 				baseClass: iconCss.label,
@@ -304,7 +304,7 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 				sourcePath
 			}),
 			v('div', {
-				classes: this.classes(workbenchCss.left, filesOpen ? null : workbenchCss.closed),
+				classes: this.theme([ workbenchCss.left, filesOpen ? null : workbenchCss.closed ]),
 				key: 'left'
 			}, [
 				w(TreePane, {
@@ -321,7 +321,7 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 				})
 			]),
 			v('div', {
-				classes: this.classes(workbenchCss.middle),
+				classes: this.theme(workbenchCss.middle),
 				key: 'middle'
 			}, [
 				w(Toolbar, {
@@ -347,7 +347,7 @@ export default class Workbench extends ThemeableBase<WorkbenchProperties> {
 				})
 			]),
 			v('div', {
-				classes: this.classes(workbenchCss.right, runnerOpen ? null : workbenchCss.closed),
+				classes: this.theme([ workbenchCss.right, runnerOpen ? null : workbenchCss.closed ]),
 				key: 'right'
 			}, [
 				w(Runner, runnerProperties)
