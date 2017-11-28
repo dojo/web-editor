@@ -90,7 +90,7 @@ registerSuite('Editor', {
 			projector.append();
 			const vnode = projector.__render__();
 			if (vnode !== null && typeof vnode === 'object' && !Array.isArray(vnode)) {
-				assert.deepEqual(vnode.properties!.classes, { [css.root]: true, [css.rootFixed]: true });
+				assert.deepEqual(vnode.properties!.classes, { [css.root]: true, [css.rootFixed]: true, [css.hide]: true });
 				assert.strictEqual(vnode.properties!.key, 'root');
 				assert.lengthOf(vnode.children!, 0);
 				assert.isFalse(monacoEditorCreateElement instanceof global.window.HTMLDivElement);
@@ -119,7 +119,13 @@ registerSuite('Editor', {
 
 		async 'sets the proper model'() {
 			await getMonacoEditor();
-			const model = {} as monaco.editor.IModel;
+			const model = {
+				uri: {
+					toString() {
+						return 'file:///./src/test.ts';
+					}
+				}
+			} as monaco.editor.IModel;
 			projector.setProperties({ model });
 			assert.isFalse(setModelStub.called, 'should not have been called yet');
 			projector.__render__();
