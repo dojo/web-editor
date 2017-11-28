@@ -1,0 +1,72 @@
+/* Themeable styles */
+
+.root {
+	display: inherit;
+}
+
+.slider {
+	border: 1px solid black;
+}
+
+.slider.dragging {
+	border: 1px solid grey;
+}
+
+.horizontal,
+.horizontal .slider {
+	height: 10px;
+}
+
+.vertical,
+.vertical .slider {
+	width: 10px;
+}
+
+.invisible {
+	display: inherit;
+}
+
+.visible {
+	background: transparent;
+}
+
+/* Fixed styles */
+
+.rootFixed,
+.rootFixed * { box-sizing: border-box; }
+
+.rootFixed {
+	position: absolute;
+}
+
+.sliderFixed {
+	position: absolute;
+}
+
+.horizontalFixed {
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+}
+
+.horizontalFixed .sliderFixed {
+	top: 0px;
+}
+
+.verticalFixed {
+	height: 100%;
+	right: 0px;
+	top: 0px;
+}
+
+.verticalFixed .sliderFixed {
+	left: 0px;
+}
+
+.invisibleFixed {
+	opacity: 0;
+}
+
+.visibleFixed {
+	opacity: 1;
+}

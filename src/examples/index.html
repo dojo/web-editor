@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
 <head>
 	<title>@dojo/web-editor</title>
 	<style>
@@ -16,8 +16,6 @@
 	<link href="../themes/dark/theme.css" rel="stylesheet">
 </head>
 <body>
-	<h1>@dojo/web-editor</h1>
-
 	<!-- postcss is created a single bundle that exports `postcss`, `cssnext`, `postcssModules` to the global namespace -->
 	<script src="../external/postcss-bundle.js"></script>
 
@@ -40,7 +38,7 @@
 			}
 		});
 
-		require([ './index' ], function () {});
+		require([ '@dojo/shim/Promise', '@dojo/shim/Symbol', './index' ], function () {});
 	</script>
 </body>
 </html>

@@ -1,7 +1,26 @@
+/* Themeable classes */
+
 .root {
-	display: flex;
+	display: inherit;
 }
 
-.filetree {
+.left {
 	flex: 1;
+}
+
+.middle,
+.right {
+	flex: 2;
+}
+
+.right.closed,
+.left.closed {
+	flex: none;
+	width: 0px;
+}
+
+/* Fixed classes */
+
+.rootFixed {
+	display: flex;
 }

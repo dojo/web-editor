@@ -1,11 +1,9 @@
-import Editor from './Editor';
 import project from './project';
 import * as routing from './routing';
-import Runner from './Runner';
+import Workbench from './Workbench';
 
 export = {
-	Editor,
 	project,
 	routing,
-	Runner
+	Workbench
 };

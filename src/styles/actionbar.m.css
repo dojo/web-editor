@@ -1,0 +1,23 @@
+/* Themeable classes */
+
+.root {
+	padding-left: 4px;
+}
+
+.toolbar {
+	margin: 0 auto;
+	padding: 0;
+	width: 100%;
+}
+
+/* Fixed classes */
+
+.rootFixed {
+	cursor: default;
+	flex: initial;
+}
+
+.toolbarFixed {
+	display: flex;
+	justify-content: flex-end;
+}

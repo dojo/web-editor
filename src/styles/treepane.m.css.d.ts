@@ -1,7 +1,6 @@
 export const root: string;
 export const scroll: string;
 export const label: string;
-export const labelFixed: string;
 export const labelName: string;
 export const content: string;
 export const hasChildren: string;

@@ -4,7 +4,8 @@ import Drag from '@dojo/widget-core/meta/Drag';
 import Matches from '@dojo/widget-core/meta/Matches';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import { theme, ThemeableMixin, ThemeableProperties } from '@dojo/widget-core/mixins/Themeable';
-import * as css from '../styles/scrollbar.m.css';
+
+import * as scrollbarCss from '../styles/scrollbar.m.css';
 
 /**
  * Properties that can be set `ScrollBar`
@@ -55,7 +56,7 @@ const ThemeableBase = ThemeableMixin(WidgetBase);
 /**
  * Convert a relative number to an absolute number
  * @param relative The relative value to convert to an absolute value
- * @param relativeSize The relative size to compare with the absolute size
+ * @param relativeSize The relative size to compare with the abosolute size
  * @param absoluteSize The absolute size to compare with the relative size
  */
 function fromRelative(relative: number, relativeSize: number, absoluteSize: number): number {
@@ -65,7 +66,7 @@ function fromRelative(relative: number, relativeSize: number, absoluteSize: numb
 /**
  * Convert an absolute number to a relative number
  * @param absolute The absolute value to convert to a relative value
- * @param relativeSize The relative size to compare with the absolute size
+ * @param relativeSize The realtive size to compare with the absolute size
  * @param absoluteSize The absolute size to compare with the relative size
  */
 function toRelative(absolute: number, relativeSize: number, absoluteSize: number): number {
@@ -77,7 +78,7 @@ function toRelative(absolute: number, relativeSize: number, absoluteSize: number
  * the scroll bar.  The properties of the scroll widget are relative, thereby not needing to translate from
  * the real DOM size of the scroll bar or scroll area it represents.
  */
-@theme(css)
+@theme(scrollbarCss)
 export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
 	private _visible = false;
 
@@ -171,9 +172,13 @@ export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
 
 		return v('div', {
 			classes: this.classes(
-				css.root,
-				horizontal ? css.horizontal : css.vertical,
-				visible || dragging ? css.visible : css.invisible
+				scrollbarCss.root,
+				horizontal ? scrollbarCss.horizontal : scrollbarCss.vertical,
+				visible || dragging ? scrollbarCss.visible : scrollbarCss.invisible
+			).fixed(
+				scrollbarCss.rootFixed,
+				horizontal ? scrollbarCss.horizontalFixed : scrollbarCss.verticalFixed,
+				visible || dragging ? scrollbarCss.visibleFixed : scrollbarCss.invisibleFixed
 			),
 			key,
 
@@ -182,7 +187,8 @@ export default class ScrollBar extends ThemeableBase<ScrollBarProperties> {
 			onpointerleave: this._onpointerleave
 		}, [
 			v('div', {
-				classes: this.classes(css.slider, dragging ? css.dragging : null),
+				classes: this.classes(scrollbarCss.slider, dragging ? scrollbarCss.dragging : null)
+					.fixed(scrollbarCss.sliderFixed),
 				key: 'slider',
 				styles
 			})

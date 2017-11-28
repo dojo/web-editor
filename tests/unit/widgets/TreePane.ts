@@ -1,9 +1,9 @@
 const { registerSuite } = intern.getInterface('object');
 import harness from '@dojo/test-extras/harness';
 import { v, w } from '@dojo/widget-core/d';
-import TreePane from '../../src/TreePane';
-import * as css from '../../src/styles/treepane.m.css';
-import ScrollBar from '../../src/support/ScrollBar';
+import TreePane from '../../../src/widgets/TreePane';
+import * as css from '../../../src/styles/treepane.m.css';
+import ScrollBar from '../../../src/widgets/ScrollBar';
 
 registerSuite('TreePane', {
 
@@ -11,6 +11,7 @@ registerSuite('TreePane', {
 		const widget = harness(TreePane);
 
 		const expected = v('div', {
+			'aria-hidden': false,
 			'aria-label': undefined,
 			classes: widget.classes(css.root),
 			key: undefined,

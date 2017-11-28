@@ -1,0 +1,83 @@
+/* Themeable classes */
+
+.root {
+	border: 1px solid black;
+	box-sizing: border-box;
+	font-size: 13px;
+	height: 100%;
+	line-height: 1.4em;
+	padding-left: 10px;
+	width: 100%;
+}
+
+.selected {
+	background-color: black;
+	color: white;
+}
+
+.label {
+	margin-bottom: auto;
+	margin-top: auto;
+}
+
+.label::before {
+	background-size: 16px;
+	background-position: 0;
+	height: 16px;
+	padding-right: 6px;
+	vertical-align: top;
+	width: 16px;
+}
+
+.description {
+	font-size: .9em;
+	margin-left: 0.5em;
+	opacity: .7;
+}
+
+.closer {
+	margin-top: auto;
+	margin-bottom: auto;
+	width: 28px;
+}
+
+/* Fixed classes - not themeable */
+
+.rootFixed {
+	cursor: pointer;
+	display: flex;
+	min-width: fit-content;
+	white-space: nowrap;
+}
+
+.labelFixed {
+	display: inline-block;
+	flex: 1;
+	overflow: visible;
+	text-overflow: ellipsis;
+	user-select: none;
+	white-space: nowrap;
+}
+
+.labelFixed::before {
+	background-repeat: no-repeat;
+	content: ' ';
+	cursor: pointer;
+	display: inline-block;
+}
+
+.link {
+	cursor: pointer;
+	text-decoration: none;
+	white-space: pre;
+}
+
+.descriptionFixed {
+	cursor: pointer;
+	white-space: pre;
+}
+
+.closeIcon {
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22%23596C79%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cg%3E%3Cpath%20d%3D%22M20.5%2079.4c1.4%201.4%203.2%202.1%205%202.1s3.6-.7%205-2.1L50%2059.9l19.5%2019.5c1.4%201.4%203.2%202.1%205%202.1s3.6-.7%205-2.1c2.7-2.7%202.7-7.2%200-9.9L59.9%2050l19.6-19.6c2.7-2.7%202.7-7.2%200-9.9s-7.2-2.7-9.9%200L50%2040.1%2030.5%2020.6c-2.7-2.7-7.2-2.7-9.9%200s-2.7%207.2%200%209.9L40.1%2050%2020.5%2069.6c-2.7%202.7-2.7%207.1%200%209.8z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+	background-size: 12px;
+}

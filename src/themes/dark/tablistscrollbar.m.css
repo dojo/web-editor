@@ -1,0 +1,23 @@
+/* ScrollBar styles */
+
+.slider {
+	background: rgba(78, 86, 102, 0.5);
+}
+
+.slider.dragging {
+	background: rgba(78, 86, 102, 0.5);
+}
+
+.horizontal,
+.horizontal .slider {
+	height: 4px;
+}
+
+.invisible {
+	transition: opacity .8s linear;
+}
+
+.visible {
+	background: transparent;
+	transition: opacity .1s linear;
+}

@@ -3,8 +3,8 @@ const { assert } = intern.getPlugin('chai');
 import harness from '@dojo/test-extras/harness';
 import { v } from '@dojo/widget-core/d';
 import { HNode } from '@dojo/widget-core/interfaces';
-import IconCss, { IconCssProperties } from '../../src/IconCss';
-import icons from '../support/iconJson';
+import IconCss from '../../../src/widgets/IconCss';
+import icons from '../../support/iconJson';
 
 registerSuite('IconCss', {
 
@@ -20,7 +20,7 @@ registerSuite('IconCss', {
 	},
 
 	'with icons'() {
-		const widget = harness<IconCssProperties, typeof IconCss>(IconCss);
+		const widget = harness(IconCss);
 
 		widget.setProperties({
 			baseClass: 'foo',

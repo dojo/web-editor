@@ -6,8 +6,9 @@ import Dimensions from '@dojo/widget-core/meta/Dimensions';
 import Drag from '@dojo/widget-core/meta/Drag';
 import { theme, ThemeableMixin, ThemeableProperties } from '@dojo/widget-core/mixins/Themeable';
 import { Keys } from '@dojo/widgets/common/util';
-import * as css from './styles/treepane.m.css';
-import ScrollBar from './support/ScrollBar';
+import ScrollBar from './ScrollBar';
+import * as css from '../styles/treepane.m.css';
+import * as iconCss from '../styles/icons.m.css';
 
 /**
  * The interface for items that can be rendered in the `TreePane`.
@@ -191,7 +192,6 @@ export class Row extends ThemeableBase<RowProperties> {
 		return v('div', {
 			'aria-level': String(level),
 			'aria-selected': selected,
-			'aria-role': 'treeitem',
 			classes: this.classes(...classes),
 			role: 'treeitem',
 			styles: {
@@ -205,7 +205,7 @@ export class Row extends ThemeableBase<RowProperties> {
 				classes: this.classes(css.content)
 			}, [
 				v('div', {
-					classes: this.classes(css.label).fixed(css.labelFixed, rowClass || null),
+					classes: this.classes(css.label).fixed(iconCss.label, rowClass || null),
 					title: title
 				}, [
 					v('a', {
@@ -244,7 +244,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 	private _sliderSize: number;
 
 	/**
-	 * Search the tree of items to find one item, in a breadth first search fashion
+	 * Search the tree of items to find one item, in a Breadth First Search fashion
 	 * @param id The tree pane item ID to match
 	 */
 	private _findItem(id: string): TreePaneItem | undefined {
@@ -527,6 +527,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 		const size = this._size = rows.length;
 
 		return v('div', {
+			'aria-hidden': false,
 			'aria-label': label,
 			classes: this.classes(css.root),
 			key,

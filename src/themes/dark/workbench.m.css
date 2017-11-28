@@ -1,4 +1,6 @@
-@import 'https://fonts.googleapis.com/css?family=Roboto+Slab';
+@import './variables.css';
+@import 'https://fonts.googleapis.com/css?family=Source+Code+Pro';
+@import 'https://fonts.googleapis.com/css?family=Source+Sans+Pro';
 
 html, body {
 	height: 100%;
@@ -13,7 +15,7 @@ body {
 	align-content: stretch;
 	display: flex;
 	flex-direction: column;
-	font-family: 'Roboto Slab', serif;
+	font-family: 'Source Sans Pro', sans-serif;
 }
 
 .root {
@@ -21,4 +23,19 @@ body {
 	align-content: stretch;
 	flex: 1;
 	display: flex;
+}
+
+.left {
+	flex: 1;
+}
+
+.middle,
+.right {
+	flex: 2;
+}
+
+.right.closed,
+.left.closed {
+	flex: none;
+	width: 0px;
 }

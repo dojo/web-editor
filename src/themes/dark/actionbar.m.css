@@ -1,0 +1,14 @@
+@import './variables.css';
+
+.root {
+	background: var(--dark-light-black);
+	border-left: 1px solid var(--dark-med-black);
+	border-right: 1px solid var(--dark-med-black);
+	padding: 0 4px;
+}
+
+.toolbar {
+	margin: 0 auto;
+	padding: 0;
+	width: 100%;
+}

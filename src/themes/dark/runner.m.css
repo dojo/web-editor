@@ -1,14 +1,10 @@
 @import './variables.css';
 
 .root {
-	background: var(--dark-black);
-	flex: 1;
-	height: 100%;
+	background: var(--dark-light-black);
+	flex: 2;
 }
 
 .iframe {
 	border: none;
-	position: relative;
-	height: 100%;
-	width: 100%;
 }

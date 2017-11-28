@@ -1,0 +1,15 @@
+@import './variables.css';
+
+.root {
+	background: var(--dark-light-black);
+}
+
+.tab {
+	box-sizing: border-box;
+	height: 36px;
+	width: 120px;
+}
+
+.tablist {
+	height: 36px;
+}
