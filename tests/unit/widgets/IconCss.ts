@@ -30,6 +30,6 @@ registerSuite('IconCss', {
 
 		const render = widget.getRender() as HNode;
 
-		assert.include(render.children[0] as string, '.foo._file_json::before');
+		assert.include((render as any).children[0].text as string, '.foo._file_json::before');
 	}
 });

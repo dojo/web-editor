@@ -1,10 +1,9 @@
 import * as base64 from '@dojo/core/base64';
-import { createHandle } from '@dojo/core/lang';
 import { v, w } from '@dojo/widget-core/d';
 import { Constructor, DNode, VirtualDomProperties, WidgetProperties } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import afterRender from '@dojo/widget-core/decorators/afterRender';
-import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
+import { ThemedMixin, ThemedProperties, theme } from '@dojo/widget-core/mixins/Themed';
 import DomWrapper from '@dojo/widget-core/util/DomWrapper';
 import { Program } from '../project';
 import DOMParser from '../support/DOMParser';
@@ -12,14 +11,12 @@ import { wrapCode } from '../support/sourceMap';
 
 import * as runnerCss from '../styles/runner.m.css';
 
-export interface RunnerProperties extends Partial<Program>, WidgetProperties, ThemeableProperties {
+export interface RunnerProperties extends Partial<Program>, ThemedProperties {
 	/**
 	 * A URI that points to an AMD loader which will be used when running the program.
 	 * Defaults to `https://unpkg.com/@dojo/loader/loader.min.js`
 	 */
 	loader?: string;
-
-	main?: string;
 
 	/**
 	 * A URI that points to the `src` to set on the Runner's `iframe`. Defaults to `../support/blank.html`
@@ -271,13 +268,13 @@ async function writeIframeDoc(iframe: HTMLIFrameElement, source: string, errorLi
 	});
 }
 
-const RunnerBase = ThemeableMixin(WidgetBase);
+const ThemedBase = ThemedMixin(WidgetBase);
 
 /**
  * A widget which will render its properties into a _runnable_ application within an `iframe`
  */
 @theme(runnerCss)
-export default class Runner extends RunnerBase<RunnerProperties> {
+export default class Runner extends ThemedBase<RunnerProperties> {
 	private _iframe: HTMLIFrameElement;
 	private _IframeDom: Constructor<WidgetBase<VirtualDomProperties & WidgetProperties>>;
 	private _onIframeError = (evt: ErrorEvent) => {
@@ -293,15 +290,10 @@ export default class Runner extends RunnerBase<RunnerProperties> {
 		const iframe = this._iframe = document.createElement('iframe');
 		iframe.setAttribute('src', DEFAULT_IFRAME_SRC);
 		this._IframeDom = DomWrapper(iframe);
-		this.own(createHandle(() => {
-			if (iframe.contentWindow) {
-				iframe.contentWindow.removeEventListener('error', this._onIframeError);
-			}
-		}));
 	}
 
 	@afterRender()
-	public updateSource(node?: DNode): DNode | undefined {
+	protected updateSource(node?: DNode): DNode | undefined {
 		if (this._updating) {
 			return node;
 		}
@@ -319,12 +311,18 @@ export default class Runner extends RunnerBase<RunnerProperties> {
 		return node;
 	}
 
-	public render() {
+	protected onDetach() {
+		if (this._iframe.contentWindow) {
+			this._iframe.contentWindow.removeEventListener('error', this._onIframeError);
+		}
+	}
+
+	protected render() {
 		const { src = DEFAULT_IFRAME_SRC } = this.properties;
 		return v('div', {
-			classes: this.classes(runnerCss.root).fixed(runnerCss.rootFixed)
+			classes: [ this.theme(runnerCss.root), runnerCss.rootFixed ]
 		}, [ w(this._IframeDom, {
-			classes: this.classes(runnerCss.iframe).fixed(runnerCss.iframeFixed),
+			classes: [ this.theme(runnerCss.iframe), runnerCss.iframeFixed ],
 			key: 'runner',
 			src,
 			title: 'Runner'

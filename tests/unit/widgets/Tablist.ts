@@ -18,7 +18,7 @@ registerSuite('widgets/Tablist', {
 
 			const expected = v('div', {
 				'aria-label': `foo, tab`,
-				classes: widget.classes(tabCss.root, null, tabCss.rootFixed),
+				classes: [ tabCss.root, null, tabCss.rootFixed ],
 				key: undefined,
 				role: 'tab',
 				tabIndex: 0,
@@ -27,18 +27,18 @@ registerSuite('widgets/Tablist', {
 				onclick: widget.listener
 			}, [
 				v('div', {
-					classes: widget.classes(tabCss.label, tabCss.labelFixed, iconCss.label, null),
+					classes: [ tabCss.label, tabCss.labelFixed, iconCss.label, null ],
 					title: undefined
 				}, [
 					v('a', {
-						classes: widget.classes(tabCss.link)
+						classes: tabCss.link
 					}, [ 'foo' ]),
 					v('span', {
-						classes: widget.classes(tabCss.description, tabCss.descriptionFixed)
+						classes: [ tabCss.description, tabCss.descriptionFixed ]
 					}, [ 'labelDescription' ])
 				]),
 				v('div', {
-					classes: widget.classes(tabCss.closer),
+					classes: tabCss.closer,
 					key: 'closer'
 				}, [
 					w(ActionBar, {
@@ -62,12 +62,12 @@ registerSuite('widgets/Tablist', {
 			const widget = harness(Tablist);
 
 			const expected = v('div', {
-				classes: widget.classes(tablistCss.root, tablistCss.rootFixed),
+				classes: [ tablistCss.root, tablistCss.rootFixed ],
 				key: 'root',
 				role: 'presentation'
 			}, [
 				v('div', {
-					classes: widget.classes(tablistCss.tablist, tablistCss.tablistFixed),
+					classes: [ tablistCss.tablist, tablistCss.tablistFixed ],
 					key: 'tablist',
 					role: 'tablist',
 					styles: {

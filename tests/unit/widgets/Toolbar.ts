@@ -12,7 +12,7 @@ registerSuite('widgets/Toolbar', {
 			const widget = harness(Toolbar);
 
 			const expected = v('div', {
-				classes: widget.classes(toolbarCss.root, toolbarCss.rootFixed),
+				classes: [ toolbarCss.root, toolbarCss.rootFixed ],
 				key: 'root'
 			}, [
 				w(ActionBar, {

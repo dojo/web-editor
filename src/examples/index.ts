@@ -22,7 +22,6 @@ let icons: IconJson;
 class App extends WidgetBase {
 	private _compiling = false;
 	private _editorFilename = '';
-	private _emptyModel = monaco.editor.createModel('');
 	private _openFiles = new Set<string>();
 	private _program: Program | undefined;
 	private _projectDirty = true;
@@ -129,10 +128,10 @@ class App extends WidgetBase {
 			v('button', { type: 'button', name: 'load-project', id: 'load-project', onclick: this._onclickLoad, disabled: isProjectLoaded ? true : false }, [ 'Load' ])
 		]);
 
-		const model = filename && isProjectLoaded && project.includes(filename) ? project.getFileModel(filename) : this._emptyModel;
+		const model = filename && isProjectLoaded && project.includes(filename) ? project.getFileModel(filename) : undefined;
 
 		return v('div', {
-			classes: { app: true }
+			classes: 'app'
 		}, [
 			projectLoad,
 			w(Workbench, {

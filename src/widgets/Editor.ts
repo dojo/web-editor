@@ -1,10 +1,8 @@
-import { createHandle } from '@dojo/core/lang';
 import { queueTask } from '@dojo/core/queue';
 import { debounce } from '@dojo/core/util';
 import { w } from '@dojo/widget-core/d';
-import { WidgetProperties } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
-import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
+import { ThemedMixin, ThemedProperties, theme } from '@dojo/widget-core/mixins/Themed';
 import DomWrapper from '@dojo/widget-core/util/DomWrapper';
 
 import * as css from '../styles/editor.m.css';
@@ -17,7 +15,7 @@ const MINIMUM_WIDTH = 150;
 /**
  * Properties that can be set on an `Editor` widget
  */
-export interface EditorProperties extends WidgetProperties, ThemeableProperties {
+export interface EditorProperties extends ThemedProperties {
 	/**
 	 * Ensure that monaco-editor instance is layed out in a way that allows the document to reflow and resize the editor properly
 	 */
@@ -34,7 +32,7 @@ export interface EditorProperties extends WidgetProperties, ThemeableProperties 
 	options?: monaco.editor.IEditorOptions;
 
 	/**
-	 * Called when the monaco-editor updates the model
+	 * Called when the monaco-editor updates a project file
 	 */
 	onDirty?(): void;
 
@@ -75,13 +73,13 @@ function isEqualSize(a: Size, b: Size): boolean {
 	return a.height === b.height && a.width === b.width;
 }
 
-const ThemeableBase = ThemeableMixin(WidgetBase);
+const ThemedBase = ThemedMixin(WidgetBase);
 
 /**
  * A class which wraps the `monaco-editor`
  */
 @theme(css)
-export default class Editor extends ThemeableBase<EditorProperties> {
+export default class Editor extends ThemedBase<EditorProperties> {
 	private _currentModel: monaco.editor.IModel | undefined;
 	private _editor: monaco.editor.IStandaloneCodeEditor | undefined;
 	private _EditorDom: DomWrapper;
@@ -111,20 +109,27 @@ export default class Editor extends ThemeableBase<EditorProperties> {
 		});
 	}
 
-	private _onAttached = () => {
+	private _onDidChangeModelContent = () => {
+		const { onDirty } = this.properties;
+		onDirty && onDirty();
+	}
+
+	constructor() {
+		super();
+		const root = this._editorRoot = document.createElement('div');
+		this._EditorDom = DomWrapper(root);
+	}
+
+	protected onAttach() {
 		const { _onDidChangeModelContent, _editorRoot, properties: { model, onInit, onLayout, options } } = this;
 		// _onAttached fires when the DOM is actually attached to the document, but the rest of the virtual DOM hasn't
 		// been layed out which causes issues for monaco-editor when figuring out its initial size, so we will schedule
 		// it to be run at the end of the turn, which will provide more reliable layout
 		queueTask(() => {
 			const editor = this._editor = monaco.editor.create(_editorRoot, options);
-			const didChangeHandle = this._didChangeHandle = editor.onDidChangeModelContent(debounce(_onDidChangeModelContent, 1000));
+			this._didChangeHandle = editor.onDidChangeModelContent(debounce(_onDidChangeModelContent, 1000));
 			onInit && onInit(editor);
 
-			this.own(createHandle(() => {
-				editor.dispose();
-				didChangeHandle.dispose();
-			}));
 			this._originalSize = getSize(_editorRoot);
 			editor.layout();
 			onLayout && onLayout();
@@ -134,18 +139,16 @@ export default class Editor extends ThemeableBase<EditorProperties> {
 		});
 	}
 
-	private _onDidChangeModelContent = () => {
-		const { onDirty } = this.properties;
-		onDirty && onDirty();
+	protected onDetach() {
+		if (this._editor) {
+			this._editor.dispose();
+		}
+		if (this._didChangeHandle) {
+			this._didChangeHandle.dispose();
+		}
 	}
 
-	constructor() {
-		super();
-		const root = this._editorRoot = document.createElement('div');
-		this._EditorDom = DomWrapper(root, { onAttached: this._onAttached });
-	}
-
-	public render() {
+	protected render() {
 		const { _currentModel, _editor, properties: { model } } = this;
 		// getting the monaco-editor to layout and not interfere with the layout of other elements is a complicated affair
 		// we have to do some quite obstuse logic in order for it to behave properly, but only do so if we suspect the
@@ -161,8 +164,11 @@ export default class Editor extends ThemeableBase<EditorProperties> {
 			this._currentModel = model;
 		}
 
+		// displaying a model can be an issue, so we are going to hide the editor when there is no valid model
+		const hasModel = model && model.uri.toString().match(/^file:\/{2}/);
+
 		return w(this._EditorDom, {
-			classes: this.classes(css.root).fixed(css.rootFixed),
+			classes: [ this.theme(css.root), css.rootFixed, hasModel ? null : css.hide ],
 			key: 'root'
 		});
 	}
