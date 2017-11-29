@@ -6,7 +6,6 @@
 interface Window {
 	MonacoEnvironment: any;
 }
-declare const importScripts: (mid: string) => void;
 
 self.MonacoEnvironment = {
 	baseUrl: '../../../node_modules/monaco-editor/min/'
