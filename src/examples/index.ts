@@ -131,7 +131,7 @@ class App extends WidgetBase {
 		const model = filename && isProjectLoaded && project.includes(filename) ? project.getFileModel(filename) : undefined;
 
 		return v('div', {
-			classes: { app: true }
+			classes: 'app'
 		}, [
 			projectLoad,
 			w(Workbench, {

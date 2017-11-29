@@ -41,7 +41,8 @@
 				{ "name": "src", "location": "dev/src" },
 				{ "name": "sinon", "location": "node_modules/sinon/pkg", "main": "sinon" },
 				{ "name": "source-map", "location": "node_modules/source-map/dist", "main": "source-map.debug" },
-				{ "name": "tests", "location": "dev/tests" }
+				{ "name": "tests", "location": "dev/tests" },
+				{ "name": "tslib", "location": "node_modules/tslib", "main": "tslib" }
 			],
 			"map": {
 				"globalize": {

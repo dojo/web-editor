@@ -17,7 +17,7 @@ registerSuite('Workbench', {
 			const widget = harness(Workbench);
 
 			const expected = v('div', {
-				classes: widget.classes(workbenchCss.root, workbenchCss.rootFixed)
+				classes: [ workbenchCss.root, workbenchCss.rootFixed ]
 			}, [
 				w(IconCss, {
 					baseClass: iconCss.label,
@@ -26,7 +26,7 @@ registerSuite('Workbench', {
 					sourcePath: undefined
 				}),
 				v('div', {
-					classes: widget.classes(workbenchCss.left, null),
+					classes: [ workbenchCss.left, null ],
 					key: 'left'
 				}, [
 					w(TreePane, {
@@ -43,7 +43,7 @@ registerSuite('Workbench', {
 					})
 				]),
 				v('div', {
-					classes: widget.classes(workbenchCss.middle),
+					classes: workbenchCss.middle,
 					key: 'middle'
 				}, [
 					w(Toolbar, {
@@ -69,7 +69,7 @@ registerSuite('Workbench', {
 					})
 				]),
 				v('div', {
-					classes: widget.classes(workbenchCss.right, null),
+					classes: [ workbenchCss.right, null ],
 					key: 'right'
 				}, [
 					w(Runner, {

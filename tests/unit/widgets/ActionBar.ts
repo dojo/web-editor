@@ -11,12 +11,12 @@ registerSuite('widgets/ActionBar', {
 			const widget = harness(ActionBarButton);
 
 			widget.expectRender(v('li', {
-				classes: widget.classes(actionbarbuttonCss.root, actionbarbuttonCss.rootFixed),
+				classes: [ actionbarbuttonCss.root, actionbarbuttonCss.rootFixed ],
 				role: 'presentation',
 				onclick: widget.listener
 			}, [
 				v('a', {
-					classes: widget.classes(actionbarbuttonCss.label, actionbarbuttonCss.labelFixed, null),
+					classes: [ actionbarbuttonCss.label, actionbarbuttonCss.labelFixed, null ],
 					role: 'button',
 					tabIndex: 0,
 					title: undefined
@@ -30,12 +30,12 @@ registerSuite('widgets/ActionBar', {
 			const widget = harness(ActionBar);
 
 			const expected = v('div', {
-				classes: widget.classes(actionbarCss.root, actionbarCss.rootFixed),
+				classes: [ actionbarCss.root, actionbarCss.rootFixed ],
 				key: 'root'
 			} , [
 				v('ul', {
 					'aria-label': undefined,
-					classes: widget.classes(actionbarCss.toolbar, actionbarCss.toolbarFixed),
+					classes: [ actionbarCss.toolbar, actionbarCss.toolbarFixed ],
 					role: 'toolbar'
 				}, [ ])
 			]);

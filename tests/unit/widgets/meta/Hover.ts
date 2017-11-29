@@ -16,7 +16,6 @@ registerSuite('widgets/meta/Hover', {
 
 			const widget = harness(HoverWidget);
 			widget.expectRender(v('div', { key: 'root', styles: { background: 'white' } }));
-			widget.expectRender(v('div', { key: 'root', styles: { background: 'white' } }));
 			widget.sendEvent('mouseenter', { eventInit: { bubbles: true } });
 			widget.expectRender(v('div', { key: 'root', styles: { background: 'black' } }));
 			widget.sendEvent('mouseenter', { eventInit: { bubbles: true } });

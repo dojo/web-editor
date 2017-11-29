@@ -13,7 +13,7 @@ registerSuite('TreePane', {
 		const expected = v('div', {
 			'aria-hidden': false,
 			'aria-label': undefined,
-			classes: widget.classes(css.root),
+			classes: css.root,
 			key: undefined,
 			role: 'tree',
 
@@ -21,7 +21,7 @@ registerSuite('TreePane', {
 			onmouseleave: widget.listener
 		}, [
 			v('div', {
-				classes: widget.classes(css.scroll),
+				classes: css.scroll,
 				key: 'rows',
 				role: 'presentation',
 				styles: {

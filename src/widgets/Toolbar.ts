@@ -1,15 +1,15 @@
 import { v, w } from '@dojo/widget-core/d';
 import { WNode } from '@dojo/widget-core/interfaces';
-import { ThemeableMixin, ThemeableProperties, theme } from '@dojo/widget-core/mixins/Themeable';
+import { ThemedMixin, ThemedProperties, theme } from '@dojo/widget-core/mixins/Themed';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import ActionBar, { ActionBarButton } from './ActionBar';
 import Tablist, { Tab } from './Tablist';
 
 import * as toolbarCss from '../styles/toolbar.m.css';
 
-const ThemeableBase = ThemeableMixin(WidgetBase);
+const ThemedBase = ThemedMixin(WidgetBase);
 
-export interface ToolbarProperties extends ThemeableProperties {
+export interface ToolbarProperties extends ThemedProperties {
 	/**
 	 * Determines if the files action button is displaying in an open or closed state
 	 */
@@ -46,7 +46,7 @@ export interface ToolbarProperties extends ThemeableProperties {
  * What tabs are displayed are the widget's children.
  */
 @theme(toolbarCss)
-export default class Toolbar extends ThemeableBase<ToolbarProperties, WNode<Tab>> {
+export default class Toolbar extends ThemedBase<ToolbarProperties, WNode<Tab>> {
 	private _onFilesClick = () => {
 		const { onToggleFiles } = this.properties;
 		onToggleFiles && onToggleFiles();
@@ -65,7 +65,7 @@ export default class Toolbar extends ThemeableBase<ToolbarProperties, WNode<Tab>
 	render() {
 		const { filesOpen, runnable, runnerOpen, theme } = this.properties;
 		return v('div', {
-			classes: this.classes(toolbarCss.root).fixed(toolbarCss.rootFixed),
+			classes: [ this.theme(toolbarCss.root), toolbarCss.rootFixed ],
 			key: 'root'
 		}, [
 			w(ActionBar, {

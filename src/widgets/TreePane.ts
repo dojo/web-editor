@@ -4,7 +4,7 @@ import { DNode, WNode } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import Dimensions from '@dojo/widget-core/meta/Dimensions';
 import Drag from '@dojo/widget-core/meta/Drag';
-import { theme, ThemeableMixin, ThemeableProperties } from '@dojo/widget-core/mixins/Themeable';
+import { theme, ThemedMixin, ThemedProperties } from '@dojo/widget-core/mixins/Themed';
 import { Keys } from '@dojo/widgets/common/util';
 import ScrollBar from './ScrollBar';
 import * as css from '../styles/treepane.m.css';
@@ -42,7 +42,7 @@ export interface TreePaneItem {
 /**
  * Properties that can be set for `TreePane`
  */
-export interface TreePaneProperties extends ThemeableProperties {
+export interface TreePaneProperties extends ThemedProperties {
 	/**
 	 * An array of item IDs that are currently exapanded.
 	 */
@@ -105,12 +105,12 @@ export interface TreePaneProperties extends ThemeableProperties {
 const ROW_HEIGHT = 22;
 const ROW_LEVEL_LEFT_PADDING = 12;
 
-const ThemeableBase = ThemeableMixin(WidgetBase);
+const ThemedBase = ThemedMixin(WidgetBase);
 
 /**
  * Properties for the internal `Row` class.
  */
-export interface RowProperties extends ThemeableProperties {
+export interface RowProperties extends ThemedProperties {
 	/**
 	 * A custom class which effects the display of the icon for the row
 	 */
@@ -161,7 +161,7 @@ export interface RowProperties extends ThemeableProperties {
  * The internal widget class which renders a row in the `TreePane`
  */
 @theme(css)
-export class Row extends ThemeableBase<RowProperties> {
+export class Row extends ThemedBase<RowProperties> {
 	private _onclick() {
 		this.properties.onClick && this.properties.onClick(this.properties.key);
 	}
@@ -192,7 +192,7 @@ export class Row extends ThemeableBase<RowProperties> {
 		return v('div', {
 			'aria-level': String(level),
 			'aria-selected': selected,
-			classes: this.classes(...classes),
+			classes: this.theme(classes),
 			role: 'treeitem',
 			styles: {
 				'padding-left': String(level * ROW_LEVEL_LEFT_PADDING) + 'px'
@@ -202,14 +202,14 @@ export class Row extends ThemeableBase<RowProperties> {
 			ondblclick: _ondblclick
 		}, [
 			v('div', {
-				classes: this.classes(css.content)
+				classes: this.theme(css.content)
 			}, [
 				v('div', {
-					classes: this.classes(css.label).fixed(iconCss.label, rowClass || null),
+					classes: [ this.theme(css.label), iconCss.label, rowClass || null ],
 					title: title
 				}, [
 					v('a', {
-						classes: this.classes(css.labelName)
+						classes: this.theme(css.labelName)
 					}, [ label ])
 				])
 			])
@@ -236,7 +236,7 @@ interface TreePaneNavigationState {
  * ability to _open_ nodes.
  */
 @theme(css)
-export default class TreePane extends ThemeableBase<TreePaneProperties> {
+export default class TreePane extends ThemedBase<TreePaneProperties> {
 	private _navigation: TreePaneNavigationState;
 	private _scrollPosition = 0;
 	private _scrollVisible = false;
@@ -529,7 +529,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 		return v('div', {
 			'aria-hidden': false,
 			'aria-label': label,
-			classes: this.classes(css.root),
+			classes: this.theme(css.root),
 			key,
 			role: 'tree',
 
@@ -537,7 +537,7 @@ export default class TreePane extends ThemeableBase<TreePaneProperties> {
 			onmouseleave: this._onmouseleave
 		}, [
 			v('div', {
-				classes: this.classes(css.scroll),
+				classes: this.theme(css.scroll),
 				key: 'rows',
 				role: 'presentation',
 				styles: {
