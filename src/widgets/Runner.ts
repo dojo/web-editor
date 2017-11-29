@@ -18,6 +18,8 @@ export interface RunnerProperties extends Partial<Program>, ThemedProperties {
 	 */
 	loader?: string;
 
+	main?: string;
+
 	/**
 	 * A URI that points to the `src` to set on the Runner's `iframe`. Defaults to `../support/blank.html`
 	 */

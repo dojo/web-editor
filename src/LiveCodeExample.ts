@@ -1,7 +1,7 @@
 import { v, w } from '@dojo/widget-core/d';
 import { WidgetProperties } from '@dojo/widget-core/interfaces';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
-import Themeable, { theme } from '@dojo/widget-core/mixins/Themeable';
+import { theme, ThemedMixin } from '@dojo/widget-core/mixins/Themed';
 import project, { Program } from './project';
 import * as livecodeexampleCss from './styles/livecodeexample.m.css';
 import LiveEditor from './widgets/LiveEditor';
@@ -13,10 +13,10 @@ interface LiveCodeExampleProperties extends WidgetProperties {
 	description: string;
 }
 
-const ThemeableBase = Themeable(WidgetBase);
+const ThemedBase = ThemedMixin(WidgetBase);
 
 @theme(livecodeexampleCss)
-export default class LiveCodeExample extends ThemeableBase<LiveCodeExampleProperties, string> {
+export default class LiveCodeExample extends ThemedBase<LiveCodeExampleProperties, string> {
 	private _program: Program | undefined;
 
 	private async _onChange() {
@@ -27,22 +27,22 @@ export default class LiveCodeExample extends ThemeableBase<LiveCodeExampleProper
 	public render() {
 		const { _program: program, properties: { id, description, theme, title } } = this;
 		return v('div', {
-			classes: this.classes(livecodeexampleCss.root).fixed(livecodeexampleCss.rootFixed),
+			classes: [ this.theme(livecodeexampleCss.root), livecodeexampleCss.rootFixed ],
 			id,
 			key: 'root'
 		}, [
 			v('div', {
-				classes: this.classes(livecodeexampleCss.left)
+				classes: this.theme(livecodeexampleCss.left)
 			}, [
 				v('h1', {}, [ title ]),
 				v('div', {
-					classes: this.classes(livecodeexampleCss.description)
+					classes: this.theme(livecodeexampleCss.description)
 				}, [
 					v('p', {}, [ description ])
 				])
 			]),
 			v('div', {
-				classes: this.classes(livecodeexampleCss.right)
+				classes: this.theme(livecodeexampleCss.right)
 			}, [
 				w(LiveEditor, {
 					id,
