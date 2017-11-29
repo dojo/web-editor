@@ -185,6 +185,13 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 		}
 	}
 
+	private _onbeforeunload = (evt: BeforeUnloadEvent) => {
+		if (this.properties.model) {
+			evt.returnValue = 'Do you wish to navigate away from this page?';
+			return evt.returnValue;
+		}
+	}
+
 	private _onItemOpen(id: string) {
 		this._selected = id;
 		const { onFileOpen } = this.properties;
@@ -227,6 +234,11 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 		}
 	}
 
+	private _onresize = () => {
+		this._layoutEditor = true;
+		this.invalidate();
+	}
+
 	private _onRun() {
 		const { onRun } = this.properties;
 		if (!this._runnerOpen) {
@@ -247,22 +259,17 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 		this.invalidate();
 	}
 
-	constructor() {
-		super();
-		// we need to "trap" window resize events so we can layout the editor intelligently
-		window.addEventListener('resize', () => {
-			this._layoutEditor = true;
-			this.invalidate();
-		});
-		window.addEventListener('beforeunload', (evt) => {
-			if (this.properties.model) {
-				evt.returnValue = 'Do you wish to navigate away from this page?';
-				return evt.returnValue;
-			}
-		});
+	protected onAttach() {
+		window.addEventListener('resize', this._onresize);
+		window.addEventListener('beforeunload', this._onbeforeunload);
 	}
 
-	render() {
+	protected onDetach() {
+		window.removeEventListener('resize', this._onresize);
+		window.removeEventListener('beforeunload', this._onbeforeunload);
+	}
+
+	protected render() {
 		const {
 			_expanded,
 			_fileTreeOpen: filesOpen,
