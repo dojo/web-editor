@@ -20,17 +20,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "../styles/actionbar.m.css", "../styles/actionbarbutton.m.css"], factory);
+        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themed", "@dojo/widget-core/WidgetBase", "../styles/actionbar.m.css", "../styles/actionbarbutton.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var d_1 = require("@dojo/widget-core/d");
-    var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
+    var Themed_1 = require("@dojo/widget-core/mixins/Themed");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var actionbarCss = require("../styles/actionbar.m.css");
     var actionbarbuttonCss = require("../styles/actionbarbutton.m.css");
-    var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
+    var ThemedBase = Themed_1.ThemedMixin(WidgetBase_1.default);
     /**
      * A widget which provides a simple icon UI element that performs a single action
      */
@@ -46,12 +46,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         ActionBarButton.prototype.render = function () {
             var _a = this.properties, iconClass = _a.iconClass, title = _a.label;
             return d_1.v('li', {
-                classes: this.classes(actionbarbuttonCss.root).fixed(actionbarbuttonCss.rootFixed),
+                classes: [this.theme(actionbarbuttonCss.root), actionbarbuttonCss.rootFixed],
                 role: 'presentation',
                 onclick: this._onclick
             }, [
                 d_1.v('a', {
-                    classes: this.classes(actionbarbuttonCss.label).fixed(actionbarbuttonCss.labelFixed, iconClass || null),
+                    classes: [this.theme(actionbarbuttonCss.label), actionbarbuttonCss.labelFixed, iconClass || null],
                     role: 'button',
                     tabIndex: 0,
                     title: title
@@ -59,10 +59,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             ]);
         };
         ActionBarButton = __decorate([
-            Themeable_1.theme(actionbarbuttonCss)
+            Themed_1.theme(actionbarbuttonCss)
         ], ActionBarButton);
         return ActionBarButton;
-    }(ThemeableBase));
+    }(ThemedBase));
     exports.ActionBarButton = ActionBarButton;
     /**
      * A widget which contains children `ActionBarButton`
@@ -74,21 +74,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         }
         ActionBar.prototype.render = function () {
             return d_1.v('div', {
-                classes: this.classes(actionbarCss.root).fixed(actionbarCss.rootFixed),
+                classes: [this.theme(actionbarCss.root), actionbarCss.rootFixed],
                 key: 'root'
             }, [
                 d_1.v('ul', {
                     'aria-label': this.properties.label,
-                    classes: this.classes(actionbarCss.toolbar).fixed(actionbarCss.toolbarFixed),
+                    classes: [this.theme(actionbarCss.toolbar), actionbarCss.toolbarFixed],
                     role: 'toolbar'
                 }, this.children)
             ]);
         };
         ActionBar = __decorate([
-            Themeable_1.theme(actionbarCss)
+            Themed_1.theme(actionbarCss)
         ], ActionBar);
         return ActionBar;
-    }(ThemeableBase));
+    }(ThemedBase));
     exports.default = ActionBar;
 });
 //# sourceMappingURL=ActionBar.js.map

@@ -6,5 +6,5 @@
 self.MonacoEnvironment = {
     baseUrl: './../node_modules/monaco-editor/min/'
 };
-importScripts('./../node_modules/monaco-editor/min/vs/base/worker/workerMain.js');
+self.importScripts('./../node_modules/monaco-editor/min/vs/base/worker/workerMain.js');
 //# sourceMappingURL=worker-proxy.js.map

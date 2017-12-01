@@ -78,7 +78,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this._compiling = false;
             _this._editorFilename = '';
-            _this._emptyModel = monaco.editor.createModel('');
             _this._openFiles = new Set_1.default();
             _this._projectDirty = true;
             _this._projectValue = '005-initial.project.json';
@@ -134,8 +133,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.invalidate();
         };
         App.prototype._onDirty = function () {
-            this._projectDirty = true;
-            this.invalidate();
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            this._projectDirty = true;
+                            if (!(project_1.default.isLoaded() && this._editorFilename)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, project_1.default.setFileDirty(this._editorFilename)];
+                        case 1:
+                            _a.sent();
+                            _a.label = 2;
+                        case 2:
+                            this.invalidate();
+                            return [2 /*return*/];
+                    }
+                });
+            });
         };
         App.prototype._onRun = function () {
             this._compiling = false;
@@ -190,9 +203,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 ]),
                 d_1.v('button', { type: 'button', name: 'load-project', id: 'load-project', onclick: this._onclickLoad, disabled: isProjectLoaded ? true : false }, ['Load'])
             ]);
-            var model = filename && isProjectLoaded && project_1.default.includes(filename) ? project_1.default.getFileModel(filename) : this._emptyModel;
+            var model = filename && isProjectLoaded && project_1.default.includes(filename) ? project_1.default.getFileModel(filename) : undefined;
             return d_1.v('div', {
-                classes: { app: true }
+                classes: 'app'
             }, [
                 projectLoad,
                 d_1.w(Workbench_1.default, {

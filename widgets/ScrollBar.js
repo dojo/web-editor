@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/meta/Drag", "@dojo/widget-core/meta/Matches", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/mixins/Themeable", "../styles/scrollbar.m.css"], factory);
+        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/meta/Drag", "@dojo/widget-core/meta/Matches", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/mixins/Themed", "../styles/scrollbar.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -30,10 +30,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var Drag_1 = require("@dojo/widget-core/meta/Drag");
     var Matches_1 = require("@dojo/widget-core/meta/Matches");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
-    var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
+    var Themed_1 = require("@dojo/widget-core/mixins/Themed");
     var scrollbarCss = require("../styles/scrollbar.m.css");
     var DEFAULT_KEY = 'root';
-    var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
+    var ThemedBase = Themed_1.ThemedMixin(WidgetBase_1.default);
     /**
      * Convert a relative number to an absolute number
      * @param relative The relative value to convert to an absolute value
@@ -128,15 +128,24 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 _g[horizontal ? 'width' : 'height'] = renderSliderSize,
                 _g);
             return d_1.v('div', {
-                classes: this.classes(scrollbarCss.root, horizontal ? scrollbarCss.horizontal : scrollbarCss.vertical, visible || dragging ? scrollbarCss.visible : scrollbarCss.invisible).fixed(scrollbarCss.rootFixed, horizontal ? scrollbarCss.horizontalFixed : scrollbarCss.verticalFixed, visible || dragging ? scrollbarCss.visibleFixed : scrollbarCss.invisibleFixed),
+                classes: this.theme([
+                    scrollbarCss.root,
+                    horizontal ? scrollbarCss.horizontal : scrollbarCss.vertical,
+                    visible || dragging ? scrollbarCss.visible : scrollbarCss.invisible
+                ]).concat([
+                    scrollbarCss.rootFixed,
+                    horizontal ? scrollbarCss.horizontalFixed : scrollbarCss.verticalFixed,
+                    visible || dragging ? scrollbarCss.visibleFixed : scrollbarCss.invisibleFixed
+                ]),
                 key: key,
                 onclick: this._onclick,
                 onpointerenter: this._onpointerenter,
                 onpointerleave: this._onpointerleave
             }, [
                 d_1.v('div', {
-                    classes: this.classes(scrollbarCss.slider, dragging ? scrollbarCss.dragging : null)
-                        .fixed(scrollbarCss.sliderFixed),
+                    classes: this.theme([scrollbarCss.slider, dragging ? scrollbarCss.dragging : null]).concat([
+                        scrollbarCss.sliderFixed
+                    ]),
                     key: 'slider',
                     styles: styles
                 })
@@ -144,10 +153,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             var _g;
         };
         ScrollBar = __decorate([
-            Themeable_1.theme(scrollbarCss)
+            Themed_1.theme(scrollbarCss)
         ], ScrollBar);
         return ScrollBar;
-    }(ThemeableBase));
+    }(ThemedBase));
     exports.default = ScrollBar;
 });
 //# sourceMappingURL=ScrollBar.js.map

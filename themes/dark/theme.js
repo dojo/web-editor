@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./actionbar.m.css", "./actionbarbutton.m.css", "./editor.m.css", "./runner.m.css", "./scrollbar.m.css", "./tab.m.css", "./tablist.m.css", "./tablistscrollbar.m.css", "./toolbar.m.css", "./treepane.m.css", "./workbench.m.css"], factory);
+        define(["require", "exports", "./actionbar.m.css", "./actionbarbutton.m.css", "./editor.m.css", "./livecodeexample.m.css", "./runner.m.css", "./scrollbar.m.css", "./tab.m.css", "./tablist.m.css", "./tablistscrollbar.m.css", "./toolbar.m.css", "./treepane.m.css", "./workbench.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -12,6 +12,7 @@
     var actionbar = require("./actionbar.m.css");
     var actionbarbutton = require("./actionbarbutton.m.css");
     var editor = require("./editor.m.css");
+    var livecodeexample = require("./livecodeexample.m.css");
     var runner = require("./runner.m.css");
     var scrollbar = require("./scrollbar.m.css");
     var tab = require("./tab.m.css");
@@ -24,6 +25,7 @@
         'dojo-actionbar': actionbar,
         'dojo-actionbarbutton': actionbarbutton,
         'dojo-editor': editor,
+        'dojo-livecodeexample': livecodeexample,
         'dojo-runner': runner,
         'dojo-scrollbar': scrollbar,
         'dojo-tab': tab,
@@ -35,6 +37,7 @@
         actionbar: actionbar,
         actionbarbutton: actionbarbutton,
         editor: editor,
+        livecodeexample: livecodeexample,
         runner: runner,
         scrollbar: scrollbar,
         tab: tab,

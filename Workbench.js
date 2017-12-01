@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/object", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "./widgets/Editor", "./widgets/IconCss", "./widgets/Runner", "./widgets/Tablist", "./widgets/TreePane", "./widgets/Toolbar", "./support/icons", "./styles/icons.m.css", "./styles/workbench.m.css"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/shim/object", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themed", "@dojo/widget-core/WidgetBase", "./widgets/Editor", "./widgets/IconCss", "./widgets/Runner", "./widgets/Tablist", "./widgets/TreePane", "./widgets/Toolbar", "./support/icons", "./styles/icons.m.css", "./styles/workbench.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -28,7 +28,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var array_1 = require("@dojo/shim/array");
     var object_1 = require("@dojo/shim/object");
     var d_1 = require("@dojo/widget-core/d");
-    var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
+    var Themed_1 = require("@dojo/widget-core/mixins/Themed");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var Editor_1 = require("./widgets/Editor");
     var IconCss_1 = require("./widgets/IconCss");
@@ -38,8 +38,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var Toolbar_1 = require("./widgets/Toolbar");
     var icons_1 = require("./support/icons");
     var iconCss = require("./styles/icons.m.css");
-    var css = require("./styles/workbench.m.css");
-    var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
+    var workbenchCss = require("./styles/workbench.m.css");
+    var ThemedBase = Themed_1.ThemedMixin(WidgetBase_1.default);
     var Workbench = /** @class */ (function (_super) {
         __extends(Workbench, _super);
         function Workbench() {
@@ -53,6 +53,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             _this._getItemClass = function (item, expanded) {
                 if (typeof item.label === 'string') {
                     return item.children && item.children.length ? _this._iconResolver.folder(item.label, expanded) : _this._iconResolver.file(item.label);
+                }
+            };
+            _this._onbeforeunload = function (evt) {
+                if (_this.properties.model) {
+                    evt.returnValue = 'Do you wish to navigate away from this page?';
+                    return evt.returnValue;
                 }
             };
             _this._onFileTabClose = function (key, label) {
@@ -71,6 +77,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 if (onFileSelect && openFiles && openFiles[idx]) {
                     onFileSelect(openFiles[idx]);
                 }
+            };
+            _this._onresize = function () {
+                _this._layoutEditor = true;
+                _this.invalidate();
             };
             return _this;
         }
@@ -191,6 +201,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             this._layoutEditor = true;
             this.invalidate();
         };
+        Workbench.prototype.onAttach = function () {
+            window.addEventListener('resize', this._onresize);
+            window.addEventListener('beforeunload', this._onbeforeunload);
+        };
+        Workbench.prototype.onDetach = function () {
+            window.removeEventListener('resize', this._onresize);
+            window.removeEventListener('beforeunload', this._onbeforeunload);
+        };
         Workbench.prototype.render = function () {
             var _a = this, _expanded = _a._expanded, filesOpen = _a._fileTreeOpen, getItemClass = _a._getItemClass, layout = _a._layoutEditor, runnerOpen = _a._runnerOpen, selected = _a._selected, _b = _a.properties, icons = _b.icons, sourcePath = _b.iconsSourcePath, model = _b.model, program = _b.program, runnable = _b.runnable, theme = _b.theme, onDirty = _b.onDirty, onRunClick = _b.onRunClick;
             if (icons && sourcePath) {
@@ -203,7 +221,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 this._layoutEditor = false;
             }
             return d_1.v('div', {
-                classes: this.classes(css.root).fixed(css.rootFixed)
+                classes: [this.theme(workbenchCss.root), workbenchCss.rootFixed]
             }, [
                 d_1.w(IconCss_1.default, {
                     baseClass: iconCss.label,
@@ -212,7 +230,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     sourcePath: sourcePath
                 }),
                 d_1.v('div', {
-                    classes: this.classes(css.left, filesOpen ? null : css.closed),
+                    classes: this.theme([workbenchCss.left, filesOpen ? null : workbenchCss.closed]),
                     key: 'left'
                 }, [
                     d_1.w(TreePane_1.default, {
@@ -228,7 +246,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     })
                 ]),
                 d_1.v('div', {
-                    classes: this.classes(css.middle),
+                    classes: this.theme(workbenchCss.middle),
                     key: 'middle'
                 }, [
                     d_1.w(Toolbar_1.default, {
@@ -254,7 +272,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     })
                 ]),
                 d_1.v('div', {
-                    classes: this.classes(css.right, runnerOpen ? null : css.closed),
+                    classes: this.theme([workbenchCss.right, runnerOpen ? null : workbenchCss.closed]),
                     key: 'right'
                 }, [
                     d_1.w(Runner_1.default, runnerProperties)
@@ -262,10 +280,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             ]);
         };
         Workbench = __decorate([
-            Themeable_1.theme(css)
+            Themed_1.theme(workbenchCss)
         ], Workbench);
         return Workbench;
-    }(ThemeableBase));
+    }(ThemedBase));
     exports.default = Workbench;
 });
 //# sourceMappingURL=Workbench.js.map

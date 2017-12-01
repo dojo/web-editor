@@ -26,15 +26,17 @@ var __extends = (this && this.__extends) || (function () {
             var _this = this;
             this._nodeMap = new WeakMap_1.default();
             this._onmouseenter = function (event) {
+                // cannot end up here unless we have data in the map
                 var data = _this._nodeMap.get(event.target);
-                if (data && !data.hovering) {
+                if (!data.hovering) {
                     data.hovering = true;
                     data.invalidate();
                 }
             };
             this._onmouseleave = function (event) {
+                // cannot end up here unless we have data in the map
                 var data = _this._nodeMap.get(event.target);
-                if (data && data.hovering) {
+                if (data.hovering) {
                     data.hovering = false;
                     data.invalidate();
                 }

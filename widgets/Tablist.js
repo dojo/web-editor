@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "./ActionBar", "./ScrollBar", "./meta/Hover", "../styles/icons.m.css", "../styles/tab.m.css", "../styles/tablist.m.css", "../styles/tablistscrollbar.m.css"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/mixins/Themed", "@dojo/widget-core/WidgetBase", "./ActionBar", "./ScrollBar", "./meta/Hover", "../styles/icons.m.css", "../styles/tab.m.css", "../styles/tablist.m.css", "../styles/tablistscrollbar.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -28,7 +28,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var array_1 = require("@dojo/shim/array");
     var d_1 = require("@dojo/widget-core/d");
     var Dimensions_1 = require("@dojo/widget-core/meta/Dimensions");
-    var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
+    var Themed_1 = require("@dojo/widget-core/mixins/Themed");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var ActionBar_1 = require("./ActionBar");
     var ScrollBar_1 = require("./ScrollBar");
@@ -37,7 +37,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var tabCss = require("../styles/tab.m.css");
     var tablistCss = require("../styles/tablist.m.css");
     var tablistScrollbarCss = require("../styles/tablistscrollbar.m.css");
-    var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
+    var ThemeableBase = Themed_1.ThemedMixin(WidgetBase_1.default);
     /**
      * A widget which provides a tab representation of its properties
      */
@@ -61,7 +61,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             var _a = this.properties, iconClass = _a.iconClass, key = _a.key, label = _a.label, labelDescription = _a.labelDescription, selected = _a.selected, title = _a.title;
             return d_1.v('div', {
                 'aria-label': label + ", tab",
-                classes: this.classes(tabCss.root, selected ? tabCss.selected : null).fixed(tabCss.rootFixed),
+                classes: this.theme([tabCss.root, selected ? tabCss.selected : null]).concat([tabCss.rootFixed]),
                 key: key,
                 role: 'tab',
                 tabIndex: 0,
@@ -69,18 +69,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 onclick: this._onclick
             }, [
                 d_1.v('div', {
-                    classes: this.classes(tabCss.label).fixed(tabCss.labelFixed, iconCss.label, iconClass || null),
+                    classes: [this.theme(tabCss.label), tabCss.labelFixed, iconCss.label, iconClass || null],
                     title: title
                 }, [
                     d_1.v('a', {
-                        classes: this.classes().fixed(tabCss.link)
+                        classes: tabCss.link
                     }, [label]),
                     d_1.v('span', {
-                        classes: this.classes(tabCss.description).fixed(tabCss.descriptionFixed)
+                        classes: [this.theme(tabCss.description), tabCss.descriptionFixed]
                     }, [labelDescription])
                 ]),
                 d_1.v('div', {
-                    classes: this.classes(tabCss.closer),
+                    classes: this.theme(tabCss.closer),
                     key: 'closer'
                 }, [
                     d_1.w(ActionBar_1.default, {
@@ -96,7 +96,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             ]);
         };
         Tab = __decorate([
-            Themeable_1.theme(tabCss)
+            Themed_1.theme(tabCss)
         ], Tab);
         return Tab;
     }(ThemeableBase));
@@ -110,10 +110,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             return _super !== null && _super.apply(this, arguments) || this;
         }
         TablistScrollBar = __decorate([
-            Themeable_1.theme(tablistScrollbarCss)
+            Themed_1.theme(tablistScrollbarCss)
         ], TablistScrollBar);
         return TablistScrollBar;
     }(ScrollBar_1.default));
+    exports.TablistScrollBar = TablistScrollBar;
     /**
      * A widget which contains tabs
      */
@@ -140,7 +141,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 }
                 return d_1.v('div', {
                     key: child.properties.key,
-                    classes: _this.classes(tablistCss.tab).fixed(tablistCss.tabFixed)
+                    classes: [_this.theme(tablistCss.tab), tablistCss.tabFixed]
                 }, [child]);
             });
         };
@@ -189,12 +190,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             this._setPosition(tablistDimensions);
             var _a = this, _position = _a._position, theme = _a.properties.theme;
             return d_1.v('div', {
-                classes: this.classes(tablistCss.root).fixed(tablistCss.rootFixed),
+                classes: [this.theme(tablistCss.root), tablistCss.rootFixed],
                 key: 'root',
                 role: 'presentation'
             }, [
                 d_1.v('div', {
-                    classes: this.classes(tablistCss.tablist).fixed(tablistCss.tablistFixed),
+                    classes: [this.theme(tablistCss.tablist), tablistCss.tablistFixed],
                     key: 'tablist',
                     role: 'tablist',
                     styles: {
@@ -214,7 +215,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             ]);
         };
         Tablist = __decorate([
-            Themeable_1.theme(tablistCss)
+            Themed_1.theme(tablistCss)
         ], Tablist);
         return Tablist;
     }(ThemeableBase));

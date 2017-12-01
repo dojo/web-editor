@@ -55,17 +55,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/core/base64", "@dojo/core/lang", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/decorators/afterRender", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/util/DomWrapper", "../support/DOMParser", "../support/sourceMap", "../styles/runner.m.css"], factory);
+        define(["require", "exports", "@dojo/core/base64", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/decorators/afterRender", "@dojo/widget-core/mixins/Themed", "@dojo/widget-core/util/DomWrapper", "../support/DOMParser", "../support/sourceMap", "../styles/runner.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var base64 = require("@dojo/core/base64");
-    var lang_1 = require("@dojo/core/lang");
     var d_1 = require("@dojo/widget-core/d");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var afterRender_1 = require("@dojo/widget-core/decorators/afterRender");
-    var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
+    var Themed_1 = require("@dojo/widget-core/mixins/Themed");
     var DomWrapper_1 = require("@dojo/widget-core/util/DomWrapper");
     var DOMParser_1 = require("../support/DOMParser");
     var sourceMap_1 = require("../support/sourceMap");
@@ -101,7 +100,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
      * @param modules Any modules to be injected into the page
      * @return The generated HTML document
      */
-    function docSrc(strings, scripts, css, bodyAttributes, html, loaderSrc, dependencies, packages, modules) {
+    function docSrc(strings, scripts, css, bodyAttributes, html, loaderSrc, dependencies, packages, modules, main) {
         var paths = [];
         for (var pkg in dependencies) {
             paths.push("'" + pkg + "': 'https://unpkg.com/" + pkg + "@" + dependencies[pkg] + "'");
@@ -139,7 +138,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         for (var attr in bodyAttributes) {
             bodyAttributesText += " " + attr + "=\"" + bodyAttributes[attr] + "\"";
         }
-        var parts = [scriptsText, cssText, bodyAttributesText, html, loaderSrc, pathsText, packagesText, modulesText];
+        var mainText = "require([ '" + main + "' ], function () { });";
+        var parts = [scriptsText, cssText, bodyAttributesText, html, loaderSrc, pathsText, packagesText, modulesText, mainText];
         var text = parts
             .reduce(function (previous, text, index) {
             return previous + strings[index] + text + '\n';
@@ -165,13 +165,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
      * @param param0 Properties from the Runner to be used to specify the document
      */
     function getSource(_a) {
-        var _b = _a.css, css = _b === void 0 ? [] : _b, _c = _a.dependencies, dependencies = _c === void 0 ? {} : _c, _d = _a.loader, loader = _d === void 0 ? DEFAULT_LOADER_URI : _d, _e = _a.html, html = _e === void 0 ? '' : _e, _f = _a.modules, modules = _f === void 0 ? {} : _f;
-        var _g = parseHtml(html), attributes = _g.attributes, body = _g.body, text = _g.css, scripts = _g.scripts;
+        var _b = _a.css, css = _b === void 0 ? [] : _b, _c = _a.dependencies, dependencies = _c === void 0 ? {} : _c, _d = _a.loader, loader = _d === void 0 ? DEFAULT_LOADER_URI : _d, _e = _a.main, main = _e === void 0 ? 'src/main' : _e, _f = _a.html, html = _f === void 0 ? '' : _f, _g = _a.modules, modules = _g === void 0 ? {} : _g;
+        var _h = parseHtml(html), attributes = _h.attributes, body = _h.body, text = _h.css, scripts = _h.scripts;
         if (text) {
             css.unshift({ name: 'project index', text: text });
         }
-        return (_h = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"", "\"></script>\n\t\t\t\t<script>require.config({\n\tpaths: ", ",\n\tpackages: ", "\n});\n\nvar cache = {};\n//# sourceURL=web-editor/config.js\n\t\t\t\t</script>\n\t\t\t\t", "\n\t\t\t\t<script>require.cache(cache);\n/* workaround for dojo/loader#124 */\nrequire.cache({});\n\nrequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\tvar request = require('@dojo/core/request').default;\n\tvar getProvider = require('../support/providers/amdRequire').default;\n\trequest.setDefaultProvider(getProvider(require));\n\trequire([ 'src/main' ], function () { });\n});\n//# sourceURL=web-editor/bootstrap.js\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], _h.raw = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"", "\"></script>\n\t\t\t\t<script>require.config({\n\tpaths: ", ",\n\tpackages: ", "\n});\n\nvar cache = {};\n//# sourceURL=web-editor/config.js\n\t\t\t\t</script>\n\t\t\t\t", "\n\t\t\t\t<script>require.cache(cache);\n/* workaround for dojo/loader#124 */\nrequire.cache({});\n\nrequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\tvar request = require('@dojo/core/request').default;\n\tvar getProvider = require('../support/providers/amdRequire').default;\n\trequest.setDefaultProvider(getProvider(require));\n\trequire([ 'src/main' ], function () { });\n});\n//# sourceURL=web-editor/bootstrap.js\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], docSrc(_h, scripts, css, attributes, body, loader, dependencies, getPackages(dependencies), modules));
-        var _h;
+        return (_j = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"", "\"></script>\n\t\t\t\t<script>require.config({\n\tpaths: ", ",\n\tpackages: ", "\n});\n\nvar cache = {};\n//# sourceURL=web-editor/config.js\n\t\t\t\t</script>\n\t\t\t\t", "\n\t\t\t\t<script>require.cache(cache);\n\nrequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\tvar request = require('@dojo/core/request').default;\n\tvar getProvider = require('../support/providers/amdRequire').default;\n\trequest.setDefaultProvider(getProvider(require));\n\t", "\n});\n//# sourceURL=web-editor/bootstrap.js\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], _j.raw = ["<!DOCTYPE html>\n\t\t\t<html>\n\t\t\t<head>\n\t\t\t\t", "\n\t\t\t\t", "\n\t\t\t</head>\n\t\t\t<body", ">\n\t\t\t\t", "\n\t\t\t\t<script src=\"", "\"></script>\n\t\t\t\t<script>require.config({\n\tpaths: ", ",\n\tpackages: ", "\n});\n\nvar cache = {};\n//# sourceURL=web-editor/config.js\n\t\t\t\t</script>\n\t\t\t\t", "\n\t\t\t\t<script>require.cache(cache);\n\nrequire([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {\n\tvar request = require('@dojo/core/request').default;\n\tvar getProvider = require('../support/providers/amdRequire').default;\n\trequest.setDefaultProvider(getProvider(require));\n\t", "\n});\n//# sourceURL=web-editor/bootstrap.js\n\t\t\t\t</script>\n\t\t\t</body>\n\t\t\t</html>"], docSrc(_j, scripts, css, attributes, body, loader, dependencies, getPackages(dependencies), modules, main));
+        var _j;
     }
     /**
      * Determine if a string is a local or remote URI, returning `true` if remote, otherwise `false`
@@ -243,7 +243,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             });
         });
     }
-    var RunnerBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
+    var ThemedBase = Themed_1.ThemedMixin(WidgetBase_1.default);
     /**
      * A widget which will render its properties into a _runnable_ application within an `iframe`
      */
@@ -260,11 +260,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             var iframe = _this._iframe = document.createElement('iframe');
             iframe.setAttribute('src', DEFAULT_IFRAME_SRC);
             _this._IframeDom = DomWrapper_1.default(iframe);
-            _this.own(lang_1.createHandle(function () {
-                if (iframe.contentWindow) {
-                    iframe.contentWindow.removeEventListener('error', _this._onIframeError);
-                }
-            }));
             return _this;
         }
         Runner.prototype.updateSource = function (node) {
@@ -285,12 +280,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             }
             return node;
         };
+        Runner.prototype.onDetach = function () {
+            if (this._iframe.contentWindow) {
+                this._iframe.contentWindow.removeEventListener('error', this._onIframeError);
+            }
+        };
         Runner.prototype.render = function () {
             var _a = this.properties.src, src = _a === void 0 ? DEFAULT_IFRAME_SRC : _a;
             return d_1.v('div', {
-                classes: this.classes(runnerCss.root).fixed(runnerCss.rootFixed)
+                classes: [this.theme(runnerCss.root), runnerCss.rootFixed]
             }, [d_1.w(this._IframeDom, {
-                    classes: this.classes(runnerCss.iframe).fixed(runnerCss.iframeFixed),
+                    classes: [this.theme(runnerCss.iframe), runnerCss.iframeFixed],
                     key: 'runner',
                     src: src,
                     title: 'Runner'
@@ -300,10 +300,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             afterRender_1.default()
         ], Runner.prototype, "updateSource", null);
         Runner = __decorate([
-            Themeable_1.theme(runnerCss)
+            Themed_1.theme(runnerCss)
         ], Runner);
         return Runner;
-    }(RunnerBase));
+    }(ThemedBase));
     exports.default = Runner;
 });
 //# sourceMappingURL=Runner.js.map

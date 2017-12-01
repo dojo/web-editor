@@ -1,0 +1,1 @@
+{"version":3,"file":"browser.js","sourceRoot":"","sources":["browser.ts"],"names":[],"mappings":";;;;;;;;;;IAAA,4BAA4B,CAAC;;IAC7B,iBAAe;IAEf,mCAAmC,CAAC;IACpC,iCAA+B","sourcesContent":["`!has('dom-pointer-events')`;\nimport 'pepjs';\n\n`!has('dom-intersection-observer')`;\nimport 'intersection-observer';\n"]}

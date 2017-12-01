@@ -20,7 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/meta/Drag", "@dojo/widget-core/mixins/Themeable", "./ScrollBar", "../styles/treepane.m.css", "../styles/icons.m.css"], factory);
+        define(["require", "exports", "@dojo/shim/array", "@dojo/widget-core/d", "@dojo/widget-core/WidgetBase", "@dojo/widget-core/meta/Dimensions", "@dojo/widget-core/meta/Drag", "@dojo/widget-core/mixins/Themed", "./ScrollBar", "../styles/treepane.m.css", "../styles/icons.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -30,13 +30,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var Dimensions_1 = require("@dojo/widget-core/meta/Dimensions");
     var Drag_1 = require("@dojo/widget-core/meta/Drag");
-    var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
+    var Themed_1 = require("@dojo/widget-core/mixins/Themed");
     var ScrollBar_1 = require("./ScrollBar");
     var css = require("../styles/treepane.m.css");
     var iconCss = require("../styles/icons.m.css");
     var ROW_HEIGHT = 22;
     var ROW_LEVEL_LEFT_PADDING = 12;
-    var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
+    var ThemedBase = Themed_1.ThemedMixin(WidgetBase_1.default);
     /**
      * The internal widget class which renders a row in the `TreePane`
      */
@@ -62,7 +62,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             return d_1.v('div', {
                 'aria-level': String(level),
                 'aria-selected': selected,
-                classes: this.classes.apply(this, classes),
+                classes: this.theme(classes),
                 role: 'treeitem',
                 styles: {
                     'padding-left': String(level * ROW_LEVEL_LEFT_PADDING) + 'px'
@@ -71,24 +71,24 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                 ondblclick: _ondblclick
             }, [
                 d_1.v('div', {
-                    classes: this.classes(css.content)
+                    classes: this.theme(css.content)
                 }, [
                     d_1.v('div', {
-                        classes: this.classes(css.label).fixed(iconCss.label, rowClass || null),
+                        classes: [this.theme(css.label), iconCss.label, rowClass || null],
                         title: title
                     }, [
                         d_1.v('a', {
-                            classes: this.classes(css.labelName)
+                            classes: this.theme(css.labelName)
                         }, [label])
                     ])
                 ])
             ]);
         };
         Row = __decorate([
-            Themeable_1.theme(css)
+            Themed_1.theme(css)
         ], Row);
         return Row;
-    }(ThemeableBase));
+    }(ThemedBase));
     exports.Row = Row;
     /**
      * A widget class which takes a tree of items with a root specified as the `root` property and renders them into
@@ -111,7 +111,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             return _this;
         }
         /**
-         * Search the tree of items to find one item, in a BFS fashion
+         * Search the tree of items to find one item, in a Breadth First Search fashion
          * @param id The tree pane item ID to match
          */
         TreePane.prototype._findItem = function (id) {
@@ -344,14 +344,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             return d_1.v('div', {
                 'aria-hidden': false,
                 'aria-label': label,
-                classes: this.classes(css.root),
+                classes: this.theme(css.root),
                 key: key,
                 role: 'tree',
                 onmouseenter: this._onmouseenter,
                 onmouseleave: this._onmouseleave
             }, [
                 d_1.v('div', {
-                    classes: this.classes(css.scroll),
+                    classes: this.theme(css.scroll),
                     key: 'rows',
                     role: 'presentation',
                     styles: {
@@ -372,10 +372,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             ]);
         };
         TreePane = __decorate([
-            Themeable_1.theme(css)
+            Themed_1.theme(css)
         ], TreePane);
         return TreePane;
-    }(ThemeableBase));
+    }(ThemedBase));
     exports.default = TreePane;
 });
 //# sourceMappingURL=TreePane.js.map

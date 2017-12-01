@@ -49,7 +49,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "vs/editor/editor.main", "@dojo/core/Evented", "@dojo/core/lang", "@dojo/core/request", "@dojo/shim/array", "@dojo/shim/WeakMap", "./support/css", "./support/json", "./support/providers/xhr"], factory);
+        define(["require", "exports", "vs/editor/editor.main", "@dojo/core/Evented", "@dojo/core/lang", "@dojo/core/request", "@dojo/shim/array", "@dojo/shim/WeakMap", "./support/css", "./support/json"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -62,9 +62,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     var WeakMap_1 = require("@dojo/shim/WeakMap");
     var css_1 = require("./support/css");
     var json_1 = require("./support/json");
-    var xhr_1 = require("./support/providers/xhr");
-    /* Changes to a provider that doesn't have issue https://github.com/dojo/core/issues/328 */
-    request_1.default.setDefaultProvider(xhr_1.default);
     /**
      * Flatten a TypeScript diagnostic message
      *
@@ -101,7 +98,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
      */
     function createMonacoModel(_a) {
         var filename = _a.name, text = _a.text, type = _a.type;
-        return monaco.editor.createModel(text, getLanguageFromType(type), monaco.Uri.file(filename));
+        var uri = monaco.Uri.file(filename);
+        return monaco.editor.getModel(uri) || monaco.editor.createModel(text, getLanguageFromType(type), uri);
     }
     /**
      * Convert a `ProjectFileType` to a monaco-editor language
@@ -132,7 +130,50 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 return 'unknown';
         }
     }
+    function getTypeFromFilename(name) {
+        var nameparts = name.toLowerCase().split('.');
+        var extension = nameparts.pop();
+        switch (extension) {
+            case 'tsx':
+            case 'ts':
+                if (nameparts.pop() === 'd') {
+                    return 2 /* Definition */;
+                }
+                return 1 /* TypeScript */;
+            case 'html':
+                return 6 /* HTML */;
+            case 'js':
+            case 'jsx':
+            case 'es':
+                return 4 /* JavaScript */;
+            case 'md':
+                return 7 /* Markdown */;
+            case 'css':
+                return 5 /* CSS */;
+            case 'json':
+                return 8 /* JSON */;
+            case 'xml':
+                return 9 /* XML */;
+            case 'map':
+                return 10 /* SourceMap */;
+            default:
+                return 11 /* PlainText */;
+        }
+    }
+    exports.getTypeFromFilename = getTypeFromFilename;
     var ScriptTarget = monaco.languages.typescript.ScriptTarget;
+    var JsxEmit = monaco.languages.typescript.JsxEmit;
+    function getJsxEmit(type) {
+        switch (type) {
+            case 'preserve':
+                return JsxEmit.Preserve;
+            case 'react':
+            case 'react-native':
+                return JsxEmit.React;
+            default:
+                return JsxEmit.None;
+        }
+    }
     function getScriptTarget(type) {
         switch (type) {
             case 'es3':
@@ -261,9 +302,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             var _a = this._project.tsconfig.compilerOptions, compilerOptions = _a === void 0 ? {} : _a;
             var options = {};
             /* copied from tsconfig.json */
-            var experimentalDecorators = compilerOptions.experimentalDecorators, lib = compilerOptions.lib, noImplicitAny = compilerOptions.noImplicitAny, noImplicitThis = compilerOptions.noImplicitThis, noImplicitReturns = compilerOptions.noImplicitReturns, noLib = compilerOptions.noLib, noUnusedLocals = compilerOptions.noUnusedLocals, noUnusedParameters = compilerOptions.noUnusedParameters, strictNullChecks = compilerOptions.strictNullChecks, target = compilerOptions.target, types = compilerOptions.types;
+            var experimentalDecorators = compilerOptions.experimentalDecorators, jsx = compilerOptions.jsx, jsxFactory = compilerOptions.jsxFactory, lib = compilerOptions.lib, noImplicitAny = compilerOptions.noImplicitAny, noImplicitThis = compilerOptions.noImplicitThis, noImplicitReturns = compilerOptions.noImplicitReturns, noLib = compilerOptions.noLib, noUnusedLocals = compilerOptions.noUnusedLocals, noUnusedParameters = compilerOptions.noUnusedParameters, strictNullChecks = compilerOptions.strictNullChecks, target = compilerOptions.target, types = compilerOptions.types;
             lang_1.assign(options, {
                 experimentalDecorators: experimentalDecorators,
+                jsx: getJsxEmit(jsx),
+                jsxFactory: jsxFactory,
                 lib: lib,
                 noImplicitAny: noImplicitAny,
                 noImplicitThis: noImplicitThis,
@@ -340,6 +383,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 });
             });
         };
+        Project.prototype.addFile = function (file) {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (!this._project) {
+                                throw new Error("Project not loaded.");
+                            }
+                            if (this.includes(file.name)) {
+                                throw new Error("File \"" + file.name + "\" already exists in project.");
+                            }
+                            this._project.files.push(file);
+                            return [4 /*yield*/, this.setFileDirty(file.name)];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        };
         /**
          * Take the currently loaded project and emit it
          */
@@ -364,7 +427,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                             });
                             return [4 /*yield*/, monaco.languages.typescript.getTypeScriptWorker()];
                         case 1:
-                            worker = _a.sent();
+                            worker = (_a.sent());
                             return [4 /*yield*/, worker.apply(void 0, typescriptFileUris)];
                         case 2:
                             services = _a.sent();
@@ -661,6 +724,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                             this._getProjectFileData(file).dirty = !reset;
                             _a.label = 3;
                         case 3: return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        Project.prototype.setFileText = function (filename, value) {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (!this.includes(filename)) {
+                                throw new Error("File \"" + filename + "\" is not part of the project.");
+                            }
+                            this.getFileModel(filename).setValue(value);
+                            return [4 /*yield*/, this.setFileDirty(filename)];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/];
                     }
                 });
             });

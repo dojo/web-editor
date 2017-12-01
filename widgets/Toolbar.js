@@ -20,18 +20,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themeable", "@dojo/widget-core/WidgetBase", "./ActionBar", "./Tablist", "../styles/toolbar.m.css"], factory);
+        define(["require", "exports", "@dojo/widget-core/d", "@dojo/widget-core/mixins/Themed", "@dojo/widget-core/WidgetBase", "./ActionBar", "./Tablist", "../styles/toolbar.m.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var d_1 = require("@dojo/widget-core/d");
-    var Themeable_1 = require("@dojo/widget-core/mixins/Themeable");
+    var Themed_1 = require("@dojo/widget-core/mixins/Themed");
     var WidgetBase_1 = require("@dojo/widget-core/WidgetBase");
     var ActionBar_1 = require("./ActionBar");
     var Tablist_1 = require("./Tablist");
     var toolbarCss = require("../styles/toolbar.m.css");
-    var ThemeableBase = Themeable_1.ThemeableMixin(WidgetBase_1.default);
+    var ThemedBase = Themed_1.ThemedMixin(WidgetBase_1.default);
     /**
      * A widget which provides a tab list of tabs based on open files and three actions buttons to control the workbench UI
      * What tabs are displayed are the widget's children.
@@ -57,7 +57,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
         Toolbar.prototype.render = function () {
             var _a = this.properties, filesOpen = _a.filesOpen, runnable = _a.runnable, runnerOpen = _a.runnerOpen, theme = _a.theme;
             return d_1.v('div', {
-                classes: this.classes(toolbarCss.root).fixed(toolbarCss.rootFixed),
+                classes: [this.theme(toolbarCss.root), toolbarCss.rootFixed],
                 key: 'root'
             }, [
                 d_1.w(ActionBar_1.default, {
@@ -98,10 +98,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
             ]);
         };
         Toolbar = __decorate([
-            Themeable_1.theme(toolbarCss)
+            Themed_1.theme(toolbarCss)
         ], Toolbar);
         return Toolbar;
-    }(ThemeableBase));
+    }(ThemedBase));
     exports.default = Toolbar;
 });
 //# sourceMappingURL=Toolbar.js.map
