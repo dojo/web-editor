@@ -22,7 +22,7 @@
 	padding: 5px;
 	align-self: center;
 	vertical-align: middle;
-	color: #ffffff;
+	color: var(--dark-off-white);
 	font-family: "Lucida Console";
 	font-size: 0.7em;
 	white-space: pre;
@@ -56,33 +56,29 @@
 }
 
 .log .meta {
-	color: green;
-	color: #99C05F;
+	color: var(--dark-green);
 }
 
 .error .meta {
-	color: #EE727A;
-	/* background-color: rgba(249, 144, 148, 0.1); */
+	color: var(--dark-red);
 }
 
 .info .meta {
-	color: #204E8A;
-	/* background-color: rgba(32 78 138, 0.1); */
+	color: var(--dark-light-blue);
 }
 
 .warn .meta {
-	color: #FECA72;
-	/* background-color: rgba(252, 225, 159, 0.1); */
+	color: var(--dark-yellow);
 }
 
 .warn.consoleRow {
-	background-color: rgba(252, 225, 159, 0.1);
+	background-color: var(--dark-light-yellow);
 }
 
 .error.consoleRow {
-	background-color: rgba(249, 144, 148, 0.1);
+	background-color: var(--dark-light-red);
 }
 
 .info {
-	background-color: rgba(32 78 138, 0.1);
+	background-color: var(--light-blue);
 }
