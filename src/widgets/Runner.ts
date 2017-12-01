@@ -9,7 +9,7 @@ import DomWrapper from '@dojo/widget-core/util/DomWrapper';
 import { Program } from '../project';
 import DOMParser from '../support/DOMParser';
 import { wrapCode } from '../support/sourceMap';
-import { ConsoleMessage } from './Console';
+import { ConsoleMessage, ConsoleMessageType } from './Console';
 
 import * as runnerCss from '../styles/runner.m.css';
 
@@ -310,9 +310,10 @@ export default class Runner extends ThemedBase<RunnerProperties> {
 	private _iframe: HTMLIFrameElement;
 	private _IframeDom: Constructor<WidgetBase<VirtualDomProperties & WidgetProperties>>;
 	private _onIframeError = (evt: ErrorEvent) => {
-		evt.preventDefault();
-		const { onError } = this.properties;
+		const { onError, onConsoleMessage } = this.properties;
 		onError && onError(evt.error);
+		onConsoleMessage && onConsoleMessage({ type: ConsoleMessageType.Error, message: evt.message });
+		return false;
 	}
 	private _updating = false;
 

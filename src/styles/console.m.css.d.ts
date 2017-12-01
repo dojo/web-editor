@@ -5,6 +5,7 @@ export const typeLabel: string;
 export const filename: string;
 export const lineNumber: string;
 export const log: string;
+export const logArg: string;
 export const logBody: string;
 export const error: string;
 export const info: string;

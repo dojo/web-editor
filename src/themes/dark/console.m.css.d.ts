@@ -2,6 +2,7 @@ export const root: string;
 export const messageContainer: string;
 export const consoleRow: string;
 export const logBody: string;
+export const logArg: string;
 export const meta: string;
 export const typeLabel: string;
 export const filename: string;

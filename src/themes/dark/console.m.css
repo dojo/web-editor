@@ -20,20 +20,25 @@
 
 .logBody {
 	padding: 5px;
+	align-self: center;
 	vertical-align: middle;
 	color: #ffffff;
 	font-family: "Lucida Console";
+	font-size: 0.7em;
 	white-space: pre;
-	align-self: center;
+}
+
+.logArg {
+	padding: 0 5px;
 }
 
 .meta {
+	font-family: "Lucida Console";
 	display: inline-block;
 	font-weight: bold;
 	text-transform: uppercase;
 	width: 64px;
 	text-align: center;
-	font-size: 0.8em;
 	padding: 5px;
 	margin-right: 10px;
 	display: flex;

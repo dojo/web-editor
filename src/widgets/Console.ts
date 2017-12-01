@@ -53,7 +53,7 @@ export class ConsoleRow extends ThemedBase<ConsoleRowProperties> {
 			}, [ v('span', { classes: this.theme(css.typeLabel) }, [ type]) ]),
 			v('span', {
 				classes: this.theme(css.logBody)
-			}, args.map((arg) => stringify(arg)))
+			}, [ ...args.map((arg) => v('span', { classes: this.theme(css.logArg) }, [ stringify(arg) ])) ])
 		]);
 	}
 }
