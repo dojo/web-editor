@@ -269,6 +269,7 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 
 	private _onToggleConsole() {
 		this._consoleOpen = !this._consoleOpen;
+		this._layoutEditor = true;
 		this.invalidate();
 	}
 
@@ -285,7 +286,9 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 			errors.map((error) => {
 				this._addConsoleMessage({
 					type: ConsoleMessageType.Error,
-					args: [ error.line, error.character, error.message ]
+					message: error.message,
+					lineNumber: error.lineNumber,
+					filename: error.filename
 				});
 			});
 		});

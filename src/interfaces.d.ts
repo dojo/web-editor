@@ -9,8 +9,9 @@ export interface EmitFile {
 
 export interface EmitError {
 	message: string;
-	line?: number;
+	lineNumber?: number;
 	character?: number;
+	filename?: string;
 }
 
 export interface PromiseLanguageService {

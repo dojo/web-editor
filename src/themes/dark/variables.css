@@ -39,6 +39,7 @@
 	--border-thick: 5px;
 	--tab-width: 120px;
 	--min-container-height: 250px;
+	--console-height: 400px;
 
 	/* Composed values */
 	--title-bar-bg: var(--dark-blue);

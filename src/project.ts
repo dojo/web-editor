@@ -200,9 +200,10 @@ export class Project extends Evented {
 			const error: EmitError = { message };
 			if (diagnostic.file && diagnostic.start) {
 				const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-				error.line = line;
-				error.character = character;
-				console.warn(`Error ${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
+				const filename = diagnostic.file.fileName;
+				error.lineNumber = line + 1;
+				error.filename = filename;
+				console.warn(`Error ${filename} (${line + 1},${character + 1}): ${message}`);
 			}
 			else {
 				console.warn(`Error: ${message}`);

@@ -2,6 +2,7 @@
 
 .root {
 	flex: 1 0 36px;
+	height: 36px;
 }
 
 /* Fixed classes */

@@ -2,21 +2,82 @@
 
 .root {
 	background: var(--dark-light-black);
-	flex: 2 1 400px;
+	border: 1px solid var(--dark-med-black);
 }
 
-.log {
+.messageContainer {
+	border-top: 1px solid var(--dark-med-black);
+	background-color: var(--dark-light-black);
+	overflow-y: scroll;
+	height: var(--console-height);
+}
+
+.consoleRow {
+	margin: 0;
+	padding: 0;
+	display: flex;
+}
+
+.logBody {
+	padding: 5px;
+	vertical-align: middle;
+	color: #ffffff;
+	font-family: "Lucida Console";
+	white-space: pre;
+	align-self: center;
+}
+
+.meta {
+	display: inline-block;
+	font-weight: bold;
+	text-transform: uppercase;
+	width: 64px;
+	text-align: center;
+	font-size: 0.8em;
+	padding: 5px;
+	margin-right: 10px;
+	display: flex;
+	align-items: center;
+}
+
+.typeLabel {
+	width: 100%;
+}
+
+.filename {
+}
+
+.lineNumber {
+}
+
+.log .meta {
 	color: green;
+	color: #99C05F;
 }
 
-.error {
-	color: red;
+.error .meta {
+	color: #EE727A;
+	/* background-color: rgba(249, 144, 148, 0.1); */
+}
+
+.info .meta {
+	color: #204E8A;
+	/* background-color: rgba(32 78 138, 0.1); */
+}
+
+.warn .meta {
+	color: #FECA72;
+	/* background-color: rgba(252, 225, 159, 0.1); */
+}
+
+.warn.consoleRow {
+	background-color: rgba(252, 225, 159, 0.1);
+}
+
+.error.consoleRow {
+	background-color: rgba(249, 144, 148, 0.1);
 }
 
 .info {
-	color: blue;
-}
-
-.warn {
-	color: orange;
+	background-color: rgba(32 78 138, 0.1);
 }
