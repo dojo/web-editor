@@ -1,5 +1,3 @@
-import 'vs/editor/editor.main'; /* imported for side-effects */
-
 import { assign } from '@dojo/shim/object';
 import { v, w } from '@dojo/widget-core/d';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
