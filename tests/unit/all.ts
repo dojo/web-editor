@@ -1,3 +1,5 @@
+import './LiveCodeController';
+import './LiveCodeExample';
 import './main';
 import './project';
 import './routing';

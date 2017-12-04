@@ -1,7 +1,7 @@
 {
 	"capabilities": {
 		"project": "Dojo 2",
-		"name": "@dojo/widgets",
+		"name": "@dojo/web-editor",
 		"browserstack.debug": false
 	},
 
@@ -58,6 +58,7 @@
 	"coverage": [
 		"./dev/src/*.js",
 		"./dev/src/support/**/*.js",
+		"./dev/src/widgets/**/*.js",
 		"!./dev/src/support/worker-proxy.js",
 		"!./dev/src/support/providers/xhr.js"
 	],
