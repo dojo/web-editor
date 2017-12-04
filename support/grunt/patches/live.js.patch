@@ -1,0 +1,15 @@
+diff --git a/examples/live.js b/examples/live.js
+index 3c1748b..8a5ae5b 100644
+--- a/examples/live.js
++++ b/examples/live.js
+@@ -61,8 +61,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
+     var LiveCodeExample_1 = require("../LiveCodeExample");
+     var project_1 = require("../project");
+     var editorThemes_1 = require("../support/editorThemes");
+-    var EDITOR_THEME = '../../data/editor-dark.json';
+-    var PROJECT_JSON = '../../../projects/live-editor.project.json';
++    var EDITOR_THEME = '../data/editor-dark.json';
++    var PROJECT_JSON = '../projects/live-editor.project.json';
+     var GREEKING = "Quidne tamen pulvinar ratis verto antehabeo quidne. Haero letatio semper ex zelus autem etiam. Utrum sino ratis validus nec. Sino delenit pecus vulpes autem ventosus. Saepius roto vindico himenaeos utinam sed mus probo. Pulvinar sed nam vestibulum curabitur gravida. Condimentum reprobo gravis semper morbi letalis tum scelerisque torquent. Platea ne sudo praesent leo secundum.";
+     var text = "import WidgetBase from '@dojo/widget-core/WidgetBase';\nimport ProjectorMixin from '@dojo/widget-core/mixins/Projector';\nimport { w } from '@dojo/widget-core/d';\nimport Button from '@dojo/widgets/button/Button';\nimport theme from '@dojo/widgets/themes/dojo/theme';\n\nclass HelloWorld extends WidgetBase {\n\trender() {\n\t\treturn w(Button, {\n\t\t\ttheme,\n\t\t\tonClick() { alert('I was clicked!'); }\n\t\t}, [ 'Click me!' ]);\n\t}\n}\n\nconst projector = new (ProjectorMixin(HelloWorld))();\nprojector.append();\n";
+     var text1 = "import WidgetBase from '@dojo/widget-core/WidgetBase';\nimport ProjectorMixin from '@dojo/widget-core/mixins/Projector';\nimport { tsx } from '@dojo/widget-core/tsx';\n\nclass HelloWorld extends WidgetBase {\n\trender() {\n\t\treturn (\n\t\t\t<div>\n\t\t\t\tHello world!\n\t\t\t</div>\n\t\t);\n\t}\n}\n\nconst projector = new (ProjectorMixin(HelloWorld))();\nprojector.append();\n";

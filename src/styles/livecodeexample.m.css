@@ -1,0 +1,25 @@
+/* Themed classes */
+
+.root {
+	padding: 1em;
+}
+
+.left {
+	flex: 1;
+}
+
+.description > p {
+	margin: 1em;
+	padding: 0;
+}
+
+.right {
+	flex: 2;
+	padding-left: 16px;
+}
+
+/* Fixed classes */
+
+.rootFixed {
+	display: flex;
+}

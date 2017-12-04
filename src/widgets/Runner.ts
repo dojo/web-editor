@@ -18,6 +18,8 @@ export interface RunnerProperties extends Partial<Program>, ThemedProperties {
 	 */
 	loader?: string;
 
+	main?: string;
+
 	/**
 	 * A URI that points to the `src` to set on the Runner's `iframe`. Defaults to `../support/blank.html`
 	 */
@@ -80,7 +82,8 @@ function docSrc(
 	loaderSrc: string,
 	dependencies: { [pkg: string]: string; },
 	packages: string[],
-	modules: { [mid: string]: { code: string, map: string } }
+	modules: { [mid: string]: { code: string, map: string } },
+	main: string
 ): string {
 	const paths: string[] = [];
 	for (const pkg in dependencies) {
@@ -126,7 +129,9 @@ function docSrc(
 		bodyAttributesText += ` ${attr}="${bodyAttributes[attr]}"`;
 	}
 
-	const parts = [ scriptsText, cssText, bodyAttributesText, html, loaderSrc, pathsText, packagesText, modulesText ];
+	const mainText = `require([ '${main}' ], function () { });`;
+
+	const parts = [ scriptsText, cssText, bodyAttributesText, html, loaderSrc, pathsText, packagesText, modulesText, mainText ];
 
 	const text = parts
 		.reduce((previous, text, index) => {
@@ -155,7 +160,7 @@ function getPackages(dependencies: { [pkg: string]: string; }): string[] {
  * Generate an HTML page which represents the Runner properties
  * @param param0 Properties from the Runner to be used to specify the document
  */
-function getSource({ css = [], dependencies = {}, loader = DEFAULT_LOADER_URI, html = '', modules = {} }: RunnerProperties): string {
+function getSource({ css = [], dependencies = {}, loader = DEFAULT_LOADER_URI, main = 'src/main', html = '', modules = {} }: RunnerProperties): string {
 	const { attributes, body, css: text, scripts } = parseHtml(html);
 	if (text) {
 		css.unshift({ name: 'project index', text });
@@ -180,14 +185,12 @@ var cache = {};
 				</script>
 				${modules}
 				<script>require.cache(cache);
-/* workaround for dojo/loader#124 */
-require.cache({});
 
 require([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {
 	var request = require('@dojo/core/request').default;
 	var getProvider = require('../support/providers/amdRequire').default;
 	request.setDefaultProvider(getProvider(require));
-	require([ 'src/main' ], function () { });
+	${main}
 });
 //# sourceURL=web-editor/bootstrap.js
 				</script>

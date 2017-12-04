@@ -80,8 +80,11 @@ class App extends WidgetBase {
 		this.invalidate();
 	}
 
-	private _onDirty() {
+	private async _onDirty() {
 		this._projectDirty = true;
+		if (project.isLoaded() && this._editorFilename) {
+			await project.setFileDirty(this._editorFilename);
+		}
 		this.invalidate();
 	}
 

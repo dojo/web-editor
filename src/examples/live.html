@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+	<title>@dojo/web-editor – Live Editor</title>
+	<!-- manually include widget styles until converted fully to WebPack -->
+	<link href="../styles/widgets.css" rel="stylesheet">
+</head>
+<body>
+	<!-- postcss is created a single bundle that exports `postcss`, `cssnext`, `postcssModules` to the global namespace -->
+	<script src="../external/postcss-bundle.js"></script>
+
+	<!-- TODO: The Dojo 2 loader appears to provide a different scope to a plugin than expected which causes errors -->
+	<script src="../../../node_modules/monaco-editor/min/vs/loader.js"></script>
+	<script>
+		window.MonacoEnvironment = {
+			getWorkerUrl: function () {
+				return '../support/worker-proxy.js';
+			}
+		};
+
+		require.config({
+			paths: {
+				'vs': '../../../node_modules/monaco-editor/min/vs',
+				'@dojo': '../../../node_modules/@dojo',
+				'maquette': '../../../node_modules/maquette/dist/maquette.min',
+				'pepjs': '../../../node_modules/pepjs/dist/pep',
+				'source-map': '../../../node_modules/source-map/dist/source-map.min',
+				'tslib': '../../../node_modules/tslib/tslib'
+			}
+		});
+
+		require([ '@dojo/shim/Promise', '@dojo/shim/Symbol', './live' ], function () {});
+	</script>
+</body>
+</html>

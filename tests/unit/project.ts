@@ -92,8 +92,11 @@ registerSuite('project', {
 		async 'load'() {
 			await project.load('project.json');
 			assert.isTrue(setCompilerOptionsSpy.called);
-			assert.deepEqual(setCompilerOptionsSpy.lastCall.args[0], { experimentalDecorators: undefined,
+			assert.deepEqual(setCompilerOptionsSpy.lastCall.args[0], {
+				experimentalDecorators: undefined,
 				lib: undefined,
+				jsx: 0,
+				jsxFactory: undefined,
 				noImplicitAny: undefined,
 				noImplicitThis: undefined,
 				noImplicitReturns: undefined,

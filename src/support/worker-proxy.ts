@@ -10,4 +10,4 @@ interface Window {
 self.MonacoEnvironment = {
 	baseUrl: '../../../node_modules/monaco-editor/min/'
 };
-importScripts('../../../node_modules/monaco-editor/min/vs/base/worker/workerMain.js');
+(self as any).importScripts('../../../node_modules/monaco-editor/min/vs/base/worker/workerMain.js');
