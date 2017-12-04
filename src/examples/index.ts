@@ -5,7 +5,7 @@ import Projector from '@dojo/widget-core/mixins/Projector';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import project, { Program } from '../project';
 import Workbench from '../Workbench';
-import { load as loadTheme } from '../support/editorThemes';
+import { loadMonaco, loadTheme } from '../support/monaco';
 import { IconJson, load as loadIcons } from '../support/icons';
 import darkTheme from '../themes/dark/theme';
 
@@ -109,6 +109,15 @@ class App extends WidgetBase {
 		catch (err) {
 			console.error(err);
 		}
+	}
+
+	constructor() {
+		super();
+		loadMonaco({
+			basePath: '..',
+			proxyPath: '../support/worker-proxy.js',
+			loaderPath: '../vs/loader.js'
+		});
 	}
 
 	render() {

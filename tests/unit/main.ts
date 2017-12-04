@@ -40,7 +40,7 @@ registerSuite('main', {
 			assert.strictEqual(main.project, project);
 			assert.strictEqual(main.routing, routing);
 			assert.strictEqual(main.Workbench, Workbench);
-			assert.lengthOf(Object.keys(main), 3, 'should have only 3 exports');
+			assert.lengthOf(Object.keys(main), 4, 'should have only 3 exports');
 		}
 	}
 });

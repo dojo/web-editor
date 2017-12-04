@@ -1,8 +1,8 @@
 import { ProjectFile, ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
 import { EmitFile } from '../interfaces';
-import postcss from './postcss';
-import cssnext from './postcssCssnext';
-import postcssModules from './postcssModules';
+import postcss = require('postcss');
+import cssnext = require('postcss-cssnext');
+import postcssModules = require('postcss-modules');
 
 /**
  * Take a map of classes and return the text of a `.d.ts` file which describes those class names

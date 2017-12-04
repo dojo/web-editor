@@ -28,6 +28,7 @@
 	"include": [
 		"./src/**/*.ts",
 		"./tests/**/*.ts",
-		"./support/intern/Reporter.ts"
+		"./support/intern/Reporter.ts",
+		"./typings/**/*.d.ts"
 	]
 }
