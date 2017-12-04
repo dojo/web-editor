@@ -286,7 +286,6 @@ export default class Runner extends ThemedBase<RunnerProperties> {
 
 	constructor() {
 		super();
-
 		const iframe = this._iframe = document.createElement('iframe');
 		iframe.setAttribute('src', DEFAULT_IFRAME_SRC);
 		this._IframeDom = DomWrapper(iframe);
