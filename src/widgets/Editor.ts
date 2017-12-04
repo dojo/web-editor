@@ -17,6 +17,12 @@ const MINIMUM_WIDTH = 150;
  */
 export interface EditorProperties extends ThemedProperties {
 	/**
+	 * The interval, in milliseconds, when the last change to the editor causes it to call `onDirty`.  It will default to
+	 * `1000` (1 second)
+	 */
+	changeInterval?: number;
+
+	/**
 	 * Ensure that monaco-editor instance is layed out in a way that allows the document to reflow and resize the editor properly
 	 */
 	layout?: boolean;
@@ -121,13 +127,24 @@ export default class Editor extends ThemedBase<EditorProperties> {
 	}
 
 	protected onAttach() {
-		const { _onDidChangeModelContent, _editorRoot, properties: { model, onInit, onLayout, options } } = this;
-		// _onAttached fires when the DOM is actually attached to the document, but the rest of the virtual DOM hasn't
+		const {
+			_onDidChangeModelContent,
+			_editorRoot,
+			properties: {
+				changeInterval = 1000,
+				model,
+				onInit,
+				onLayout,
+				options
+			}
+		} = this;
+
+		// onAttach fires when the DOM is actually attached to the document, but the rest of the virtual DOM hasn't
 		// been layed out which causes issues for monaco-editor when figuring out its initial size, so we will schedule
 		// it to be run at the end of the turn, which will provide more reliable layout
 		queueTask(() => {
 			const editor = this._editor = monaco.editor.create(_editorRoot, options);
-			this._didChangeHandle = editor.onDidChangeModelContent(debounce(_onDidChangeModelContent, 1000));
+			this._didChangeHandle = editor.onDidChangeModelContent(debounce(_onDidChangeModelContent, changeInterval));
 			onInit && onInit(editor);
 
 			this._originalSize = getSize(_editorRoot);

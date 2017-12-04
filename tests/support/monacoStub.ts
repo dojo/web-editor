@@ -7,9 +7,10 @@ export const extraLibMap = new Map<string, string>();
 
 export const compilerOptionsDiagnostics: Diagnostic[] = [];
 export const outputFilesMap = new Map<string, { name: string; writeByteOrderMark: boolean, text: string; }[]>();
+export const modelMap = new Map<string, any>();
 
 export const createModelSpy = sandbox.spy((text: string, language: string, filename: string) => {
-	return {
+	const model = {
 		getValue: sandbox.spy(() => {
 			return text;
 		}),
@@ -20,9 +21,15 @@ export const createModelSpy = sandbox.spy((text: string, language: string, filen
 			}
 		}
 	};
+
+	modelMap.set(`file:///${filename}`, model);
+	return model;
+});
+export const getModelSpy = sandbox.spy((uri: string) => {
+	return modelMap.get(uri);
 });
 export const uriFileSpy = sandbox.spy((filename: string) => {
-	return 'file:///' + filename;
+	return `file:///${filename}`;
 });
 export const addExtraLibSpy = sandbox.spy((text: string, filename: string) => {
 	if (extraLibMap.has(filename)) {
@@ -78,6 +85,12 @@ export function restoreSandbox() {
 	extraLibMap.clear();
 }
 
+enum JsxEmit {
+	None = 0,
+	Preserve = 1,
+	React = 2
+}
+
 enum ModuleKind {
 	None = 0,
 	CommonJS = 1,
@@ -104,11 +117,13 @@ enum ScriptTarget {
 
 export default {
 	editor: {
-		createModel: createModelSpy
+		createModel: createModelSpy,
+		getModel: getModelSpy
 	},
 	languages: {
 		typescript: {
 			getTypeScriptWorker: getTypeScriptWorkerSpy,
+			JsxEmit,
 			ModuleKind,
 			ModuleResolutionKind,
 			ScriptTarget,

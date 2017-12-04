@@ -11,6 +11,15 @@ export = function(grunt: IGrunt) {
 			}
 		},
 
+		liveJs: {
+			options: {
+				patch: 'support/grunt/patches/live.js.patch'
+			},
+			files: {
+				'dist/examples/live.js': 'dist/examples/live.js'
+			}
+		},
+
 		workerProxyJs: {
 			options: {
 				patch: 'support/grunt/patches/worker-proxy.js.patch'

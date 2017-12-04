@@ -3,9 +3,7 @@
 <head>
 	<title>@dojo/web-editor – Live Editor</title>
 	<!-- manually include widget styles until converted fully to WebPack -->
-	<link href="./live.m.css" rel="stylesheet">
 	<link href="../styles/widgets.css" rel="stylesheet">
-	<link href="../themes/dark/theme.css" rel="stylesheet">
 </head>
 <body>
 	<!-- postcss is created a single bundle that exports `postcss`, `cssnext`, `postcssModules` to the global namespace -->
@@ -26,7 +24,8 @@
 				'@dojo': '../../../node_modules/@dojo',
 				'maquette': '../../../node_modules/maquette/dist/maquette.min',
 				'pepjs': '../../../node_modules/pepjs/dist/pep',
-				'source-map': '../../../node_modules/source-map/dist/source-map.min'
+				'source-map': '../../../node_modules/source-map/dist/source-map.min',
+				'tslib': '../../../node_modules/tslib/tslib'
 			}
 		});
 

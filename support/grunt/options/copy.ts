@@ -23,7 +23,7 @@ export = function(grunt: IGrunt) {
 			} ],
 			options: {
 				process(content: string, srcpath: string) {
-					if (srcpath === 'src/examples/index.html') {
+					if (srcpath === 'src/examples/index.html' || srcpath === 'src/examples/live.html') {
 						return content
 							.replace(/(?:\.\.\/){3}node_modules\//g, `../node_modules/`)
 							.replace(`'../../..'`, `'..'`);

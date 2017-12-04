@@ -185,8 +185,6 @@ var cache = {};
 				</script>
 				${modules}
 				<script>require.cache(cache);
-/* workaround for dojo/loader#124 */
-require.cache({});
 
 require([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {
 	var request = require('@dojo/core/request').default;
