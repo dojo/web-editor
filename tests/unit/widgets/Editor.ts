@@ -22,7 +22,6 @@ let onDidChangeModelContentStub: SinonStub;
 let onDidChangeModelContentDisposeStub: SinonStub;
 let disposeStub: SinonStub;
 let layoutStub: SinonStub;
-let setFileDirtyStub: SinonStub;
 
 function getMonacoEditor(properties: Partial<EditorProperties> = {}): Promise<monaco.editor.IStandaloneCodeEditor> {
 	return new Promise((resolve, reject) => {
@@ -49,7 +48,6 @@ registerSuite('Editor', {
 		onDidChangeModelContentStub = sandbox.stub();
 		disposeStub = sandbox.stub();
 		layoutStub = sandbox.stub();
-		setFileDirtyStub = sandbox.stub();
 
 		global.monaco = {
 			editor: {

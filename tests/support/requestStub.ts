@@ -1,7 +1,7 @@
 import Observable from '@dojo/core/Observable';
 import Task from '@dojo/core/async/Task';
 import request, { Headers } from '@dojo/core/request';
-import { Response } from '@dojo/core/request/interfaces';
+import { Response } from '@dojo/core/request';
 import Map from '@dojo/shim/Map';
 
 export const responseMap = new Map<string, any>();
@@ -23,6 +23,7 @@ export class ResponseStub implements Response {
 	readonly status: number;
 	readonly statusText: string;
 	readonly url: string;
+	readonly requestOptions: any;
 
 	constructor(url: string, { response, ok = true, status = 200, statusText = 'OK' }: StubResponseOptions) {
 		this._response = response;

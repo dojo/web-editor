@@ -1,6 +1,6 @@
 const { registerSuite } = intern.getInterface('object');
 const { assert } = intern.getPlugin('chai');
-import { Handle } from '@dojo/interfaces/core';
+import { Handle } from '@dojo/core/interfaces';
 import loadModule from '../../support/loadModule';
 import * as UnitUnderTest from '../../../src/support/css';
 

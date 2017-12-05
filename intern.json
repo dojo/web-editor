@@ -1,8 +1,7 @@
 {
 	"capabilities": {
 		"project": "Dojo 2",
-		"name": "@dojo/widgets",
-		"browserstack.debug": false
+		"name": "@dojo/widgets"
 	},
 
 	"environments": [
@@ -65,6 +64,10 @@
 	"configs": {
 		"browserstack": {
 			"tunnel": "browserstack",
+
+			"capabilities+": {
+				"browserstack.debug": false
+			},
 
 			"environments+": [
 				{ "browserName": "internet explorer", "version": "11" },
