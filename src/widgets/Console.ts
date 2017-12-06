@@ -1,11 +1,17 @@
 import { v, w } from '@dojo/widget-core/d';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
-import { WidgetProperties } from '@dojo/widget-core/interfaces';
 import { ThemedMixin, ThemedProperties, theme } from '@dojo/widget-core/mixins/Themed';
 import { stringify } from '../util';
 import ActionBar, { ActionBarButton } from './ActionBar';
 import * as css from '../styles/console.m.css';
 
+/**
+ * The type of supported log messages. We currently support:
+ * * console.log
+ * * console.error
+ * * console.info
+ * * console.warn
+ */
 export enum ConsoleMessageType {
 	Log = 'log',
 	Error = 'error',
@@ -14,14 +20,33 @@ export enum ConsoleMessageType {
 }
 
 export interface ConsoleMessage {
+	/**
+	 * The type of console message.
+	 */
 	type: ConsoleMessageType;
-	message: any | any[];
+	/**
+	 * The actual console message to show.
+	 */
+	message: any;
+	/**
+	 * The filename associated with the console message, if any.
+	 */
 	filename?: string;
+	/**
+	 * The line number associated with the console message, if any.
+	 */
 	lineNumber?: number;
 }
 
-export interface ConsoleProperties extends WidgetProperties, ThemedProperties {
+export interface ConsoleProperties extends ThemedProperties {
+	/**
+	 * A list of console messages to render
+	 */
 	messages?: ConsoleMessage[];
+	/**
+	 * A callback to call when the "clear" button is triggered.
+	 * Ideally, this callback clears out the passed messages.
+	 */
 	onClear?(): void;
 }
 
@@ -34,26 +59,28 @@ function getLogType(type: ConsoleMessageType): string {
 
 const ThemedBase = ThemedMixin(WidgetBase);
 
-export interface ConsoleRowProperties extends WidgetProperties, ThemedProperties {
+interface ConsoleRowProperties extends ThemedProperties {
 	key: string;
 	message: ConsoleMessage;
 }
 
 @theme(css)
-export class ConsoleRow extends ThemedBase<ConsoleRowProperties> {
-	render() {
+class ConsoleRow extends ThemedBase<ConsoleRowProperties> {
+	protected render() {
 		const { key, message: { message, type } } = this.properties;
-		const args = Array.isArray(message) ? message : [ message ];
+		const children = (Array.isArray(message) ? message : [ message ]).map((child) => {
+			return v('span', { classes: this.theme(css.logArg) }, [ stringify(child) ]);
+		});
 		return v('div', {
 			key,
 			classes: this.theme([ getLogType(type), css.consoleRow ])
 		}, [
 			v('span', {
 				classes: this.theme(css.meta)
-			}, [ v('span', { classes: this.theme(css.typeLabel) }, [ type]) ]),
+			}, [ v('span', { classes: this.theme(css.typeLabel) }, [ type ]) ]),
 			v('span', {
 				classes: this.theme(css.logBody)
-			}, [ ...args.map((arg) => v('span', { classes: this.theme(css.logArg) }, [ stringify(arg) ])) ])
+			}, children)
 		]);
 	}
 }
@@ -65,10 +92,13 @@ export default class Console extends ThemedBase<ConsoleProperties> {
 		onClear && onClear();
 	}
 
-	render() {
+	protected render() {
 		const { messages = [], theme } = this.properties;
+		const children = messages.map((message, i) => {
+			return w(ConsoleRow, { theme, message, key: `message-${i}` });
+		});
 		return v('div', {
-			classes: [ this.theme(css.root), css.rootFixed ]
+			classes: this.theme(css.root)
 		}, [
 			w(ActionBar, {
 				label: 'Console Actions',
@@ -85,7 +115,7 @@ export default class Console extends ThemedBase<ConsoleProperties> {
 			v('div', {
 				key: 'messageContainer',
 				classes: this.theme(css.messageContainer)
-			}, messages.map((message, i) => w(ConsoleRow, { theme, message, key: `message-${i}` })))
+			}, children)
 		]);
 	}
 }

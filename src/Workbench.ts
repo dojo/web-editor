@@ -305,11 +305,6 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 		this.invalidate();
 	}
 
-	constructor() {
-		super();
-
-	}
-
 	protected render() {
 		const {
 			_expanded,

@@ -40,7 +40,7 @@ export interface RunnerProperties extends Partial<Program>, ThemedProperties {
 	/**
 	 * A method that will be called when the console has been invoked within the runner
 	 */
-	onConsoleMessage?(message: ConsoleMessage): void; // TODO: give message a type
+	onConsoleMessage?(message: ConsoleMessage): void;
 }
 
 /**
@@ -272,7 +272,6 @@ async function writeIframeDoc(iframe: HTMLIFrameElement, source: string, errorLi
 	});
 }
 
-// TODO: capture file and line numbers
 function hijackConsole(iframe: HTMLIFrameElement): void {
 	const win = iframe.contentWindow;
 	const context = win.parent;

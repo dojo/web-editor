@@ -38,6 +38,15 @@ function formatObject(object: any, visits: any[]) {
 	}
 }
 
+/**
+ * Stringify an object of any type so that it can be logged out.
+ * This works even if the object is recursive an is used to take
+ * any kind of value that should be logged to a console, for example,
+ * and make it a loggable string.
+ * @param object The object to stringify
+ * @param visits The object containing visited objects
+ * @return The stringified version of the object passed in
+ */
 export function stringify(object: any, visits?: any): string {
 	let atTop = false;
 	const toStringValue = Object.prototype.toString.call(object);

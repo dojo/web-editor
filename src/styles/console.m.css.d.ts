@@ -12,4 +12,3 @@ export const info: string;
 export const warn: string;
 export const messageContainer: string;
 export const clearConsoleIcon: string;
-export const rootFixed: string;
