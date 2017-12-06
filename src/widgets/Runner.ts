@@ -355,7 +355,7 @@ export default class Runner extends ThemedBase<RunnerProperties> {
 	}
 
 	protected onAttach() {
-		global.addEventListener('message', this._handleConsoleMessage);
+		global.window.addEventListener('message', this._handleConsoleMessage);
 	}
 
 	protected onDetach() {
