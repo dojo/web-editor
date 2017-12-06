@@ -1,4 +1,4 @@
-import { Handle } from '@dojo/interfaces/core';
+import { Handle } from '@dojo/core/interfaces';
 import { forOf } from '@dojo/shim/iterator';
 import WeakMap from '@dojo/shim/WeakMap';
 import Task, { State } from '@dojo/core/async/Task';
@@ -269,12 +269,10 @@ export default function xhr(url: string, options: XhrRequestOptions = {}): Uploa
 	}
 
 	let hasContentTypeHeader = false;
-	let hasRequestedWithHeader = false;
 
 	if (options.headers) {
 		const requestHeaders = new Headers(options.headers);
 
-		hasRequestedWithHeader = requestHeaders.has('x-requested-with');
 		hasContentTypeHeader = requestHeaders.has('content-type');
 
 		forOf(requestHeaders, ([key, value]) => {

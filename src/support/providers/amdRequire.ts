@@ -85,6 +85,6 @@ export default function getProvider(req: NodeRequire = require): Provider {
 			});
 			return task as UploadObservableTask<AMDRequireResponse>;
 		}
-		return xhr(url, options) as UploadObservableTask<AMDRequireResponse>;
+		return xhr(url, options) as any;
 	};
 }

@@ -44,7 +44,7 @@ export default class Hover extends Base {
 	private _boundInvalidate: () => void = this.invalidate.bind(this);
 
 	public get(key: string | number): boolean {
-		const node = this.getNode(key);
+		const node = this.getNode(key) as HTMLElement;
 
 		if (!node) {
 			return false;

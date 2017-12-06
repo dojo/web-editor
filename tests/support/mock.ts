@@ -1,6 +1,6 @@
 /// <reference path="../../node_modules/@dojo/loader/dojo-loader.d.ts" />
 import { createHandle } from '@dojo/core/lang';
-import { Handle } from '@dojo/interfaces/core';
+import { Handle } from '@dojo/core/interfaces';
 
 const map: { [mid: string]: any } = {};
 let disableHandle: Handle | undefined;
