@@ -3,11 +3,14 @@
  * in the background
  */
 
+// declare function importScripts(script: string): void;
+
 interface Window {
 	MonacoEnvironment: any;
 }
 
 self.MonacoEnvironment = {
-	baseUrl: '../../../node_modules/monaco-editor/min/'
+	baseUrl: '..'
 };
-importScripts('../../../node_modules/monaco-editor/min/vs/base/worker/workerMain.js');
+
+importScripts('../vs/base/worker/workerMain.js');

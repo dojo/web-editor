@@ -1,6 +1,7 @@
 import * as webpack from 'webpack';
 import { existsSync } from 'fs';
 import { resolve, join, sep, isAbsolute } from 'path';
+import HtmlWebpackPlugin = require('html-webpack-plugin');
 
 // loaders
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer-sunburst');
@@ -49,7 +50,7 @@ const cssModuleLoader = ExtractTextPlugin.extract({
 const webpackConfig = (env: any = {}, args: any) => {
 	return {
 		entry: {
-			'main': './src/main.ts',
+			'main': './src/index.ts',
 			'support/providers/amdRequire': './src/support/providers/amdRequire.ts',
 			'support/worker-proxy': './src/support/worker-proxy.ts'
 		},
@@ -133,6 +134,14 @@ const webpackConfig = (env: any = {}, args: any) => {
 			]
 		},
 		plugins: [
+			new HtmlWebpackPlugin({
+				template: 'src/index.html',
+				excludeChunks: [
+					'support/providers/amdRequire',
+					'support/worker-proxy'
+				],
+				inject: 'body'
+			}),
 			new NormalModuleReplacementPlugin(/\.m\.css$/, (result: any) => {
 				if (isAbsolute(result.request)) {
 					return;
@@ -173,11 +182,14 @@ const webpackConfig = (env: any = {}, args: any) => {
 			new ContextReplacementPlugin(/dojo-app[\\\/]lib/, { test: () => false }),
 			new ContextReplacementPlugin(/.*/, { test: () => false }),
 			new ExtractTextPlugin({ filename: 'main.css', allChunks: true }),
-			new CopyWebpackPlugin([ { context: 'src', from: '**/*', ignore: '*.ts' } ]),
-			new CoreLoadPlugin({ basePath }),
 			new CopyWebpackPlugin([
+				{ context: 'src', from: '**/*', ignore: '*.ts' },
+				{ from: resolve(__dirname, 'projects'), to: 'projects' },
+				{ from: resolve(__dirname, 'data'), to: 'data' },
+				{ from: resolve(__dirname, 'extensions'), to: 'extensions' },
 				{ from: resolve(__dirname, 'node_modules/monaco-editor/min/vs'), to: 'vs' }
-			])
+			]),
+			new CoreLoadPlugin({ basePath })
 		],
 		node: {
 			dgram: 'empty',

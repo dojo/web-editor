@@ -5,7 +5,7 @@ import Projector from '@dojo/widget-core/mixins/Projector';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import project, { Program } from '../project';
 import Workbench from '../Workbench';
-import { loadMonaco, loadTheme } from '../support/monaco';
+import { load as loadMonaco, loadTheme } from '../support/monaco';
 import { IconJson, load as loadIcons } from '../support/icons';
 import darkTheme from '../themes/dark/theme';
 

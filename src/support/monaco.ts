@@ -84,7 +84,7 @@ class MonacoScript extends WidgetBase<MonacoScriptProperties> {
 
 let promise: Promise<Monaco>;
 
-export function loadMonaco(config?: MonacoConfig): Promise<Monaco> {
+export function load(config?: MonacoConfig): Promise<Monaco> {
 	if (!promise) {
 		promise = new Promise((resolve, reject) => {
 			const projector = new (Projector(MonacoScript))();
@@ -104,13 +104,19 @@ export function loadMonaco(config?: MonacoConfig): Promise<Monaco> {
 	return promise;
 }
 
-export default loadMonaco;
+export default function loadMonaco(): Promise<Monaco> {
+	return load({
+		basePath: '.',
+		proxyPath: './support/worker-proxy.js',
+		loaderPath: './vs/loader.js'
+	});
+}
 
 export function getMonaco(): Promise<Monaco> {
 	if (!promise) {
 		console.warn('Monaco not loaded yet. call loadMonaco to initialize before required');
 	}
-	return Promise.resolve(promise);
+	return promise;
 }
 
 async function loadThemeFile(filename: string): Promise<ThemeJson> {
