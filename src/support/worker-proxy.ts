@@ -3,8 +3,6 @@
  * in the background
  */
 
-// declare function importScripts(script: string): void;
-
 interface Window {
 	MonacoEnvironment: any;
 }
