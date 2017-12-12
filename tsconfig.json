@@ -1,5 +1,6 @@
 {
 	"compilerOptions": {
+		"baseUrl": "./",
 		"experimentalDecorators": true,
 		"inlineSources": true,
 		"lib": [
@@ -13,6 +14,9 @@
 		"module": "umd",
 		"moduleResolution": "node",
 		"noUnusedLocals": true,
+		"paths": {
+			"postcss-*": [ "./types/postcss-*" ]
+		},
 		"outDir": "dev",
 		"removeComments": false,
 		"rootDir": ".",
@@ -28,7 +32,6 @@
 	"include": [
 		"./src/**/*.ts",
 		"./tests/**/*.ts",
-		"./support/intern/Reporter.ts",
-		"./typings/**/*.d.ts"
+		"./support/intern/Reporter.ts"
 	]
 }
