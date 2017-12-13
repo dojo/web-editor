@@ -26,7 +26,7 @@ export interface MonacoScriptProperties extends MonacoConfig, WidgetProperties {
 	onError?(error: any): void;
 }
 
-class MonacoScript extends WidgetBase<MonacoScriptProperties> {
+export class MonacoScript extends WidgetBase<MonacoScriptProperties> {
 	promise: Promise<void>;
 	private _onload: () => void;
 	private _onerror: (error: any) => void;
@@ -92,8 +92,8 @@ export function load(config?: MonacoConfig): Promise<Monaco> {
 				onLoad: resolve,
 				onError: reject,
 				basePath: '..',
-				proxyPath: '../support/worker-proxy.js',
-				loaderPath: '../vs/loader.js',
+				proxyPath: './support/worker-proxy.js',
+				loaderPath: './vs/loader.js',
 				editorModuleId: 'vs/editor/editor.main',
 				...config
 			});
@@ -104,22 +104,17 @@ export function load(config?: MonacoConfig): Promise<Monaco> {
 	return promise;
 }
 
-export default function loadMonaco(): Promise<Monaco> {
-	return load({
-		basePath: '.',
-		proxyPath: './support/worker-proxy.js',
-		loaderPath: './vs/loader.js'
-	});
-}
+export default load;
 
 export function getMonaco(): Promise<Monaco> {
+	/* istanbul ignore if */
 	if (!promise) {
 		console.warn('Monaco not loaded yet. call loadMonaco to initialize before required');
 	}
 	return promise;
 }
 
-async function loadThemeFile(filename: string): Promise<ThemeJson> {
+export async function loadThemeFile(filename: string): Promise<ThemeJson> {
 	return (await request(filename)).json<ThemeJson>();
 }
 
