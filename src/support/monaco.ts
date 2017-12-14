@@ -91,7 +91,7 @@ export function load(config?: MonacoConfig): Promise<Monaco> {
 			projector.setProperties({
 				onLoad: resolve,
 				onError: reject,
-				basePath: '..',
+				basePath: '.',
 				proxyPath: './support/worker-proxy.js',
 				loaderPath: './vs/loader.js',
 				editorModuleId: 'vs/editor/editor.main',
