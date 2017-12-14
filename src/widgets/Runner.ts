@@ -49,7 +49,7 @@ const DEFAULT_LOADER_URI = 'https://unpkg.com/@dojo/loader/loader.min.js';
 /**
  * The default source that should be displayed in the IFrame before the runner loads a program
  */
-const DEFAULT_IFRAME_SRC = '../support/blank.html';
+const DEFAULT_IFRAME_SRC = './support/blank.html';
 
 /**
  * A map of custom package data that needs to be added if this package is part of project that is being run
@@ -183,7 +183,7 @@ var cache = {};
 /* workaround for dojo/loader#124 */
 require.cache({});
 
-require([ 'tslib', '@dojo/core/request', '../support/providers/amdRequire' ], function () {
+require([ 'tslib', '@dojo/core/request', './support/providers/amdRequire' ], function () {
 	var request = require('@dojo/core/request').default;
 	var getProvider = require('../support/providers/amdRequire').default;
 	request.setDefaultProvider(getProvider(require));
@@ -265,7 +265,7 @@ async function writeIframeDoc(iframe: HTMLIFrameElement, source: string, errorLi
 	});
 }
 
-const ThemedBase = ThemedMixin(WidgetBase);
+export const ThemedBase = ThemedMixin(WidgetBase);
 
 /**
  * A widget which will render its properties into a _runnable_ application within an `iframe`

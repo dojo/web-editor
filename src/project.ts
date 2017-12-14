@@ -1,5 +1,3 @@
-import 'vs/editor/editor.main'; /* imported for side-effects */
-
 import { ProjectJson, ProjectFile, ProjectFileType } from '@dojo/cli-export-project/interfaces/project.json';
 import Evented from '@dojo/core/Evented';
 import { assign } from '@dojo/core/lang';
@@ -135,9 +133,9 @@ function getLanguageFromType(type: ProjectFileType): string {
 }
 
 type ScriptTarget = monaco.languages.typescript.ScriptTarget;
-const ScriptTarget = monaco.languages.typescript.ScriptTarget;
 
 function getScriptTarget(type: string): ScriptTarget {
+	const ScriptTarget = monaco.languages.typescript.ScriptTarget;
 	switch (type) {
 	case 'es3':
 		return ScriptTarget.ES3;

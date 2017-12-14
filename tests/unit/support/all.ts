@@ -1,12 +1,9 @@
 import './css';
 import './DOMParser';
-import './editorThemes';
 import './gists';
 import './icons';
 import './json';
-import './postcss';
-import './postcssCssnext';
-import './postcssModules';
+import './monaco';
 import './sourceMap';
 import './URL';
 import './providers/all';

@@ -94,7 +94,7 @@ registerSuite('Runner', {
 			assert.lengthOf(render.children, 1, 'should have only one child');
 			assert.isFunction((render.children[0] as WNode).widgetConstructor, 'should be a function');
 			assert.strictEqual((render.children[0] as WNode).properties.key, 'runner', 'should have runner key set');
-			assert.strictEqual(((render.children[0] as WNode).properties as any).src, '../support/blank.html', 'should have src set to default');
+			assert.strictEqual(((render.children[0] as WNode).properties as any).src, './support/blank.html', 'should have src set to default');
 		},
 
 		'support setting src'() {

@@ -73,7 +73,7 @@ function isEqualSize(a: Size, b: Size): boolean {
 	return a.height === b.height && a.width === b.width;
 }
 
-const ThemedBase = ThemedMixin(WidgetBase);
+export const ThemedBase = ThemedMixin(WidgetBase);
 
 /**
  * A class which wraps the `monaco-editor`
