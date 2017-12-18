@@ -2,17 +2,8 @@ function wasVisited(object: any, visits: any[]): boolean {
 	return visits.indexOf(object) !== -1;
 }
 
-function encode(str: string): string {
-	return str.replace(/[\u00A0-\u9999<>\&]/g, (i) => `&#${i.charCodeAt(0)}`);
-}
-
 function formatString(object: string, includeQuotes: boolean = false): string {
-	const result = encode(object);
-	if (includeQuotes) {
-		return `"${result}"`;
-	}
-
-	return result;
+	return includeQuotes ? `"${object}"` : object;
 }
 
 function formatArray(object: any[], visits: any[]): string {
@@ -57,7 +48,7 @@ export function stringify(object: any, visits?: any): string {
 	}
 
 	if (object == null) {
-		return object;
+		return `${object}`;
 	}
 	else if (typeof object === 'string') {
 		return formatString(object, !atTop);
@@ -72,5 +63,5 @@ export function stringify(object: any, visits?: any): string {
 		return formatObject(object, visits);
 	}
 
-	return object;
+	return `${object}`;
 }
