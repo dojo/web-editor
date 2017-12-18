@@ -65,7 +65,7 @@ interface ConsoleRowProperties extends ThemedProperties {
 }
 
 @theme(css)
-class ConsoleRow extends ThemedBase<ConsoleRowProperties> {
+export class ConsoleRow extends ThemedBase<ConsoleRowProperties> {
 	protected render() {
 		const { key, message: { message, type } } = this.properties;
 		const children = (Array.isArray(message) ? message : [ message ]).map((child) => {

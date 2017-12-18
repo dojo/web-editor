@@ -1,4 +1,5 @@
 import './ActionBar';
+import './Console';
 import './Editor';
 import './IconCss';
 import './Runner';
