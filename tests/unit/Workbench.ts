@@ -9,6 +9,7 @@ import TreePane from '../../src/widgets/TreePane';
 import Toolbar from '../../src/widgets/Toolbar';
 import Editor from '../../src/widgets/Editor';
 import Runner from '../../src/widgets/Runner';
+import Console from '../../src/widgets/Console';
 
 registerSuite('Workbench', {
 
@@ -47,10 +48,12 @@ registerSuite('Workbench', {
 					key: 'middle'
 				}, [
 					w(Toolbar, {
+						consoleOpen: true,
 						runnable: undefined,
 						runnerOpen: true,
 						filesOpen: true,
 						theme: undefined,
+						onToggleConsole: widget.listener,
 						onRunClick: undefined,
 						onToggleFiles: widget.listener,
 						onToggleRunner: widget.listener
@@ -66,6 +69,11 @@ registerSuite('Workbench', {
 						},
 						theme: undefined,
 						onDirty: undefined
+					}),
+					w(Console, {
+						messages: [],
+						onClear: widget.listener,
+						theme: undefined
 					})
 				]),
 				v('div', {
@@ -75,7 +83,8 @@ registerSuite('Workbench', {
 					w(Runner, {
 						key: 'runner',
 						theme: undefined,
-						onRun: widget.listener
+						onRun: widget.listener,
+						onConsoleMessage: widget.listener
 					})
 				])
 			]);

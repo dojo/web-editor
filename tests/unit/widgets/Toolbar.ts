@@ -43,6 +43,12 @@ registerSuite('widgets/Toolbar', {
 						onClick: widget.listener
 					}),
 					w(ActionBarButton, {
+						key: 'toggleConsole',
+						label: 'Toggle console',
+						iconClass: toolbarCss.consoleIconDisabled,
+						onClick: widget.listener
+					}),
+					w(ActionBarButton, {
 						key: 'toggleRunner',
 						label: 'Toggle runner',
 						iconClass: toolbarCss.previewIconClosed,

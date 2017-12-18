@@ -375,9 +375,9 @@ export default class Workbench extends ThemedBase<WorkbenchProperties> {
 				key: 'middle'
 			}, [
 				w(Toolbar, {
+					consoleOpen,
 					runnable,
 					runnerOpen,
-					consoleOpen,
 					filesOpen,
 					theme,
 					onToggleConsole: this._onToggleConsole,

@@ -170,7 +170,7 @@ export class Project extends Evented {
 	 */
 	private _fileMap = new WeakMap<ProjectFile, ProjectFileData>();
 
-	private _emitErrorsObserver: Observer<EmitError[]>;
+	private _emitErrorsObserver?: Observer<EmitError[]>;
 
 	emitErrors: Observable<EmitError[]>;
 
@@ -211,7 +211,7 @@ export class Project extends Evented {
 			errors.push(error);
 		});
 
-		this._emitErrorsObserver.next(errors);
+		this._emitErrorsObserver && this._emitErrorsObserver.next(errors);
 	}
 
 	/**
