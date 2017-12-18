@@ -1,10 +1,12 @@
 /* Themeable classes */
 
 .root {
+	display: inherited;
 }
 
 /* Fixed classes */
 .rootFixed {
+	display: inherited;
 }
 
 .hide > * {
