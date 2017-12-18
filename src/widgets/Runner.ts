@@ -192,7 +192,7 @@ require.cache({});
 
 require([ 'tslib', '@dojo/core/request', './support/providers/amdRequire' ], function () {
 	var request = require('@dojo/core/request').default;
-	var getProvider = require('../support/providers/amdRequire').default;
+	var getProvider = require('./support/providers/amdRequire').default;
 	request.setDefaultProvider(getProvider(require));
 	require([ 'src/main' ], function () { });
 });
