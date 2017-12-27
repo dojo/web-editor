@@ -1,7 +1,8 @@
 const { registerSuite } = intern.getInterface('object');
 import harness from '@dojo/test-extras/harness';
+import loadModule from '../support/loadModule';
+import { enable, register } from '../support/mock';
 import { v, w } from '@dojo/widget-core/d';
-import Workbench from '../../src/Workbench';
 import * as workbenchCss from '../../src/styles/workbench.m.css';
 import * as iconCss from '../../src/styles/icons.m.css';
 import IconCss from '../../src/widgets/IconCss';
@@ -11,7 +12,25 @@ import Editor from '../../src/widgets/Editor';
 import Runner from '../../src/widgets/Runner';
 import Console from '../../src/widgets/Console';
 
+let project: any;
+let handle: any;
+let Workbench: any;
+
 registerSuite('Workbench', {
+	async before() {
+		project = {
+			emitErrors: {
+				subscribe() {}
+			}
+		};
+		register('dev/src/prject', { default: project });
+		handle = enable();
+		Workbench = (await loadModule('../../src/Workbench')).default;
+	},
+
+	after() {
+		handle.destroy();
+	},
 
 	tests: {
 		'basic rendering'() {
