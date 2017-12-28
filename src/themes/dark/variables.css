@@ -10,6 +10,10 @@
 	--dark-light-gray: rgba(255, 255, 255, 0.7);
 	--dark-red: #ED5153;
 	--dark-green: #01D48E;
+	--dark-yellow: #FECA72;
+	--dark-light-yellow: rgba(252, 225, 159, 0.1);
+	--dark-light-red: rgba(249, 144, 148, 0.1);
+	--light-blue: rgba(32, 78, 138, 0.1);
 	--dark-gray: #BBB;
 	--dark-black: rgb(31, 34, 33);
 	--dark-med-black: #262932;
@@ -39,6 +43,7 @@
 	--border-thick: 5px;
 	--tab-width: 120px;
 	--min-container-height: 250px;
+	--console-height: 300px;
 
 	/* Composed values */
 	--title-bar-bg: var(--dark-blue);

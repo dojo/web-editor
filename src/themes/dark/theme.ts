@@ -1,5 +1,6 @@
 import * as actionbar from './actionbar.m.css';
 import * as actionbarbutton from './actionbarbutton.m.css';
+import * as console from './console.m.css';
 import * as editor from './editor.m.css';
 import * as runner from './runner.m.css';
 import * as scrollbar from './scrollbar.m.css';
@@ -13,6 +14,7 @@ import * as workbench from './workbench.m.css';
 export default {
 	'dojo-actionbar': actionbar,
 	'dojo-actionbarbutton': actionbarbutton,
+	'dojo-console': console,
 	'dojo-editor': editor,
 	'dojo-runner': runner,
 	'dojo-scrollbar': scrollbar,
@@ -24,6 +26,7 @@ export default {
 	'dojo-workbench': workbench,
 	actionbar,
 	actionbarbutton,
+	console,
 	editor,
 	runner,
 	scrollbar,

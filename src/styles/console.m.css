@@ -1,0 +1,56 @@
+.root {
+	display: inherit;
+}
+
+.consoleRow {
+	display: inherit;
+}
+
+.meta {
+	display: inherit;
+}
+
+.typeLabel {
+	display: inherit;
+}
+
+.filename {
+	display: inherit;
+}
+
+.lineNumber {
+	display: inherit;
+}
+
+.log {
+	display: inherit;
+}
+
+.logArg {
+	display: inherit;
+}
+
+.logBody {
+	display: inherit;
+}
+
+.error {
+	display: inherit;
+}
+
+.info {
+	display: inherit;
+}
+
+.warn {
+	display: inherit;
+}
+
+.messageContainer {
+	display: inherit;
+}
+
+.clearConsoleIcon {
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20viewBox%3D%220%200%2064%2064%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Aserif%3D%22http%3A%2F%2Fwww.serif.com%2F%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-miterlimit%3D%221.5%22%3E%3Cg%20serif%3Aid%3D%22Trash%20Can%22%3E%3Cpath%20fill%3D%22none%22%20stroke%3D%22%232db5f9%22%20stroke-width%3D%222.9955230999999998%22%20d%3D%22M9.161%209.174h45.677v10.169H9.16zM14.178%2019.344h35.643v40.647H14.178z%22%2F%3E%3Cpath%20fill%3D%22none%22%20stroke%3D%22%232db5f9%22%20stroke-width%3D%222.9955230999999998%22%20d%3D%22M31.988%2024.204H32v27.622h-.012zM21.946%2024.204h.012v27.622h-.012zM41.731%2024.204h.012v27.622h-.012z%22%2F%3E%3Cpath%20fill%3D%22none%22%20stroke%3D%22%232db5f9%22%20stroke-width%3D%223.2%22%20d%3D%22M22.965%206.696h10.808v5.952H22.965z%22%20transform%3D%22matrix%281.00135%200%200%20.8676%204.12%20-1.799%29%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+	background-size: 18px;
+}

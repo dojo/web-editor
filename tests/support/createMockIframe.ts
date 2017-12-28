@@ -84,6 +84,13 @@ export default function createMockIframe(): HTMLIFrameElement {
 					iframeData.get(iframe)!.contentWindowEventListeners[type] = listeners
 						.filter((item) => item !== listener);
 				}
+			},
+
+			console: {
+				log() {},
+				error() {},
+				warn() {},
+				info() {}
 			}
 		},
 

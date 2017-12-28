@@ -271,6 +271,9 @@ registerSuite('project', {
 		},
 
 		async 'emit() with diagnostic errors'() {
+			project.emitErrors.subscribe((messages) => {
+				assert.strictEqual(messages[0].message, 'foo');
+			});
 			await project.load('project.json');
 			const warnSpy = stub(console, 'warn');
 			compilerOptionsDiagnostics.push({

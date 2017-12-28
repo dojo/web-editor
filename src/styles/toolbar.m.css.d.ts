@@ -6,3 +6,5 @@ export const filesIconOpen: string;
 export const filesIconClosed: string;
 export const runIconEnabled: string;
 export const runIconDisabled: string;
+export const consoleIconEnabled: string;
+export const consoleIconDisabled: string;

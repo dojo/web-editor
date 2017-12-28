@@ -7,9 +7,10 @@ import WeakMap from '@dojo/shim/WeakMap';
 import { DiagnosticMessageChain, OutputFile } from 'typescript';
 import { getDefinitions, getEmit as getCssEmit } from './support/css';
 import { getEmit as getJsonEmit } from './support/json';
+import Observable, { Observer } from '@dojo/core/Observable';
 import xhr from './support/providers/xhr';
 
-import { EmitFile, PromiseLanguageService, TypeScriptWorker } from './interfaces';
+import { EmitError, EmitFile, PromiseLanguageService, TypeScriptWorker } from './interfaces';
 
 /**
  * Interface that provides the data required to run a program.
@@ -169,6 +170,17 @@ export class Project extends Evented {
 	 */
 	private _fileMap = new WeakMap<ProjectFile, ProjectFileData>();
 
+	private _emitErrorsObserver?: Observer<EmitError[]>;
+
+	emitErrors: Observable<EmitError[]>;
+
+	constructor() {
+		super();
+		this.emitErrors = new Observable<EmitError[]>((observer) => {
+			this._emitErrorsObserver = observer;
+		});
+	}
+
 	/**
 	 * Check if there are any emit errors for a given file
 	 * @param services The language services to check
@@ -181,16 +193,25 @@ export class Project extends Evented {
 			...await services.getSyntacticDiagnostics(filename)
 		];
 
+		const errors: EmitError[] = [];
+
 		diagnostics.forEach((diagnostic) => {
 			const message = flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+			const error: EmitError = { message };
 			if (diagnostic.file && diagnostic.start) {
 				const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-				console.warn(`Error ${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
+				const filename = diagnostic.file.fileName;
+				error.lineNumber = line + 1;
+				error.filename = filename;
+				console.warn(`Error ${filename} (${line + 1},${character + 1}): ${message}`);
 			}
 			else {
 				console.warn(`Error: ${message}`);
 			}
+			errors.push(error);
 		});
+
+		this._emitErrorsObserver && this._emitErrorsObserver.next(errors);
 	}
 
 	/**

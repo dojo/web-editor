@@ -1,7 +1,8 @@
 const { registerSuite } = intern.getInterface('object');
 import harness from '@dojo/test-extras/harness';
+import loadModule from '../support/loadModule';
+import { enable, register } from '../support/mock';
 import { v, w } from '@dojo/widget-core/d';
-import Workbench from '../../src/Workbench';
 import * as workbenchCss from '../../src/styles/workbench.m.css';
 import * as iconCss from '../../src/styles/icons.m.css';
 import IconCss from '../../src/widgets/IconCss';
@@ -9,8 +10,27 @@ import TreePane from '../../src/widgets/TreePane';
 import Toolbar from '../../src/widgets/Toolbar';
 import Editor from '../../src/widgets/Editor';
 import Runner from '../../src/widgets/Runner';
+import Console from '../../src/widgets/Console';
+
+let project: any;
+let handle: any;
+let Workbench: any;
 
 registerSuite('Workbench', {
+	async before() {
+		project = {
+			emitErrors: {
+				subscribe() {}
+			}
+		};
+		register('dev/src/prject', { default: project });
+		handle = enable();
+		Workbench = (await loadModule('../../src/Workbench')).default;
+	},
+
+	after() {
+		handle.destroy();
+	},
 
 	tests: {
 		'basic rendering'() {
@@ -47,10 +67,12 @@ registerSuite('Workbench', {
 					key: 'middle'
 				}, [
 					w(Toolbar, {
+						consoleOpen: true,
 						runnable: undefined,
 						runnerOpen: true,
 						filesOpen: true,
 						theme: undefined,
+						onToggleConsole: widget.listener,
 						onRunClick: undefined,
 						onToggleFiles: widget.listener,
 						onToggleRunner: widget.listener
@@ -66,6 +88,11 @@ registerSuite('Workbench', {
 						},
 						theme: undefined,
 						onDirty: undefined
+					}),
+					w(Console, {
+						messages: [],
+						onClear: widget.listener,
+						theme: undefined
 					})
 				]),
 				v('div', {
@@ -75,7 +102,8 @@ registerSuite('Workbench', {
 					w(Runner, {
 						key: 'runner',
 						theme: undefined,
-						onRun: widget.listener
+						onRun: widget.listener,
+						onConsoleMessage: widget.listener
 					})
 				])
 			]);

@@ -1,0 +1,84 @@
+@import './variables.css';
+
+.root {
+	background: var(--dark-light-black);
+	border: 1px solid var(--dark-med-black);
+}
+
+.messageContainer {
+	border-top: 1px solid var(--dark-med-black);
+	background-color: var(--dark-light-black);
+	overflow-y: scroll;
+	height: var(--console-height);
+}
+
+.consoleRow {
+	margin: 0;
+	padding: 0;
+	display: flex;
+}
+
+.logBody {
+	padding: 5px;
+	align-self: center;
+	vertical-align: middle;
+	color: var(--dark-off-white);
+	font-family: "Lucida Console";
+	font-size: 0.7em;
+	white-space: pre-wrap;
+}
+
+.logArg {
+	padding: 0 5px;
+}
+
+.meta {
+	font-family: "Lucida Console";
+	display: inline-block;
+	font-weight: bold;
+	text-transform: uppercase;
+	width: 64px;
+	text-align: center;
+	padding: 5px;
+	margin-right: 10px;
+	display: flex;
+	align-items: center;
+}
+
+.typeLabel {
+	width: 100%;
+}
+
+.filename {
+}
+
+.lineNumber {
+}
+
+.log .meta {
+	color: var(--dark-green);
+}
+
+.error .meta {
+	color: var(--dark-red);
+}
+
+.info .meta {
+	color: var(--dark-light-blue);
+}
+
+.warn .meta {
+	color: var(--dark-yellow);
+}
+
+.warn.consoleRow {
+	background-color: var(--dark-light-yellow);
+}
+
+.error.consoleRow {
+	background-color: var(--dark-light-red);
+}
+
+.info {
+	background-color: var(--light-blue);
+}

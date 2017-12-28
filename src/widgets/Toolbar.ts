@@ -26,6 +26,11 @@ export interface ToolbarProperties extends ThemedProperties {
 	runnerOpen?: boolean;
 
 	/**
+	 * Determines if the console is open and what button to display
+	 */
+	consoleOpen?: boolean;
+
+	/**
 	 * Called when the Run action button is clicked
 	 */
 	onRunClick?(): void;
@@ -34,6 +39,11 @@ export interface ToolbarProperties extends ThemedProperties {
 	 * Called when the Files action button is clicked
 	 */
 	onToggleFiles?(): void;
+
+	/**
+	 * Called when the Console button is clicked
+	 */
+	onToggleConsole?(): void;
 
 	/**
 	 * Called when the Runner action button is clicked
@@ -62,8 +72,13 @@ export default class Toolbar extends ThemedBase<ToolbarProperties, WNode<Tab>> {
 		onToggleRunner && onToggleRunner();
 	}
 
+	private _onConsoleClick = () => {
+		const { onToggleConsole } = this.properties;
+		onToggleConsole && onToggleConsole();
+	}
+
 	render() {
-		const { filesOpen, runnable, runnerOpen, theme } = this.properties;
+		const { filesOpen, runnable, runnerOpen, consoleOpen, theme } = this.properties;
 		return v('div', {
 			classes: [ this.theme(toolbarCss.root), toolbarCss.rootFixed ],
 			key: 'root'
@@ -94,6 +109,12 @@ export default class Toolbar extends ThemedBase<ToolbarProperties, WNode<Tab>> {
 					iconClass: runnable ? toolbarCss.runIconEnabled : toolbarCss.runIconDisabled,
 					theme,
 					onClick: this._onRunClick
+				}),
+				w(ActionBarButton, {
+					key: 'toggleConsole',
+					label: 'Toggle console',
+					iconClass: consoleOpen ? toolbarCss.consoleIconEnabled : toolbarCss.consoleIconDisabled,
+					onClick: this._onConsoleClick
 				}),
 				w(ActionBarButton, {
 					key: 'toggleRunner',
